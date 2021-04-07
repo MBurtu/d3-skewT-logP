@@ -775,7 +775,7 @@ function loadSounding(lat,lon,name) {
     drawToolTips();
 
     // Load data
-    d3.json('data/sounding'+lat+'N'+lon+'E.js').then(function(json){
+    d3.json('data/sounding'+lat+'N'+lon+'E.json').then(function(json){
         sounding = []; // Array with all model soundings
         dateTime = []; // Array with the forecast time for each sounding
         hodoData = []; // Array with data for hodoline
@@ -811,7 +811,7 @@ function loadSounding(lat,lon,name) {
                             levels.push(bindingLvl);
                         }
                         level.wdir = soundingStep[i].wdir;
-                        level.wspd = soundingStep[i].wspd;
+                        level.wspd = soundingStep[i].wspd*ms2kt; // Convert to kt
                         levels.push(level);
                     }
                 }
