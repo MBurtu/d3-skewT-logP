@@ -4,9 +4,9 @@ Plots model soundings and parcel profiles on a skew-T log-P diagram. Indicies su
 Json, see example under /data. 
 
 ## Dependencies
-D3 v.5
-Jquery
-Google maps api
+- D3 v.5  
+- Jquery  
+- Google maps api  
 
 ## Demo
 http://www.westerlies.eu/soundings/d3_skewt.html
