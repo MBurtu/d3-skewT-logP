@@ -1,0 +1,851 @@
+/*
+//      sounding_style.css
+//-
+
+//      Table of Contents
+//      1. Body      
+//      2. Map
+//          2.1 Header
+//          2.2 Markers
+//      3. Layout
+//          3.1 Floats
+//          3.2 On/Off switch
+//          3.3 Tabs
+//          3.4 Modal
+//      4. Typography
+//      5. Containers
+//          5.1 Sounding
+//          5.2 Wind barbs
+//          5.3 Hodograph
+//          5.4 Convective data
+//          5.5 Air parcel
+//      6. Plots
+//          6.1 Axis & Labels
+//          6.2 Sounding lines
+//          6.3 Hodograph lines
+//          6.4 Grid lines
+//          6.5 Tooltips
+
+//-
+//-
+*/
+
+/**********************************
+*
+*     1. Body
+*
+***********************************/
+
+@import url(http://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300italic,700);
+@import url(http://fonts.googleapis.com/css?family=Open+Sans:400,400italic,700);
+@import url(http://fonts.googleapis.com/css?family=Sorts+Mill+Goudy:400,400italic,700);
+@import url(https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@200;400&display=swap);
+
+body {
+  width: 100%;
+	padding: 0; 
+	margin: 0;
+	font-size: 17px;
+	line-height: 28px;
+  font-family: 'Open Sans Condensed', sans-serif, Georgia;
+	font-weight: bold;
+  text-align: center;
+  color: #333;
+  overflow: hidden;
+}
+@media screen and (max-width: 450px) {
+	body {
+		font-size: 9px;
+		line-height: 15px;
+	}
+}
+@media screen and (min-width: 960px) and (max-width: 1200px) {
+	body {
+		font-size: 18px;
+		line-height: 29px;
+	}
+}
+@media screen and (min-width: 1200px) and (max-width: 1450px) {
+	body {
+		font-size: 19px;
+		line-height: 30px;
+	}
+}
+@media screen and (min-width: 1450px) and (max-width: 1550px) {
+	body {
+		font-size: 20px;
+		line-height: 32px;
+	}
+}
+@media screen and (min-width: 1550px) and (max-width: 1750px) {
+	body {
+		font-size: 22px;
+		line-height: 34px;
+	}
+}
+@media screen and (min-width: 1750px) and (max-width: 2000px) {
+	body {
+		font-size: 25px;
+		line-height: 37px;
+	}
+}
+@media screen and (min-width: 2000px) and (max-width: 2500px) {
+	body {
+		font-size: 28px;
+		line-height: 38px;
+	}
+}
+@media screen and (min-width: 2500px) {
+	body {
+		font-size: 32px;
+		line-height: 41px;
+	}
+}
+
+html {
+  box-sizing: border-box;
+}
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+/**********************************
+*
+*     2. Map
+*
+***********************************/
+
+#map {
+  width: 100%;
+  height: 100vh;
+  position:absolute;
+  z-index: 1;
+  cursor: pointer;
+}
+#map:active {
+  outline: none;
+}
+
+/**********************************
+*     2.1 Header */
+
+header {
+  height: 10vh;
+  position: absolute;
+  left: 20vw;
+  top: 0;
+  z-index: 2;
+}
+
+#navigation {
+  float: left;
+  text-align: center;
+  background-color: rgb(236,225,203);
+  color: #333;
+  margin-left: 2vw;
+	-webkit-box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
+	-moz-box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
+	box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
+  border-radius: 0 0 3px 3px;
+}
+table.date_container {
+  border-collapse: collapse;
+}
+.hour {
+  font-size: 80%;
+  line-height: 100%;
+  font-weight: normal;
+  cursor: pointer;
+  padding: 0 3px 3px 3px;
+}
+.hour.selected {
+  background-color: rgb(130,188,237);
+  color: white;
+}
+.hour.locked {
+  background-color: rgb(255, 128, 128);
+  color: white;
+}
+.date {
+  font-size: 80%;
+  line-height: 100%;
+}
+
+.tag {
+  float: left;
+  background-color: rgb(236,225,203);
+	-webkit-box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
+	-moz-box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
+	box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
+  border-radius: 0 0 3px 3px;
+  padding: 0 1px 1px 1px;
+}
+.tag-logo {
+  font-size: 80%;
+  line-height: 100%;
+  background-color: rgb(130,188,237);
+  color: white;
+}
+.tag-text {
+  font-size: 80%;
+  line-height: 100%;
+  font-weight: normal;
+  color: #333;
+  padding: 0 2px 2px 2px;
+}
+.information {
+  cursor: pointer;
+}
+
+
+/**********************************
+*     2.2 Markers */
+
+.markers, .markers svg {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+}
+
+.markers circle {
+  fill: transparent;
+  stroke: rgb(255, 187, 60);
+  stroke-width: 0.3em;
+  cursor: pointer;
+  pointer-events: all;  
+  -webkit-filter: drop-shadow( 0px 0px 2px rgba(0, 0, 0, .8));
+  filter: drop-shadow( 0px 0px 2px rgba(0, 0, 0, .8));
+}
+
+/**********************************
+*
+*     3. Layout
+*
+***********************************/
+
+/**********************************
+*     3.1 Floats */
+
+.w100 {
+  float: left;
+  width: 100%;
+}
+.w90 {
+  float: left;
+  width: 90%;
+}
+.w60 {
+  float: left;
+  width: 60%;
+}
+.w50 {
+  float: left;
+  width: 50%;
+}
+.w40 {
+  float: left;
+  width: 40%;
+}
+.w10 {
+  float: left;
+  width: 10%;
+}
+.w2 {
+  float: left;
+  width: 2%;
+}
+
+.toggle_convection {
+  cursor: pointer;
+}
+
+/**********************************
+*     3.2 On/Off switch */
+
+.on-off{
+  margin: 0 auto;
+  width:1.4em;
+  height:0.9em;
+  position:relative; 
+}
+.on-off:hover{
+  cursor: pointer;
+}
+.back{
+  width:1.4em;
+  height:0.9em;
+  border:2px solid white;
+  background-color: #ff4d4d;
+  position: absolute;
+  border-radius: 0.9em;
+  transition: background-color 200ms linear;
+}
+.front{
+  width:0.9em;
+  height:0.9em;
+  border: 2px solid white;
+  border-radius: 0.9em;
+  position:absolute;
+  left: 0;
+  background-color:lightgrey;
+  transition: left 200ms ease-in-out,
+              right 200ms ease-in-out;
+}
+
+/* Toggle info-box */
+.toggle-info {
+  display: inline-block;
+  cursor: pointer;
+  font-size: 0.7em;
+}
+.toggle-info > i {
+  vertical-align: 15%;
+}
+
+/**********************************
+*     3.3 Tabs */
+
+ul.tabs {
+  display: inline-block;
+	margin: 0;
+  padding: 0;
+  border-top: 5px solid #333;
+  border-radius: 20px;
+  text-align: center;
+}
+ul.tabs li {
+  display: inline-block;
+  padding:0 5px;
+	margin: 0 auto;
+  margin-bottom: 10px;
+  font-size: 0.8em;
+  border-bottom: 4px solid transparent;
+}
+ul.tabs li a {
+  padding: 4px;
+	text-decoration: none;
+  color: #333;
+}
+ul.tabs li a.selected {
+  border-bottom: 4px dashed #333;
+}
+
+/**********************************
+*     3.4 Modal */
+
+.modal-bg {
+  display: none;
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  z-index: 5;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, .5);
+}
+.modal {
+  position: absolute;
+  width: 60%;
+  top: 20vh;
+  left: 20%;
+  padding: 1px;
+  background-color: rgb(227, 212, 181);
+	-webkit-box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
+	-moz-box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
+	box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
+  border-radius: 5px;
+}
+.modal-header {
+  float: left;
+  width: 100%;
+  background-color: rgb(130,188,237);
+  color: white;
+  text-align: left;
+  padding: 0 10px 0 10px;
+  border-radius: 5px 5px 0 0;
+}
+.modal-header > .close {
+  float: right;
+}
+.grid-container {
+  display: grid;
+  grid-gap: 10px;
+  padding: 10px;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: auto;
+  grid-template-areas: 
+  'control control  parcels parcels'
+  'dry     moist    parcels parcels'
+  'ratio   standard parcels parcels'
+  'abbr    abbr     abbr abbr';
+}
+.modal-grid {
+  background-color: rgb(236, 225, 203);
+  text-align: left;
+  padding: 10px;
+  border-radius: 3px;
+}
+.grid-container > .control {
+  grid-area: control;
+}
+.grid-container > .abbr {
+  grid-area: abbr;
+}
+.grid-container > .ratio {
+  grid-area: ratio;
+}
+.grid-container > .dry {
+  grid-area: dry;
+}
+.grid-container > .moist {
+  grid-area: moist;
+}
+.grid-container > .standard {
+  grid-area: standard;
+}
+.grid-container > .parcels {
+  grid-area: parcels;
+}
+
+.modal-txt {
+  font-size: 0.8em;
+  line-height: 150%;
+}
+
+/**********************************
+*
+*     4. Typography
+*
+***********************************/
+
+h2 { display: inline; font-size: 1.5em; line-height: 1em; margin-right: 20px;}
+
+.font-size-08 { font-size: 0.8em; }
+.font-size-07 { font-size: 0.7em; }
+
+.blue {color: #33495f;}
+.sky-blue {color: #009ACD;}
+.red {color: red;}
+.white {color: white;}
+.orange { color: rgb(255, 187, 60); }
+.bg-orange { background-color: #e69900;}
+.bg-light-purple { background-color: #EE82EE;}
+.bg-light-green { background-color: #5cd65c;}
+.bg-sky-blue { background-color: #009ACD;}
+.bg-blue { background-color: rgb(130,188,237); }
+.blue-bg-white-txt { background-color: rgb(130,188,237); color: white; padding: 0 5px 0 5px; }
+.red-bg-white-txt { background-color: rgb(255, 128, 128); color: white; padding: 0 5px 0 5px; }
+
+.bottoms {
+  display: inline-block;
+  width: 40px;
+}
+.green-bottom { border-bottom: 5px solid rgb(92, 214, 92); }
+.brown-bottom { border-bottom: 5px solid rgb(230, 153, 0); }
+.red-bottom { border-bottom: 5px dashed rgb(255, 128, 128); }
+.purple-bottom { border-bottom: 5px dashed #EE82EE; }
+
+/**********************************
+*
+*     5. Containers
+*
+***********************************/
+
+/**********************************
+*     5.1 Sounding */
+
+#sounding_container {
+  position: absolute;
+  height: 90vh;
+  width: 50%;
+  left: 0;
+  top: 10vh;
+  z-index: 3;
+  background-color: rgb(236,225,203);
+	-webkit-box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
+	-moz-box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
+	box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
+  border-radius: 0 3px 0 0;
+}
+
+#sounding_name {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, 0%);
+  z-index: inherit;
+  text-align: center;
+  color: #333;
+  font-size: 0.9em;
+}
+
+#sounding {
+  float: left; 
+}
+
+/* Loader */
+#loader {
+  display: none;
+  position: absolute;
+	top: 40%;
+	left: 40%;
+	z-index: 4;
+}
+/* https://loading.io/css/ */
+.lds-ring {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+.lds-ring div {
+  box-sizing: border-box;
+  display: block;
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  margin: 8px;
+  border: 8px solid rgb(130,188,237);
+  border-radius: 50%;
+  animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  border-color: rgb(130,188,237) transparent transparent transparent;
+}
+.lds-ring div:nth-child(1) {
+  animation-delay: -0.45s;
+}
+.lds-ring div:nth-child(2) {
+  animation-delay: -0.3s;
+}
+.lds-ring div:nth-child(3) {
+  animation-delay: -0.15s;
+}
+@keyframes lds-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/**********************************
+*     5.2 Wind barbs */
+
+#windbarbs {
+  float: left;
+}
+
+#current {
+  float: left;
+  width: 50%;
+  font-size: 5em;
+  line-height: 1em;
+  text-align: left;
+  color: white;
+}
+
+/**********************************
+*     5.3 Hodograph */
+
+#hodo-container {
+  float: left;
+  background-color: rgb(236,225,203);
+  padding: 10px 0 10px 0;
+  border-right: 1px solid #333;
+}
+#hodobox {
+  float: left;
+  width: 100%;
+}
+
+table.legend {
+  margin: 0 auto;
+  border-collapse: collapse;
+  font-size: 0.8em;
+}
+table.legend tr:nth-last-of-type(1) {
+  text-align: center;
+}
+table.legend td {
+  padding: 0;
+  line-height: 1em;
+}
+.legend-box {
+  display: inline-block;
+  width: 2em;
+  height: 0.7em;
+  border: 1px solid #333;
+}
+
+/**********************************
+*     5.4 Convective data */
+
+#convection { 
+  position: absolute;
+  width: 52%;
+  left: 0%;
+  top: 15vh;
+  z-index: 2;
+  color: #333;
+  padding: 1px;
+  background-color: rgb(236,225,203);
+	-webkit-box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
+	-moz-box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
+	box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
+  border-radius: 0 3px 3px 0;
+}
+
+#conv-data {
+  float: left;
+  width: 92%;
+  max-height: 80vh;
+}
+#conv-left {
+  float: left;
+  width: 4%;
+  height: auto;
+}
+#conv-right {
+  float: left;
+  width: 4%;
+  height: 100%;
+  color: white;
+  background-color: rgb(130,188,237);
+  border-radius: 0 3px 3px 0;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.convective-data {
+  border-collapse: collapse;
+  width: 100%;
+  color: #333;
+}
+.convective-data th {
+  padding: 5px;
+  font-size: 0.8em;
+  background-color: rgb(227, 212, 181);
+  line-height: 80%;
+}
+.convective-data th:first-of-type {
+  text-align: right;
+}
+.convective-data tbody {
+  font-weight: 200;
+  text-align: center;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.8em;
+}
+.convective-data tbody tr:nth-last-of-type(2n) {
+  background-color: rgb(227, 212, 181);
+}
+.convective-data tbody td:first-of-type {
+  font-weight: bold;
+  text-align: right;
+  font-family: 'Open Sans Condensed', sans-serif, Georgia;
+}
+
+/**********************************
+*     5.5 Air parcel */
+
+#lift-air-parcel {
+  float: left;
+  width: 100%;
+  background-color: rgb(227, 212, 181);
+  padding: 0 0 10px 0;
+  border-top: 1px solid #333;
+}
+.parcel-data {
+  margin: 0 auto;
+  color: #333;
+}
+.parcel-data tbody {
+  font-weight: bold;
+  text-align: right;
+  font-size: 0.8em;
+}
+.parcel-data td {
+  padding: 0 10px 0 10px;
+}
+.parcel-data tbody td:nth-of-type(2n) {
+  background-color: rgb(236,225,203);
+  text-align: center;
+  font-family: 'Source Code Pro', monospace;
+  font-weight: 200;
+}
+
+.info {
+  display: none;
+  margin: 0 auto;
+  width: 80%;
+  font-size: 0.7em;
+  line-height: 100%;
+  text-align: left;
+  padding: 0 5% 0.5em 5%;
+  border-left: 5px solid rgb(130,188,237);
+  border-right: 5px solid rgb(130,188,237);
+}
+#parcel-info {
+  display: none;
+}
+
+.air-parcel {
+  display: none;
+  fill: transparent;
+  stroke: rgb(255, 187, 60);
+  stroke-width: 0.2em;
+  cursor: pointer;
+  pointer-events: all;
+  -webkit-filter: drop-shadow( 0px 0px 2px rgba(0, 0, 0, .5));
+  filter: drop-shadow( 0px 0px 2px rgba(0, 0, 0, .5));
+}
+
+/**********************************
+*
+*     6. Plots
+*
+***********************************/
+
+/**********************************
+*     6.1 Axis & Labels */
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #333;
+  stroke-width: 1px;
+  shape-rendering: crispEdges;
+}
+
+.axis { fill: #333; font-family: 'Open Sans Condensed', sans-serif, Georgia; }
+.y.axis { font-size: 0.7em; }
+.y.axis.hght { font-size: 9px; fill:red;}
+.x.axis { font-size: 0.7em; }
+.y.axis.ticks text { display: none; }
+
+.axis_label {
+  font-weight: bold;
+  font-size: 0.8em;
+  fill: #333;
+}
+
+.mix_label, .mix_unit {
+  font-weight: bold;
+  font-size: 0.7em;
+  fill: rgba(255, 77, 255, 0.7);
+}
+.mix_unit {
+  font-size: 0.6em;
+}
+
+.isa_label {
+  font-weight: bold;
+  font-size: 0.7em;
+  fill: rgba(255, 128, 128,0.8);
+}
+
+.parcel_label {
+  font-weight: bold;
+  font-size: 0.7em;
+  fill: #333;
+  -webkit-filter: drop-shadow( 0px 0px 2px rgba(0, 0, 0, .5));
+  filter: drop-shadow( 0px 0px 2px rgba(0, 0, 0, .5));
+}
+.parcel_gridline {
+  stroke: #333;
+  stroke-width: 2px;
+  fill: none;
+  -webkit-filter: drop-shadow( 0px 0px 2px rgba(0, 0, 0, .5));
+  filter: drop-shadow( 0px 0px 2px rgba(0, 0, 0, .5));
+  stroke-dasharray: 5,5;
+}
+
+/**********************************
+*     6.2 Sounding lines */
+
+.temp_line {
+  fill: none;
+  stroke:red;
+  stroke-width: 0.15em;
+}
+.dwp_line {
+  fill: none;
+  stroke: green;
+  stroke-width: 0.15em;
+}
+
+.surface_parcel, .unstable_parcel, .mixed_parcel, .dry_parcel_line, .moist_parcel_line, .mix_parcel_line {
+  fill: none;
+  stroke-width: 0.15em;
+  -webkit-filter: drop-shadow( 0px 0px 2px rgba(0, 0, 0, .5));
+  filter: drop-shadow( 0px 0px 2px rgba(0, 0, 0, .5));
+}
+
+.dry_parcel_line {
+  stroke: rgba(230, 153, 0, 1);
+}
+.moist_parcel_line {
+  stroke: rgba(92, 214, 92, 1);
+}
+.mix_parcel_line {
+  stroke: #ff4dff; 
+  stroke-dasharray: 5,5;
+}
+.cape_area {
+  fill: rgba(92, 214, 92, 0.3);
+}
+.cin_area {
+  fill: rgba(255,0,0,0.3);
+}
+
+/**********************************
+*     6.3 Hodograph lines */
+
+.hodoline { fill: none; stroke-width: 0.2em; }
+.hodo01 { stroke: #e69900;}
+.hodo13 { stroke: #EE82EE;}
+.hodo36 { stroke: #5cd65c;}
+.hodo69 { stroke: #009ACD;}
+
+
+/**********************************
+*     6.4 Grid lines */
+
+.gridline, .thin_gridline, .tempzero, .dryline, .thin_dryline, .moistline, .thin_moistline, .mixing_ratio, .isaline {
+   stroke: #333;
+   stroke-width: 0.05em;
+   fill: none;
+}
+
+.thin_gridline { stroke: #999999; stroke-width: 0.03em; }
+.tempzero { stroke: #333; stroke-width: 0.08em; }
+
+.dryline { stroke: rgba(230, 153, 0, 1); }
+.thin_dryline { stroke: rgba(230, 153, 0, 0.7); stroke-width: 0.03em; }
+.moistline { stroke: rgba(92, 214, 92, 1); }
+.thin_moistline { stroke: rgba(92, 214, 92, 0.8); stroke-width: 0.03em; }
+.mixing_ratio { stroke: #ff4dff; stroke-dasharray: 5,5; stroke-width: 0.06em;}
+.isaline { stroke: rgba(255, 128, 128,1); stroke-dasharray: 5,5; stroke-width: 0.08em;}
+
+.barline { stroke: #333; stroke-width: 0.03em; }
+/*.rectline { fill: #333; opacity: 0.5;}
+.rectline2 { fill: #333; }
+.index { font-size: 13px; }
+.header { font-weight: bold; font-size: 11px;}*/
+.hodolabels { font-size: 0.6em; fill: rgba(51, 51, 51, 0.9);}
+/*.lcltext { font-size: 11px; }
+.key { font-size: 10px; }*/
+
+.windbarb { stroke: #333; stroke-width: 0.05em; fill: none; }
+.flag { fill: #333; }
+
+/**********************************
+*     6.5 Tooltips */
+
+.overlay {
+  fill: none;
+  pointer-events: all;
+}
+
+.focus.tmpc circle { fill: red;   stroke: none; }
+.focus.dwpc circle { fill: green; stroke: none; }
+.focus text { font-size: 0.7em; fill: #333; }

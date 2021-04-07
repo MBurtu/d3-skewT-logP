@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Cache-control" content="no-store">
+  <title>Model Soundings (GFS)</title>
+
+  <link rel="stylesheet" type="text/css" href="css/soundings_style.css?v=1">
+</head>
+
+<body>
+
+  <header>
+    <div class="tag">
+      <table class="date_container">
+        <tr><td class="tag-logo">GFS 0.25&deg;</td></tr>
+        <tr><td class="tag-text" id="model_run"></td></tr>
+      </table>
+    </div>
+    <nav id="navigation">
+    </nav>
+    <div class="tag information" style="margin-left:2vw;">
+      <table class="date_container">
+        <tr><td class="tag-logo" style="padding:0 0.5em 0 0.5em">i</td><td class="tag-text">information</td></tr>
+      </table>
+    </div>
+  </header>
+ 
+  <div id="sounding_container">
+    <div id="loader">
+      <div class="lds-ring"><div></div><div></div><div></div><div></div></div>
+    </div>
+    <div id="sounding_name"></div>
+    <div id="sounding"></div>
+    <div id="windbarbs"></div>
+  </div>
+  
+  <div id="convection">
+    <div id="conv-left">&nbsp;</div>
+    <div id="conv-data">
+      <div class="w50" style="text-align:center;height:100%;background-color:rgb(227, 212, 181);">
+        <div id="hodo-container">
+          <div id="hodobox"></div>
+          <div class="w100">
+            <table class="legend">
+              <tbody>
+                <tr><td><div class="legend-box bg-orange"></div></td><td><div class="legend-box bg-light-purple"></div></td><td><div class="legend-box bg-light-green"></div></td><td><div class="legend-box bg-sky-blue"></div></td></tr>
+                <tr><td>0-1</td><td>1-3</td><td>3-6</td><td>6-9</td><td>[km]</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="w50">
+        <table class="convective-data">
+          <thead>
+            <tr><th>[km]</th><th>0-1</th><th>0-3</th><th>0-6</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Bulk shear [kt]</td><td id="bs01"></td><td id="bs03"></td><td id="bs06"></td></tr>
+          </tbody>
+        </table>
+        <table class="convective-data" style="border-top: 1px solid #333;">
+          <thead>
+            <tr><th></th><th style="vertical-align: bottom;">surface<br>based</th><th>most<br>unstable</th><th>mixed<br>layer</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Profile</td>
+              <td>
+                <div class="on-off" id="surface_parcel">
+                  <div class="back"></div>
+                  <div class="front"></div>
+                </div>
+              </td>
+              <td>
+                <div class="on-off" id="unstable_parcel">
+                  <div class="back"></div>
+                  <div class="front"></div>
+                </div>
+              </td>
+              <td>
+                <div class="on-off" id="mixed_parcel">
+                  <div class="back"></div>
+                  <div class="front"></div>
+                </div>
+              </td>
+            </tr>
+            <tr><td>LCL [ft agl]</td><td id="lcl"></td><td id="mulcl"></td><td id="mllcl"></td></tr>
+            <tr><td>LFC [ft agl]</td><td id="lfc"></td><td id="mulfc"></td><td id="mllfc"></td></tr>
+            <tr><td>EL [ft agl]</td><td id="el"></td><td id="muel"></td><td id="mlel"></td></tr>
+            <tr><td>CAPE [J/kg]</td><td id="cape"></td><td id="mucape"></td><td id="mlcape"></td></tr>
+            <tr><td>CIN [J/kg]</td><td id="cin"></td><td id="mucin"></td><td id="mlcin"></td></tr>
+            <tr><td colspan="2">Convective temperature</td><td id="conv_tmpc" colspan="2"></td></tr>
+            <tr><td colspan="2">(lowest) Freezing level</td><td id="fzlvl" colspan="2"></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="w50">
+        <div id="lift-air-parcel">
+          <div class="w100">
+            <div class="w60" style="text-align: right;">
+              lift air parcel
+            </div> 
+            <div class="w40" style="padding-top:0.4em;">
+              <div class="on-off" id="air-parcel" style="margin-left:0.2em;"><div class="back"></div><div class="front"></div></div>
+            </div>
+          </div>
+          <div class="w100">
+            <div class="info">
+              Drag the circle to the temperature from where you want to lift a parcel.
+            </div>
+          </div>
+          <table class="parcel-data">
+            <tbody>
+              <tr><td>T<sub>2m</sub></td><td id="parcel_tmpc">---</td><td>P<sub>sfc</sub></td><td id="parcel_pres">---</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div id="conv-right">
+      <div class="toggle_convection">>></div>
+    </div>
+  </div>
+  
+  <div id="map"></div>
+
+  <div class="modal-bg" id="information" >
+    <div class="modal">
+      <div class="modal-header">
+        information 
+        <div class="close information">X</div>
+      </div>
+      <div class="grid-container">
+        <div class="modal-grid control">
+          <span class="blue-bg-white-txt">timestep</span><br>
+          <div class="modal-txt">
+            <span class="red-bg-white-txt">Change</span> with either mouse hover or mouse scroll.<br>
+            <span class="red-bg-white-txt">Lock &amp; unlock</span> with spacebar.
+          </div>
+        </div>
+        <div class="modal-grid parcels">
+          <span class="blue-bg-white-txt">convection</span><br>
+          <div class="modal-txt">
+            <span class="red-bg-white-txt">Mixed layer parcel</span> - average potential temperature and average mixing ratio of the lowest 100 hPa.<br>
+            <span class="red-bg-white-txt">Most unstable parcel</span> - parcel with highest cape when starting in the lowest 300 hPa.<br>  
+            <span class="red-bg-white-txt">Convective temperature</span> - lowest temperature required for surface driven convection (LCL = LFC).<br>
+            <!--<span class="red-bg-white-txt">Virtual temperature correction</span> is done for all saturated parcels, i.e. above the LCL.-->
+          </div>
+        </div>
+        <div class="modal-grid dry">
+          <div class="modal-txt">
+            <div class="bottoms brown-bottom"></div> dry adiabat
+          </div>
+        </div>
+        <div class="modal-grid moist">
+          <div class="modal-txt">
+            <div class="bottoms green-bottom"></div> moist adiabat
+          </div>
+        </div>
+        <div class="modal-grid ratio">
+          <div class="modal-txt">
+            <div class="bottoms purple-bottom"></div> saturation mixing ratio
+          </div>
+        </div>
+        <div class="modal-grid standard">
+          <div class="modal-txt">
+            <div class="bottoms red-bottom"></div> international standard atmosphere
+          </div>
+        </div>
+        <div class="modal-grid abbr">
+          <span class="blue-bg-white-txt">abbreviations</span><br>
+          <div class="modal-txt">
+            <span class="red-bg-white-txt">LCL</span> - Lifting Condensation Level
+            <span class="red-bg-white-txt">LFC</span> - Level of Free Convection
+            <span class="red-bg-white-txt">EL</span> - Equilibrium Level
+            <span class="red-bg-white-txt">CAPE</span> - Convective Available Potential Energy
+            <span class="red-bg-white-txt">CIN</span> - Convective Inhibition
+            <span class="red-bg-white-txt">FL</span> - Flight Level
+            <span class="red-bg-white-txt">AGL</span> - Above Ground Level
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://maps.googleapis.com/maps/api/js?key=<your API key>"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.js"></script>
+  <script src="js/config.js?v=1"></script>
+  <script src="js/locations.js?v=1"></script>
+  <script src="js/math.js?v=1"></script>
+  <script src="js/main.js?v=1"></script>
+
+  <script>
+    // Create the Google map
+    var map = new google.maps.Map(d3.select("#map").node(), {
+          center: {lat: 64, lng: -15},
+          zoom: 4,
+          mapTypeId: 'terrain',
+          disableDefaultUI: true,
+          zoomControl: false,
+          draggable: false,
+          scrollwheel: false,
+          styles: [{
+            featureType: "all",
+            elementType: "labels",
+            stylers: [
+              { visibility: "off" }
+            ]
+          }]
+    });
+  </script>
+
+</body>
+</html>
