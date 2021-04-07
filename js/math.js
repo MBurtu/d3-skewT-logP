@@ -36,6 +36,7 @@ const deg2rad = (Math.PI/180), // Converts degrees to radians
 
 const m2hft = 3.28084/100;  // Converts meter to hectofeet
 const m2ft = 3.28084;  // Converts meter to feet
+const ms2kt = 1.944; // Converts m/s to kt
 
 /////////////////////////////////
 //
