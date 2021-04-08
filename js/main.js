@@ -807,7 +807,7 @@ function loadSounding(lat,lon,name) {
                     if (soundingStep[i].hght >= prev_lvl) {
                         if (lvl > 1000) {
                             bindingLvl.wdir = soundingStep[i-1].wdir; //Binding -> e.g. first value of 1-3km the same as the last value of 0-1km  
-                            bindingLvl.wspd = soundingStep[i-1].wspd;
+                            bindingLvl.wspd = soundingStep[i-1].wspd*ms2kt; // Convert to kt;
                             levels.push(bindingLvl);
                         }
                         level.wdir = soundingStep[i].wdir;
@@ -820,7 +820,7 @@ function loadSounding(lat,lon,name) {
                 var interp = d3.interpolateObject(soundingStep[i-1],soundingStep[i]); // interp btw two levels
                 var half = interp(1-(lvl - soundingStep[i].hght)/(soundingStep[i-1].hght - soundingStep[i].hght));
                 interpolatedLvls.wdir = Math.round(half.wdir,1);
-                interpolatedLvls.wspd = Math.round(half.wspd,1);
+                interpolatedLvls.wspd = Math.round(half.wspd*ms2kt,1);
                 levels.push(interpolatedLvls);
                 interpolTemp.push(interpolatedLvls);
                 step.push([levels]);
