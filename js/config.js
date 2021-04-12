@@ -3,7 +3,9 @@
 //-
 
 //      Table of Contents
-//      1. Dataset      
+//      1. Dataset     
+//          2.1 Time
+//          2.2 Defaults 
 //      2. Sounding
 //          2.1 Size
 //          2.2 Domain & Axis
@@ -26,10 +28,21 @@
 //
 /////////////////////////////////
 
+/////////////////////////////////
+//      1.1 Time
+
 const firstStep = 0,       // timestep of first image
       timeStep = 3, 	   // timestep in hours
       lastStep = 72,	   // forecast hour of last sounding
       nrOfSoundings = 24;  // nr of model soundings per location
+
+/////////////////////////////////
+//      1.2 Defaults
+
+var unit_height = 'ft'; // ft | m
+var unit_wind = 'kt'; // kt | m/s
+
+var virtual_temperature_correction = false;   // true | false
 
 /////////////////////////////////
 //
