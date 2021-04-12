@@ -26,12 +26,9 @@ Json as seen below. See /data for a full example.
 
 ### Dependencies
 - d3 v.5  
-- Jquery  
-- Google maps api  
-
-### To do
-- Settings where user can change units, domain etc.
-- Virtual temperature correction
+- jQuery  
+- Google maps api
+- Font Awesome  
 
 ### Known bugs
 - Date grid is not generated correctly when transitioning to and from summer time.
