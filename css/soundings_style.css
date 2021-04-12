@@ -132,7 +132,7 @@ html {
 header {
   height: 10vh;
   position: absolute;
-  left: 20vw;
+  left: 15vw;
   top: 0;
   z-index: 2;
 }
@@ -193,7 +193,7 @@ table.date_container {
   color: #333;
   padding: 0 2px 2px 2px;
 }
-.information {
+.modal-tag {
   cursor: pointer;
 }
 
@@ -366,18 +366,41 @@ ul.tabs li a.selected {
 }
 .modal-header > .close {
   float: right;
+  cursor: pointer;
 }
-.grid-container {
+.save {
+  float: right;
+  padding: 5px 10px 5px 10px;
+  cursor: pointer;
+  background-color: rgb(92, 214, 92);
+  color: white; 
+  -webkit-box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
+	-moz-box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
+	box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
+  border-radius: 5px;
+}
+.modal-footer {
+  float: left;
+  width: 100%;
+  background-color: rgb(130,188,237);
+  color: white;
+  font-size: 80%;
+  text-align: center;
+  padding: 0 10px 0 10px;
+  border-radius: 0 0 5px 5px;
+}
+.grid-container-info {
   display: grid;
   grid-gap: 10px;
   padding: 10px;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: auto;
   grid-template-areas: 
-  'control control  parcels parcels'
-  'dry     moist    parcels parcels'
-  'ratio   standard parcels parcels'
-  'abbr    abbr     abbr abbr';
+  'control control     parcels parcels'
+  'dry     moist       parcels parcels'
+  'ratio   standard    parcels parcels'
+  'corrected corrected parcels parcels'
+  'abbr    abbr        abbr abbr';
 }
 .modal-grid {
   background-color: rgb(236, 225, 203);
@@ -385,26 +408,49 @@ ul.tabs li a.selected {
   padding: 10px;
   border-radius: 3px;
 }
-.grid-container > .control {
+.grid-container-info > .control {
   grid-area: control;
 }
-.grid-container > .abbr {
+.grid-container-info > .abbr {
   grid-area: abbr;
 }
-.grid-container > .ratio {
+.grid-container-info > .ratio {
   grid-area: ratio;
 }
-.grid-container > .dry {
+.grid-container-info > .dry {
   grid-area: dry;
 }
-.grid-container > .moist {
+.grid-container-info > .moist {
   grid-area: moist;
 }
-.grid-container > .standard {
+.grid-container-info > .standard {
   grid-area: standard;
 }
-.grid-container > .parcels {
+.grid-container-info > .parcels {
   grid-area: parcels;
+}
+.grid-container-info > .corrected {
+  grid-area: corrected;
+}
+
+.grid-container-set {
+  display: grid;
+  grid-gap: 10px;
+  padding: 10px;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: auto;
+  grid-template-areas: 
+  'units  domain'
+  'convection convection';
+}
+.grid-container-set > .units {
+  grid-area: units;
+}
+.grid-container-set > .domain {
+  grid-area: domain;
+}
+.grid-container-set > .convection {
+  grid-area: convection;
 }
 
 .modal-txt {
@@ -444,6 +490,9 @@ h2 { display: inline; font-size: 1.5em; line-height: 1em; margin-right: 20px;}
 .brown-bottom { border-bottom: 5px solid rgb(230, 153, 0); }
 .red-bottom { border-bottom: 5px dashed rgb(255, 128, 128); }
 .purple-bottom { border-bottom: 5px dashed #EE82EE; }
+.blue-bottom { border-bottom: 5px dashed #009ACD; }
+
+a { text-decoration: none; color: white;}
 
 /**********************************
 *
@@ -773,7 +822,7 @@ table.legend td {
   stroke-width: 0.15em;
 }
 
-.surface_parcel, .unstable_parcel, .mixed_parcel, .dry_parcel_line, .moist_parcel_line, .mix_parcel_line {
+.surface_parcel, .unstable_parcel, .mixed_parcel, .dry_parcel_line, .dry_virtual_parcel_line, .moist_parcel_line, .moist_virtual_parcel_line, .mix_parcel_line {
   fill: none;
   stroke-width: 0.15em;
   -webkit-filter: drop-shadow( 0px 0px 2px rgba(0, 0, 0, .5));
@@ -788,6 +837,10 @@ table.legend td {
 }
 .mix_parcel_line {
   stroke: #ff4dff; 
+  stroke-dasharray: 5,5;
+}
+.dry_virtual_parcel_line, .moist_virtual_parcel_line {
+  stroke: #009ACD;
   stroke-dasharray: 5,5;
 }
 .cape_area {
@@ -848,4 +901,4 @@ table.legend td {
 
 .focus.tmpc circle { fill: red;   stroke: none; }
 .focus.dwpc circle { fill: green; stroke: none; }
-.focus text { font-size: 0.7em; fill: #333; }
+.focus text { font-size: 0.7em; fill: #333; cursor: default; }
