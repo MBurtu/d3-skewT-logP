@@ -7,9 +7,10 @@
 //          1.1 Mousewheel & Spacebar
 //          1.2 Defaults
 //          1.3 Markers 
-//      2. Buttons & Dates
+//      2. Switches & Dates
 //          2.1 Toggle data
-//          2.2 Date grid
+//          2.2 Modal
+//          2.3 Date grid
 //      3. SVG
 //          3.1 Containers
 //          3.2 Background
@@ -120,8 +121,22 @@ $(document).ready(function() {
  
     switchTabs($('.defaulttab'));
 
-    // Load default sounding (ESSA)
-    //loadSounding('59.75','18.0','Arlanda');
+    // Units
+    if ( unit_height == 'ft' ) {
+        m2hft = 3.28084/100;  // Converts meter to hectofeet
+        m2ft = 3.28084;  // Converts meter to feet
+    } else {
+        m2hft = 1;  // No conversion from unit in json, i.e. meter.
+        m2ft = 1;  
+    }
+    $('.unit_height').html(unit_height);
+
+    if ( unit_wind == 'kt' ) {
+        ms2kt = 1.944;  // Converts m/s to kt
+    } else {
+        ms2kt = 1;  // No conversion from unit in json, i.e. m/s.
+    }
+    $('.unit_wind').html(unit_wind);
 
     /////////////////////////////////
     //      1.3 Markers
@@ -153,10 +168,9 @@ $(document).ready(function() {
                 .attr("cx", padding)
                 .attr("cy", padding)
                 .on("click", function(d) {
-                    var latitude = d.value["lat"];
-                    var longitude = d.value["lon"];
                     var name = d.value["name"];
-                    loadSounding(latitude,longitude,name);
+                    var fileName = d.value["filename"];
+                    loadSounding(fileName,name);
                 });
     
             function transform(d) {
@@ -180,7 +194,7 @@ $(document).ready(function() {
 
 /////////////////////////////////
 //
-//      2. Buttons and Dates
+//      2. Switches and Dates
 //
 /////////////////////////////////
 
@@ -198,8 +212,17 @@ $('.toggle_convection').on('click', function(){
     }
 });
 
+function switchTabs(obj){
+	$('.tab-content').hide();
+	$('.tabs a').removeClass("selected");
+	var id = obj.attr("data-tab");
+ 
+	$('#'+id).show();
+	obj.addClass("selected");
+}
+
 //   Hide/Show parcel profile
-$('.on-off').on('click', function(){
+$('.parcel-switch').on('click', function(){
     
     var parcels = ['surface_parcel','unstable_parcel','mixed_parcel','air-parcel'];
     var parcel = $(this).attr('id');
@@ -245,50 +268,129 @@ $('.on-off').on('click', function(){
 
 });
 
+/////////////////////////////////
+//      2.2 Modal
 
-// Hide/Show info
-$('.toggle-info').on('click', function(){
-    
-    var fullId = $(this).attr('id');
-    var id = parseInt(fullId.substring(fullId.length-2, fullId.length));
-    id = Math.abs(id); // -> id > 0
+// Show modal
+$('.modal-tag').on('click', function(){
+    var modalID = $(this).attr('data-id');
 
-    // Hide all other infoboxes that are visible
-    $('.info').each(function(){
-        var infoId = $(this).attr('id');
-        var toggleId = infoId.substring(0,4) + '-' + parseInt(infoId.substring(4,infoId.length));
-        if ($('#'+infoId).is(":visible") && infoId != 'info'+id){
-            $('#'+toggleId).children(':nth-child(2)').toggleClass('fa-angle-double-right');
-            $('#'+toggleId).children(':nth-child(2)').toggleClass('red fa-angle-double-down');
-            $('#'+infoId).slideToggle('slow');
+    // Setup
+    if (modalID == 'settings') {
+
+        // Units
+        if (unit_height == 'ft') {
+            $('#feet').prop("checked", true).trigger("click");
+        } else if (unit_height = 'm') {
+            $('#meter').prop("checked", true).trigger("click");
         }
-    });
+        if (unit_wind == 'kt') {
+            $('#knots').prop("checked", true).trigger("click");
+        } else if (unit_wind = 'ms') {
+            $('#ms').prop("checked", true).trigger("click");
+        }
 
-    // Toggle infobox related to the clicked div
-    $(this).children(':nth-child(2)').toggleClass('fa-angle-double-right');
-    $(this).children(':nth-child(2)').toggleClass('red fa-angle-double-down');
-    $('#info'+id).slideToggle('slow');
+        // Virtual temperature correction
+        var virt_tmp_switch = $('#vir_tmp_corr');
+        var back = virt_tmp_switch.find('.back');
+        var front = virt_tmp_switch.find('.front');
+
+        if (virtual_temperature_correction) {
+            front.css("left",(back.outerWidth()-front.outerWidth()) + "px");  
+            back.css("background-color","#5cd65c"); // green
+        } else {
+            front.css("left",0);   
+            back.css("background-color","#ff4d4d"); // red
+        }
+
+    }
+
+    $('#' + modalID).show();
+
+});
+
+// Hide modal
+$('.close').on('click', function(){
+
+    $('.modal-bg').hide();
+
+});
+
+// Save settings
+$('.save').on('click', function(){ 
+
+    // Units
+    if ( $('#feet').is(':checked') ) {
+        unit_height = 'ft'
+        m2hft = 3.28084/100;  // Converts meter to hectofeet
+        m2ft = 3.28084;  // Converts meter to feet
+    } else {
+        unit_height = 'm'
+        m2hft = 1;  // No conversion from unit in json, i.e. meter.
+        m2ft = 1;  
+    }
+    $('.unit_height').html(unit_height);
+
+    if ( $('#knots').is(':checked') ) {
+        unit_wind = 'kt'
+        ms2kt = 1.944;  // Converts m/s to kt
+    } else {
+        unit_wind = 'm/s'
+        ms2kt = 1;  // No conversion from unit in json, i.e. m/s.
+    }
+    $('.unit_wind').html(unit_wind);
+
+    // Virtual temperature correction
+    var virt_tmp_switch = $('#vir_tmp_corr');
+    var front = virt_tmp_switch.find('.front');
+
+    if (front.position().left != 0){
+        virtual_temperature_correction = true;
+    } else {
+        virtual_temperature_correction = false;
+    }
+
+    // Clear plot
+    skewtgroup.selectAll("*").remove();
+    barbgroup.selectAll("*").remove();
+    hodogroup.selectAll("*").remove();
+    parcelgroup.selectAll("*").remove();
+    // Clear background
+    svg.selectAll("*").remove(); 
+    svgwind.selectAll("*").remove();
+    svghodo.selectAll("*").remove();
     
+    // Draw new background
+    drawBackground();
 
-    return false;
+    // Reload sounding with new settings
+    if (typeof soundingName !== 'undefined') {
+        loadSounding(soundingFileName, soundingName);
+    }
+
+    $('.modal-bg').hide();
+
 });
 
-// Show information
-$('.information').on('click', function(){
-    $('#information').toggle();
+//  Settings that can be turned on/off
+$('.settings-switch').on('click', function(){
+    
+    var back = $(this).find('.back');
+    var front = $(this).find('.front');
+
+    if (front.position().left != 0){
+        front.css("left",0);   
+        back.css("background-color","#ff4d4d"); // red
+    } else {
+        front.css("left",(back.outerWidth()-front.outerWidth()) + "px");  
+        back.css("background-color","#5cd65c"); // green
+    }
+
 });
 
-function switchTabs(obj){
-	$('.tab-content').hide();
-	$('.tabs a').removeClass("selected");
-	var id = obj.attr("data-tab");
- 
-	$('#'+id).show();
-	obj.addClass("selected");
-}
 
 /////////////////////////////////
-//      2.2 Date grid
+//      2.3 Date grid
 
 // Generate and plot date-grid
 function dateGrid(modelrun) {
@@ -386,7 +488,7 @@ function dateGrid(modelrun) {
 //      3.1 Containers
 
 // Create svg container for sounding
-var svg = d3.select("div#sounding")
+var svgContainer = d3.select("div#sounding")
     .append("svg")
     .attr("width", w + margin.right + margin.left)
     .attr("height", h + margin.top + margin.bottom)      
@@ -394,7 +496,7 @@ var svg = d3.select("div#sounding")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 // Create svg container for wind barbs
-var svgwind = d3.select("div#windbarbs")
+var svgwindContainer = d3.select("div#windbarbs")
     .append("svg")
     .attr("width", w_barbs)
     .attr("height", h + margin.top + margin.bottom)      
@@ -402,7 +504,7 @@ var svgwind = d3.select("div#windbarbs")
     .attr("transform", "translate(" + 0 + "," + margin.top + ")");
     
 // Create svg container for hodograph
-var svghodo = d3.select("div#hodobox")
+var svghodoContainer = d3.select("div#hodobox")
     .append("svg")
     .attr("width", hodo_w + hodoMargin.right + hodoMargin.left)
     .attr("height", hodo_h + hodoMargin.top + hodoMargin.bottom)
@@ -412,19 +514,19 @@ var svghodo = d3.select("div#hodobox")
 makeBarbTemplates();
 drawBackground();
 
-var skewtgroup = svg.append("g").attr("class", "skewt"); // put skewt lines in this group
-var parcelgroup = svg.append("g") // put parcels in this group
-var barbgroup  = svgwind.append("g").attr("class", "windbarb"); // put barbs in this group
-var hodogroup = svghodo.append("g").attr("class", "hodo"); // put hodo stuff in this group
-
 /////////////////////////////////
 //      3.2 Background
 
 function drawBackground() {
 
-    var svghodo = d3.select("div#hodobox svg g").append("g").attr("class", "hodobg");
-    var svg = d3.select("div#sounding svg g").append("g").attr("class", "skewtbg");
-    var svgwind = d3.select("div#windbarbs svg g").append("g").attr("class", "windbg");
+    svghodo = d3.select("div#hodobox svg g").append("g").attr("class", "hodobg");
+    svg = d3.select("div#sounding svg g").append("g").attr("class", "skewtbg");
+    svgwind = d3.select("div#windbarbs svg g").append("g").attr("class", "windbg");
+
+    skewtgroup = svgContainer.append("g").attr("class", "skewt"); // put skewt lines in this group
+    parcelgroup = svgContainer.append("g") // put parcels in this group
+    barbgroup  = svgwindContainer.append("g").attr("class", "windbarb"); // put barbs in this group
+    hodogroup = svghodoContainer.append("g").attr("class", "hodo"); // put hodo stuff in this group
 
     // Add clipping path
     svg.append("clipPath")
@@ -710,7 +812,7 @@ function drawBackground() {
         .attr('dy', '0.4em')
         .attr('class', 'hodolabels')
         .attr('text-anchor', 'middle')
-        .text(function(d) { if(d==50) {d = d + ' kt'} return d; });
+        .text(function(d) { if(d==50) {d = d + ' ' + unit_wind} return d; });
     svghodo.selectAll("hodolabels")
         .data(d3.range(10,100,20)).enter().append("text")
         .attr('x', 0)
@@ -718,7 +820,7 @@ function drawBackground() {
         .attr('dy', '0.4em')
         .attr('class', 'hodolabels')
         .attr('text-anchor', 'middle')
-        .text(function(d) { if(d==50) {d = d + ' kt'} return d; });
+        .text(function(d) { if(d==50) {d = d + ' ' + unit_wind} return d; });
     // Horizontal
     svghodo.selectAll("hodolabels")
         .data(d3.range(20,100,20)).enter().append("text")
@@ -749,9 +851,12 @@ function drawBackground() {
 /////////////////////////////////
 //      4.1 Load data
 
-function loadSounding(lat,lon,name) {
+function loadSounding(fileName,name) {
 
     $('#loader').show();
+
+    soundingName = name; // global variable containing the (header) name of the current sounding
+    soundingFileName = fileName; // global variable containing the (file) name of the current sounding
 
     // Clear plot
     skewtgroup.selectAll("*").remove();
@@ -764,18 +869,18 @@ function loadSounding(lat,lon,name) {
     $("li.rollover").removeClass("selected");
     $("#0").addClass("selected"); // timestep +00
     $('.on-off').each(function(){ // switch off all parcel profiles
-        var back = $(this).find('.back').css("background-color","#ff4d4d");
-        var front = $(this).find('.front').css("left",0); 
+        $(this).find('.back').css("background-color","#ff4d4d");
+        $(this).find('.front').css("left",0); 
     });
     spaceBar = false;
 
-    // Add location name and lat lon
-    $('#sounding_name').html(name + ' (' + lat + '&deg;N' + lon + '&deg;E)');  
+    // Add location name 
+    $('#sounding_name').html(name);  
 
     drawToolTips();
 
     // Load data
-    d3.json('data/sounding'+lat+'N'+lon+'E.json').then(function(json){
+    d3.json('data/sounding_'+fileName+'.json').then(function(json){
         sounding = []; // Array with all model soundings
         dateTime = []; // Array with the forecast time for each sounding
         hodoData = []; // Array with data for hodoline
@@ -992,7 +1097,7 @@ function loadSounding(lat,lon,name) {
 
 function makeBarbTemplates() {
     var speeds = d3.range(0,155,5);
-    barbdef = svgwind.append('defs')
+    barbdef = svgwindContainer.append('defs')
     speeds.forEach(function(d) {
     	var thisbarb = barbdef.append('g').attr('id', 'barb'+d);
     	
@@ -1095,7 +1200,7 @@ function drawFirstHour() {
     allbarbs = barbgroup.selectAll("barbs")
         .data(sounding[0][0]).enter().append("use")
     	.attr("xlink:href", function (d) { 
-            var wspdround = Math.ceil(d.wspd/5)*5;
+            var wspdround = Math.ceil((d.wspd*ms2kt)/5)*5;
             return "#barb"+wspdround; 
         })
         .attr("transform", function(d) { return "translate("+w_barbs/2+","+y(d.pres)+") rotate("+(d.wdir+180)+")"; });
@@ -1114,7 +1219,7 @@ function drawFirstHourText() {
     if (conv_data[0].fzlvl == 'Sfc') {
         $("#fzlvl").html(conv_data[0].fzlvl);
     } else {
-        $("#fzlvl").html(conv_data[0].fzlvl + ' ft agl');
+        $("#fzlvl").html(conv_data[0].fzlvl + ' '+ unit_height + ' agl');
     }
     
     $("#lcl").html(sb_parcel[0].lcl_hght);
@@ -1170,16 +1275,22 @@ function drawToolTips() {
       var d0 = mouseoverdata[i - 1];
       var d1 = mouseoverdata[i];
       var d = y0 - d0.pres > d1.pres - y0 ? d1 : d0;
+      
       focus.attr("transform", "translate(" + (x(d.tmpc) + (y(basep)-y(d.pres))/tan)+ "," + y(d.pres) + ")");
       focus2.attr("transform", "translate(" + (x(d.dwpc) + (y(basep)-y(d.pres))/tan)+ "," + y(d.pres) + ")");
       focus3.attr("transform", "translate(0," + y(d.pres) + ")");
       focus4.attr("transform", "translate(0," + y(d.pres) + ")");
       focus.select("text").text(Math.round(d.tmpc) + "°C");
       focus2.select("text").text(Math.round(d.dwpc) + "°C");
-      focus3.select("text").text("-" + Math.round(d.hghtagl*m2hft)*100 + " ft agl");
+      if (unit_height == 'ft') {
+        focus3.select("text").text("-" + Math.round(d.hghtagl*m2hft)*100 + ' '+ unit_height + ' agl');
+      } else {
+        focus3.select("text").text("-" + Math.round(d.hghtagl*(m2hft/10))*10 + ' '+ unit_height + ' agl');
+      }
+
       var p_altiude = calc_pressure_altitude(d.pres); // m
-      var p_altiude_hft = Math.round((p_altiude*m2hft)/5)*5; // nearest multiple of 5
-      if (d.hghtagl*m2ft >= 5000) { // only show FLs from 5000 ft agl and above
+      var p_altiude_hft = Math.round((p_altiude*(3.28084/100))/5)*5; // nearest multiple of 5 [ft]
+      if (d.hghtagl*3.28084 >= 5000) { // only show FLs from 5000 ft agl and above
         if (p_altiude_hft < 100) {
             focus4.select("text").text("FL0" + p_altiude_hft + '-');  
         } else {
@@ -1197,7 +1308,7 @@ function updateData(i) {
     tdlines.data(sounding[i]).attr("d", tdline);
     allbarbs.data(sounding[i][0])
         .attr("xlink:href", function (d) { 
-            var wspdround = Math.ceil(d.wspd/5)*5;
+            var wspdround = Math.ceil((d.wspd*ms2kt)/5)*5;
             return "#barb"+wspdround; 
         })
         .attr("transform", function(d,i) { return "translate("+w_barbs/2+","+y(d.pres)+") rotate("+(d.wdir+180)+")"; });
@@ -1230,7 +1341,7 @@ function updateData(i) {
     if (conv_data[i].fzlvl == 'Sfc') {
         $("#fzlvl").html(conv_data[i].fzlvl);
     } else {
-        $("#fzlvl").html(conv_data[i].fzlvl + ' ft agl');
+        $("#fzlvl").html(conv_data[i].fzlvl + ' '+ unit_height + ' agl');
     }
     
     $("#lcl").html(sb_parcel[i].lcl_hght);
@@ -1323,6 +1434,9 @@ function makeProfile (step,lift_tmpc,lift_dwpc,lift_press) {
     // Vapor pressure
     var lift_e = calc_e(lift_dwpc);
 
+    // Mixing ratio
+    var lift_r = calc_mixing_ratio(lift_e,lift_press);
+
     // Pressure range
     var pp_parcel_range = d3.range(topp,lift_press,dp);
     var pp_parcel = pp_parcel_range.sort((a,b)=>b-a); // flip order, bottom first
@@ -1337,7 +1451,11 @@ function makeProfile (step,lift_tmpc,lift_dwpc,lift_press) {
     var env_lcl_e = calc_e(env_lcl_dwpc);
 
     var lcl_hght = calc_hypsometric(lift_press,lcl_pres,lift_tmpc+T0,env_lcl_tmpc+T0,lift_e,env_lcl_e);
-    var lcl_hght = Math.round(lcl_hght*m2hft)*100;
+    if (unit_height == 'ft') {
+        var lcl_hght = Math.round(lcl_hght*m2hft)*100;
+    } else {
+        var lcl_hght = Math.round(lcl_hght*(m2hft/10))*10;
+    }
     
     // Dry (->LCL) and moist (LCL->) pressure ranges
     var pp_dry_parcel_range = d3.range(lcl_pres,lift_press+dp,dp);
@@ -1361,7 +1479,11 @@ function makeProfile (step,lift_tmpc,lift_dwpc,lift_press) {
     if (lfc_tmpk != '---') {
 
         var lfc_hght = calc_hypsometric(lift_press,lfc_pres2,lift_tmpc+T0,env_lfc_tmpk,lift_e,env_lfc_e);
-        var lfc_hght = Math.round(lfc_hght*m2hft)*100;
+        if (unit_height == 'ft') {
+            var lfc_hght = Math.round(lfc_hght*m2hft)*100;
+        } else {
+            var lfc_hght = Math.round(lfc_hght*(m2hft/10))*10;
+        }
 
         var pp_lfc_parcel_range = d3.range(topp,lfc_pres2+dp,dp);
         var pp_lfc_parcel = pp_lfc_parcel_range.sort((a,b)=>b-a);
@@ -1375,7 +1497,11 @@ function makeProfile (step,lift_tmpc,lift_dwpc,lift_press) {
         var env_el_e = calc_e(env_el_dwpk - T0);
 
         var el_hght = calc_hypsometric(lift_press,el_pres,twom_tmpc+T0,env_el_tmpk,lift_e,env_el_e);
-        var el_hght = Math.round(el_hght*m2hft)*100;
+        if (unit_height == 'ft') {
+            var el_hght = Math.round(el_hght*m2hft)*100;
+        } else {
+            var el_hght = Math.round(el_hght*(m2hft/10))*10;
+        }
 
         // Convective Available Potential Energy (CAPE)
         var pp_cape_range = d3.range(el_pres,lfc_pres+dp,dp);
@@ -1386,7 +1512,7 @@ function makeProfile (step,lift_tmpc,lift_dwpc,lift_press) {
         // Convective InhibitioN (CIN)
         var pp_cin_range = d3.range(lfc_pres2,lift_press,dp);
         var pp_cin = pp_cin_range.sort((a,b)=>b-a);
-        var cin = calc_cin(step,lift_theta,lcl_pres,pp_cin);
+        var cin = calc_cin(step,lift_theta,lift_r,lcl_pres,pp_cin);
         var cin_val = Math.round(cin[0]);
         
     }
@@ -1464,13 +1590,13 @@ function drawProfile(profile) {
     .curve(d3.curveLinear)
     .x(function(d,i) {
         
-        var m_tmp =  lcl_tmpk + deltaT;
-        var m_pres = pp_moist_parcel[i];
-        var dt = calc_moist_gradient(m_tmp,m_pres,dp);
+        var parc_tmp =  lcl_tmpk + deltaT;
+        var parc_pres = pp_moist_parcel[i];
+        var dt = calc_moist_gradient(parc_tmp,parc_pres,dp);
 
         deltaT -= dt;
 
-        return x(m_tmp - dt - T0) + (y(basep)-y(pp_moist_parcel[i]))/tan;
+        return x(parc_tmp - dt - T0) + (y(basep)-y(pp_moist_parcel[i]))/tan;
     })
     .y(function(d,i) { return y(pp_moist_parcel[i]) } );
 
@@ -1489,7 +1615,79 @@ function drawProfile(profile) {
         .attr("d", parcelMoistLine);
 
 
+    // If virtual temperature correction is ON draw virtual profile as well
+    if (virtual_temperature_correction) {
+        var tmp_lift_tmpk = theta / Math.pow(1000/pp_dry_parcel[0], Rd/cpd);
+        var virt_lift_tmpk = calc_virtual_temperature(tmp_lift_tmpk,pp_dry_parcel[0],lift_e);
+        var virt_theta = calc_theta(virt_lift_tmpk - T0, pp_dry_parcel[0]);
+        
+        // Draw parcel profile
+        // Dry adiabat
+        var parcelVirtualDryLine = d3.line()
+        .curve(d3.curveLinear)
+        .x(function(d,i) {
+            
+            var dry_tmpk = virt_theta / Math.pow(1000/pp_dry_parcel[i], Rd/cpd);
+
+            return x(dry_tmpk - T0) + (y(basep)-y(pp_dry_parcel[i]))/tan;
+        })
+        .y(function(d,i) { return y(pp_dry_parcel[i]) } );
+
+        var all_dry = [];
+        for (var i=0; i<1; i++) { 
+            var z = [];
+            for (var j=0; j<pp_dry_parcel.length; j++) { z.push(pp_dry_parcel[i]); }
+            all_dry.push(z);
+        }
+
+        parcelgroup.selectAll(".parcel_virtual_dry_line")
+            .data(all_dry)
+            .enter().append("path")
+            .attr("class", "dry_virtual_parcel_line")
+            .attr("clip-path", "url(#clipper)")
+            .attr("d", parcelVirtualDryLine);
+
+        // Moist adiabat
+        var deltaT = 0;
+        var lcl_tmpk = lcl[0];
+        var lcl_e = calc_e(lcl_tmpk - T0); // tmp = dwp
+        var lcl_pres = lcl[1];
+        var lcl_virt_tmpk = calc_virtual_temperature(lcl_tmpk,lcl_pres,lcl_e);
+
+        var parcelVirtualMoistLine = d3.line()
+        .curve(d3.curveLinear)
+        .x(function(d,i) {
+            
+            var parc_tmp =  lcl_virt_tmpk + deltaT;
+            var parc_pres = pp_moist_parcel[i];
+            var dt = calc_moist_gradient(parc_tmp,parc_pres,dp);
+
+            deltaT -= dt;
+
+            return x(parc_tmp - dt - T0) + (y(basep)-y(pp_moist_parcel[i]))/tan;
+        })
+        .y(function(d,i) { return y(pp_moist_parcel[i]) } );
+
+        var all_moist = [];
+        for (var i=0; i<1; i++) { 
+            var z = [];
+            for (var j=0; j<pp_moist_parcel.length; j++) { z.push(pp_moist_parcel[i]); }
+            all_moist.push(z);
+        }
+        
+        parcelgroup.selectAll(".parcel_virtual_moist_line")
+            .data(all_moist)
+            .enter().append("path")
+            .attr("class", "moist_virtual_parcel_line")
+            .attr("clip-path", "url(#clipper)")
+            .attr("d", parcelVirtualMoistLine);
+    }
+
+
     // Labels
+    if (virtual_temperature_correction) {
+        lcl_tmpk = lcl_virt_tmpk;
+    }
     var lfc_tmpk = lfc[lfc.length-1].lfc_tmpk; // Highest LFC
     var lfc_pres = lfc[lfc.length-1].lfc_pres;
     if (lcl_tmpk == lfc_tmpk) {
@@ -1498,7 +1696,7 @@ function drawProfile(profile) {
             .attr("text-anchor", "left")
             .attr("x", x(lcl_tmpk - T0 + 4) + (y(basep)-y(lcl_pres))/tan)
             .attr("y", y(lcl_pres) + emToPx(0.2)) 
-            .text('lcl, lfc: ' + Math.round(lcl_hght) + ' ft agl');   
+            .text('lcl, lfc: ' + Math.round(lcl_hght) + ' '+ unit_height + ' agl');   
         parcelgroup.append("line")
             .attr("x1", x(lcl_tmpk - T0) + (y(basep)-y(lcl_pres))/tan)
             .attr("x2", x(lcl_tmpk - T0 + 4) + (y(basep)-y(lcl_pres))/tan)
@@ -1511,7 +1709,7 @@ function drawProfile(profile) {
             .attr("text-anchor", "left")
             .attr("x", x(lcl_tmpk - T0 + 4) + (y(basep)-y(lcl_pres))/tan)
             .attr("y", y(lcl_pres) + emToPx(0.2)) 
-            .text('lcl: ' + Math.round(lcl_hght) + ' ft agl');
+            .text('lcl: ' + Math.round(lcl_hght) + ' '+ unit_height + ' agl');
         parcelgroup.append("line")
             .attr("x1", x(lcl_tmpk - T0) + (y(basep)-y(lcl_pres))/tan)
             .attr("x2", x(lcl_tmpk - T0 + 4) + (y(basep)-y(lcl_pres))/tan)
@@ -1525,7 +1723,7 @@ function drawProfile(profile) {
                 .attr("text-anchor", "left")
                 .attr("x", x(lfc_tmpk - T0 + 4) + (y(basep)-y(lfc_pres))/tan)
                 .attr("y", y(lfc_pres) + emToPx(0.2)) 
-                .text('lfc: ' + Math.round(lfc_hght) + ' ft agl');
+                .text('lfc: ' + Math.round(lfc_hght) + ' '+ unit_height + ' agl');
             parcelgroup.append("line")
                 .attr("x1", x(lfc_tmpk - T0) + (y(basep)-y(lfc_pres))/tan)
                 .attr("x2", x(lfc_tmpk - T0 + 4) + (y(basep)-y(lfc_pres))/tan)
@@ -1543,7 +1741,7 @@ function drawProfile(profile) {
             .attr("text-anchor", "left")
             .attr("x", x(el_tmpk - T0 + 4) + (y(basep)-y(el_pres))/tan)
             .attr("y", y(el_pres) + emToPx(0.2)) 
-            .text('el: ' + Math.round(el_hght) + ' ft agl');
+            .text('el: ' + Math.round(el_hght) + ' ' + unit_height + ' agl');
         parcelgroup.append("line")
             .attr("x1", x(el_tmpk - T0) + (y(basep)-y(el_pres))/tan)
             .attr("x2", x(el_tmpk - T0 + 4) + (y(basep)-y(el_pres))/tan)

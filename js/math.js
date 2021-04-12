@@ -34,10 +34,6 @@ const Lv = 2.5 * Math.pow(10,6),
 const deg2rad = (Math.PI/180), // Converts degrees to radians
       tan = Math.tan(55*deg2rad);
 
-const m2hft = 3.28084/100;  // Converts meter to hectofeet
-const m2ft = 3.28084;  // Converts meter to feet
-const ms2kt = 1.944; // Converts m/s to kt
-
 /////////////////////////////////
 //
 //      2. Functions
@@ -158,7 +154,7 @@ function env_t_td_from_pressure(index,pres) {
 
 }
 
-// Finds the (lowest) freezing level (ft)
+// Finds the (lowest) freezing level [m | ft]
 function find_freezing_lvl(index,pp,p_sfc,t_twom,td_twom) {
 
     var fzlvl = 'Sfc';
@@ -171,10 +167,13 @@ function find_freezing_lvl(index,pp,p_sfc,t_twom,td_twom) {
             var env_e = calc_e(env_td);
             if (env_t <= 0) {
                 fzlvl = calc_hypsometric(p_sfc,pp[p],t_twom + T0,env_t + T0,lift_e,env_e);
-                fzlvl = Math.round(fzlvl*m2hft)*100;
+                if (unit_height == 'ft') {
+                    fzlvl = Math.round(fzlvl*m2hft)*100;
+                } else {
+                    fzlvl = Math.round(fzlvl*(m2hft/10))*10;
+                }
                 break;
             }
-
         }
     }
     
@@ -253,28 +252,40 @@ function findLCL (lift_e,theta,pp) {
 function findLFC (step,lcl_tmpk,pp_moist_range) {
 
     var lfcs = [];
-    var deltaT = 0; var nr_of_lfcs = 0; var nr_of_els = 0; 
-    for (var j=0; j<pp_moist_range.length; j++) {
-        var parc_tmpk =  lcl_tmpk + deltaT;
+    var deltaT = 0; var nr_of_lfcs = 0; var nr_of_els = 0;
+    
+    for (var j=0; j<pp_moist_range.length; j++) { 
         var parc_pres = pp_moist_range[j];
+
+        var parc_tmpk =  lcl_tmpk + deltaT;
         var dt = calc_moist_gradient(parc_tmpk,parc_pres,dp);
         deltaT -= dt;
 
-        var env_tmpc = env_t_td_from_pressure(step,parc_pres)[0];
-        var env_dwpc = env_t_td_from_pressure(step,parc_pres)[1];
-        if (parc_tmpk >= (env_tmpc + T0) && (nr_of_lfcs == 0 || nr_of_els == 1)) {
+        var env = env_t_td_from_pressure(step,parc_pres);
+        var env_tmpk = env[0] + T0;
+        var env_dwpk = env[1] + T0;
+
+        if (virtual_temperature_correction) {
+            var parc_e = calc_e(parc_tmpk - T0)
+            parc_tmpk = calc_virtual_temperature(parc_tmpk, parc_pres, parc_e);
+        
+            var env_e = calc_e(env_dwpk - T0);
+            env_tmpk = calc_virtual_temperature(env_tmpk, parc_pres, env_e);       
+        }
+
+        if (parc_tmpk >= env_tmpk && (nr_of_lfcs == 0 || nr_of_els == 1)) {
             lfcs[nr_of_lfcs] = {
                 "lfc_tmpk":parc_tmpk,
                 "lfc_pres":parc_pres,
-                "lfc_env_tmpk":env_tmpc + T0,
-                "lfc_env_dwpk": env_dwpc + T0
+                "lfc_env_tmpk":env_tmpk,
+                "lfc_env_dwpk": env_dwpk
             };
             nr_of_lfcs += 1;
             if (nr_of_lfcs == 2) { //max two lfcs
                 break;
             }
         }
-        if (parc_tmpk <= (env_tmpc + T0 ) && nr_of_lfcs == 1) { // check for equilibrium level
+        if (parc_tmpk <= env_tmpk && nr_of_lfcs == 1) { // check for equilibrium level
             nr_of_els += 1;
         }
     }
@@ -295,22 +306,33 @@ function findLFC (step,lcl_tmpk,pp_moist_range) {
 // Returns temperature and pressure of the EL
 function findEL (step,lfc_tmpk,pp_lfc_range) {
 
-    var el_tmpk = '---'; var el_pres = '---'; var el_env_tmpk = '---';
+    var el_tmpk = '---'; var el_pres = '---'; var el_env_tmpk = '---'; var el_env_dwpk = '---';
     
     var deltaT = 0;
     for (var j=0; j<pp_lfc_range.length; j++) {
-        var m_tmpk =  lfc_tmpk + deltaT;
-        var m_pres = pp_lfc_range[j];
-        var dt = calc_moist_gradient(m_tmpk,m_pres,dp);
+        var parc_pres = pp_lfc_range[j];
+
+        var parc_tmpk =  lfc_tmpk + deltaT;
+        var dt = calc_moist_gradient(parc_tmpk,parc_pres,dp);
         deltaT -= dt;
+       
+        var env = env_t_td_from_pressure(step,parc_pres);
+        var env_tmpk = env[0] + T0;
+        var env_dwpk = env[1] + T0;
+
+        if (virtual_temperature_correction) {
+            var parc_e = calc_e(parc_tmpk - T0)
+            parc_tmpk = calc_virtual_temperature(parc_tmpk, parc_pres, parc_e);
         
-        var env_tmpc = env_t_td_from_pressure(step,m_pres)[0];
-        var env_dwpc = env_t_td_from_pressure(step,m_pres)[1];
-        if (m_tmpk <= (env_tmpc + T0 )) {
-            el_tmpk = m_tmpk;
-            el_pres = m_pres;
-            el_env_tmpk = env_tmpc + T0;
-            el_env_dwpk = env_dwpc + T0;
+            var env_e = calc_e(env_dwpk - T0);
+            env_tmpk = calc_virtual_temperature(env_tmpk,parc_pres,env_e);
+        }
+
+        if (parc_tmpk <= env_tmpk) {
+            el_tmpk = parc_tmpk;
+            el_pres = parc_pres;
+            el_env_tmpk = env_tmpk;
+            el_env_dwpk = env_dwpk;
 
             break;
         }
@@ -360,7 +382,17 @@ function calc_cape (step,lfc_tmpk,pp_cape) {
         var pres = pp_cape[j];
         var dt = calc_moist_gradient(parc_tmpk,pres,dp);
         
-        var env_tmpk = env_t_td_from_pressure(step,pres)[0] + T0;
+        var env = env_t_td_from_pressure(step,pres);
+        var env_tmpk = env[0] + T0;
+        var env_dwpk = env[1] + T0;
+
+        if (virtual_temperature_correction) {
+            var parc_e = calc_e(parc_tmpk - T0); //parcel tmp = dwp
+            parc_tmpk = calc_virtual_temperature(parc_tmpk,pres,parc_e);
+            
+            var env_e = calc_e(env_dwpk - T0); 
+            env_tmpk = calc_virtual_temperature(env_tmpk,pres,env_e);
+        }
         
         var tmp_cape = Rd*(parc_tmpk - env_tmpk)*Math.log(pres/(pres-dp)); // Wallace & Hobbs (2006) p.345
         if (tmp_cape > 0) {
@@ -389,10 +421,10 @@ function calc_cape (step,lfc_tmpk,pp_cape) {
 
 // Integrates between the SFC and LFC
 // Returns CIN (and parcel coords of cin area)
-function calc_cin (step,lift_theta,lcl_pres,pp_cin) {
+function calc_cin (step,lift_theta,lift_r,lcl_pres,pp_cin) {
 
     var cin = 0; var cin_coords = []; var cin_env_coords = []; 
-    var parc_tmpk; var env_tmpk;
+    var parc_tmpk; var env_tmpk; var parc_e;
     for (var j=0; j<pp_cin.length; j++) {
         
         var pres = pp_cin[j];
@@ -403,9 +435,27 @@ function calc_cin (step,lift_theta,lcl_pres,pp_cin) {
             var dt = calc_moist_gradient(parc_tmpk,pres,dp);
             parc_tmpk -= dt;
         }            
+            
+        var env = env_t_td_from_pressure(step,pres);
+        var env_tmpk = env[0] + T0;
+        var env_dwpk = env[1] + T0;
 
-        var env_tmpk = env_t_td_from_pressure(step,pres)[0] + T0;
-        var tmp_cin = Rd*(parc_tmpk - env_tmpk)*Math.log(pres/(pres-dp));
+        if (virtual_temperature_correction) {
+            if (pres > lcl_pres) {
+                parc_e = (lift_r*pres)/(lift_r + eps); // vapor pressure, Wallace & Hobbs (2006) eqn 3.63
+            } else {
+                parc_e = calc_e(parc_tmpk - T0); //parcel tmp = dwp above the LCL
+            }
+            parc_virt_tmpk = calc_virtual_temperature(parc_tmpk,pres,parc_e);
+            
+            var env_e = calc_e(env_dwpk - T0); 
+            env_virt_tmpk = calc_virtual_temperature(env_tmpk,pres,env_e);
+
+            var tmp_cin = Rd*(parc_virt_tmpk - env_virt_tmpk)*Math.log(pres/(pres-dp));
+        } else {
+            var tmp_cin = Rd*(parc_tmpk - env_tmpk)*Math.log(pres/(pres-dp));
+        }
+
         if (tmp_cin < 0) {
             cin += tmp_cin;
             cin_coords.push({"tmpc":parc_tmpk-T0, "pres":pres});
