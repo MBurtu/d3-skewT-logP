@@ -6,11 +6,17 @@
   <title>Model Soundings (GFS)</title>
 
   <link rel="stylesheet" type="text/css" href="css/soundings_style.css?v=1">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="your_key" crossorigin="anonymous">
 </head>
 
 <body>
 
   <header>
+    <div class="tag modal-tag" data-id="settings" style="margin-right:2vw;">
+      <table class="date_container">
+        <tr><td class="tag-logo" style="padding:0 0.5em 0 0.5em"><i class="fas fa-sliders-h"></i></td><td class="tag-text">settings</td></tr>
+      </table>
+    </div>
     <div class="tag">
       <table class="date_container">
         <tr><td class="tag-logo">GFS 0.25&deg;</td></tr>
@@ -19,9 +25,9 @@
     </div>
     <nav id="navigation">
     </nav>
-    <div class="tag information" style="margin-left:2vw;">
+    <div class="tag modal-tag" data-id="information" style="margin-left:2vw;">
       <table class="date_container">
-        <tr><td class="tag-logo" style="padding:0 0.5em 0 0.5em">i</td><td class="tag-text">information</td></tr>
+        <tr><td class="tag-logo" style="padding:0 0.5em 0 0.5em"><i class="fas fa-info"></i></td><td class="tag-text">information</td></tr>
       </table>
     </div>
   </header>
@@ -46,6 +52,7 @@
               <tbody>
                 <tr><td><div class="legend-box bg-orange"></div></td><td><div class="legend-box bg-light-purple"></div></td><td><div class="legend-box bg-light-green"></div></td><td><div class="legend-box bg-sky-blue"></div></td></tr>
                 <tr><td>0-1</td><td>1-3</td><td>3-6</td><td>6-9</td><td>[km]</td></tr>
+                <tr><td>&nbsp;&nbsp;0-3&nbsp;&nbsp;</td><td>&nbsp;&nbsp;3-10&nbsp;</td><td>&nbsp;10-20&nbsp;</td><td>&nbsp;20-30&nbsp;</td><td>[kft]</td></tr>
               </tbody>
             </table>
           </div>
@@ -58,7 +65,7 @@
             <tr><th>[km]</th><th>0-1</th><th>0-3</th><th>0-6</th></tr>
           </thead>
           <tbody>
-            <tr><td>Bulk shear [kt]</td><td id="bs01"></td><td id="bs03"></td><td id="bs06"></td></tr>
+            <tr><td>Bulk shear [<span class="unit_wind">kt</span>]</td><td id="bs01"></td><td id="bs03"></td><td id="bs06"></td></tr>
           </tbody>
         </table>
         <table class="convective-data" style="border-top: 1px solid #333;">
@@ -69,27 +76,27 @@
             <tr>
               <td>Profile</td>
               <td>
-                <div class="on-off" id="surface_parcel">
+                <div class="on-off parcel-switch" id="surface_parcel">
                   <div class="back"></div>
                   <div class="front"></div>
                 </div>
               </td>
               <td>
-                <div class="on-off" id="unstable_parcel">
+                <div class="on-off parcel-switch" id="unstable_parcel">
                   <div class="back"></div>
                   <div class="front"></div>
                 </div>
               </td>
               <td>
-                <div class="on-off" id="mixed_parcel">
+                <div class="on-off parcel-switch" id="mixed_parcel">
                   <div class="back"></div>
                   <div class="front"></div>
                 </div>
               </td>
             </tr>
-            <tr><td>LCL [ft agl]</td><td id="lcl"></td><td id="mulcl"></td><td id="mllcl"></td></tr>
-            <tr><td>LFC [ft agl]</td><td id="lfc"></td><td id="mulfc"></td><td id="mllfc"></td></tr>
-            <tr><td>EL [ft agl]</td><td id="el"></td><td id="muel"></td><td id="mlel"></td></tr>
+            <tr><td>LCL [<span class="unit_height">ft</span> agl]</td><td id="lcl"></td><td id="mulcl"></td><td id="mllcl"></td></tr>
+            <tr><td>LFC [<span class="unit_height">ft</span> agl]</td><td id="lfc"></td><td id="mulfc"></td><td id="mllfc"></td></tr>
+            <tr><td>EL [<span class="unit_height">ft</span> agl]</td><td id="el"></td><td id="muel"></td><td id="mlel"></td></tr>
             <tr><td>CAPE [J/kg]</td><td id="cape"></td><td id="mucape"></td><td id="mlcape"></td></tr>
             <tr><td>CIN [J/kg]</td><td id="cin"></td><td id="mucin"></td><td id="mlcin"></td></tr>
             <tr><td colspan="2">Convective temperature</td><td id="conv_tmpc" colspan="2"></td></tr>
@@ -104,7 +111,7 @@
               lift air parcel
             </div> 
             <div class="w40" style="padding-top:0.4em;">
-              <div class="on-off" id="air-parcel" style="margin-left:0.2em;"><div class="back"></div><div class="front"></div></div>
+              <div class="on-off parcel-switch" id="air-parcel" style="margin-left:0.2em;"><div class="back"></div><div class="front"></div></div>
             </div>
           </div>
           <div class="w100">
@@ -127,13 +134,57 @@
   
   <div id="map"></div>
 
+  <div class="modal-bg" id="settings" >
+    <div class="modal">
+      <div class="modal-header">
+        settings
+        <div class="close">X</div>
+      </div>
+      <div class="grid-container-set">
+        <div class="modal-grid units">
+          <span class="blue-bg-white-txt">units</span><br>
+          <div class="modal-txt">
+            <span class="red-bg-white-txt">Height</span>
+            <input type="radio" id="feet" name="height" value="ft">
+            <label for="feet">ft</label>
+            <input type="radio" id="meter" name="height" value="m">
+            <label for="meter">m</label>
+            |
+            <span class="red-bg-white-txt">Wind</span>
+            <input type="radio" id="knots" name="wind" value="kt">
+            <label for="knots">kt</label>
+            <input type="radio" id="ms" name="wind" value="m/s">
+            <label for="ms">m/s</label>
+          </div>
+        </div>
+        <div class="modal-grid domain">
+          <span class="blue-bg-white-txt">domain</span><br>
+          <div class="modal-txt">
+            <span class="red-bg-white-txt">Temperature</span>
+            <span class="red-bg-white-txt">Pressure</span>
+          </div>
+        </div>
+        <div class="modal-grid convection">
+          <span class="blue-bg-white-txt">convection</span><br>
+          <div class="modal-txt" style="float:left;">
+            <span class="red-bg-white-txt">Virtual temperature correction</span>
+          </div>
+          <div style="float:left;padding-top:0.2em;">
+            <div class="on-off settings-switch" id="vir_tmp_corr" style="margin-left:0.2em;"><div class="back"></div><div class="front"></div></div>
+          </div>
+          <div class="save"><i class="far fa-save"></i> Save</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-bg" id="information" >
     <div class="modal">
       <div class="modal-header">
         information 
-        <div class="close information">X</div>
+        <div class="close">X</div>
       </div>
-      <div class="grid-container">
+      <div class="grid-container-info">
         <div class="modal-grid control">
           <span class="blue-bg-white-txt">timestep</span><br>
           <div class="modal-txt">
@@ -144,10 +195,11 @@
         <div class="modal-grid parcels">
           <span class="blue-bg-white-txt">convection</span><br>
           <div class="modal-txt">
+            <span class="red-bg-white-txt">Surface based parcel</span> - temperature and dewpoint of the bottom layer of the sounding.<br>
             <span class="red-bg-white-txt">Mixed layer parcel</span> - average potential temperature and average mixing ratio of the lowest 100 hPa.<br>
             <span class="red-bg-white-txt">Most unstable parcel</span> - parcel with highest cape when starting in the lowest 300 hPa.<br>  
-            <span class="red-bg-white-txt">Convective temperature</span> - lowest temperature required for surface driven convection (LCL = LFC).<br>
-            <!--<span class="red-bg-white-txt">Virtual temperature correction</span> is done for all saturated parcels, i.e. above the LCL.-->
+            <span class="red-bg-white-txt">Convective temperature</span> - lowest temperature required for surface driven convection.<br>
+            <span class="red-bg-white-txt">Virtual temperature correction</span> can be switched ON or OFF under settings.
           </div>
         </div>
         <div class="modal-grid dry">
@@ -168,6 +220,11 @@
         <div class="modal-grid standard">
           <div class="modal-txt">
             <div class="bottoms red-bottom"></div> international standard atmosphere
+          </div>
+        </div>
+        <div class="modal-grid corrected">
+          <div class="modal-txt">
+            <div class="bottoms blue-bottom"></div> virtual temperature corrected parcel ascent
           </div>
         </div>
         <div class="modal-grid abbr">
