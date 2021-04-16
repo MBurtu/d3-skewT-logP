@@ -27,7 +27,8 @@ Json as seen below. See /data for a full example.
 ### Dependencies
 - d3 v.5  
 - jQuery  
-- Google maps api
+- Leaflet
+- OpenStreetMap
 - Font Awesome  
 
 ### Known bugs
