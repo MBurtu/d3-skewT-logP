@@ -141,49 +141,56 @@ $(document).ready(function() {
     /////////////////////////////////
     //      1.3 Markers
 
-    // Draw markers on map (https://bl.ocks.org/mbostock/899711)
-
-    var overlay = new google.maps.OverlayView();
-
-    // Add the container when the overlay is added to the map.
-    overlay.onAdd = function() {
-        var layer = d3.select(this.getPanes().overlayMouseTarget).append("div")
-        .attr("class", "markers");
-
-        // Draw each marker as a separate SVG element.
-        overlay.draw = function() {
-            var projection = this.getProjection(),
-                padding = 10;
+    // Draw markers on map (https://observablehq.com/@delos/intro-to-leaflet-d3-interactivity)
     
-            var marker = layer.selectAll("svg")
-                .data(d3.entries(soundingLocations))
-                .each(transform) // update existing markers
-            .enter().append("svg:svg")
-                .each(transform)
-                .attr("class", "marker");
+    var map = L
+        .map('map', {
+        center: [64, -10],
+        zoom: 4,
+        maxZoom: 6,
+        minZoom: 4,
+        zoomControl: false,
+        scrollWheelZoom: false 
+    });   
     
-            // Add a circle.
-            marker.append("svg:circle")
-                .attr("r", "0.3em")
-                .attr("cx", padding)
-                .attr("cy", padding)
-                .on("click", function(d) {
-                    var name = d.value["name"];
-                    var fileName = d.value["filename"];
-                    loadSounding(fileName,name);
-                });
-    
-            function transform(d) {
-                d = new google.maps.LatLng(d.value["lat"], d.value["lon"]);
-                dProj = projection.fromLatLngToDivPixel(d);
-                return d3.select(this)
-                    .style("left", (dProj.x - padding) + "px")
-                    .style("top", (dProj.y - padding) + "px");
-            }
-        };
-    };
-    // Bind our overlay to the map…
-    overlay.setMap(map);  
+    L.control.zoom({
+        position: 'bottomright'
+    }).addTo(map);
+
+    // Add a tile to the map
+    L.tileLayer(
+        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
+    }).addTo(map);
+
+    //initialize svg to add to map
+    L.svg({clickable:true}).addTo(map) // we have to make the svg layer clickable
+  
+    const overlay = d3.select(map.getPanes().overlayPane).attr("class", "markers");
+    const svg = overlay.select('svg').attr("pointer-events", "auto");
+
+    const markers = svg.selectAll('markers')
+        .data(soundingLocations) 
+        .enter().append('circle')
+        .attr("cx", function(d){ return map.latLngToLayerPoint([d.lat, d.lon]).x })
+        .attr("cy", function(d){ return map.latLngToLayerPoint([d.lat, d.lon]).y })
+        .attr("r", "0.3em")
+        .on("click", function(d) {
+            var name = d.name;
+            var fileName = d.filename;
+            loadSounding(fileName,name);
+        });
+
+    // Function that update circle position if something change
+    const update = () => markers
+        .attr("cx", function(d){ return map.latLngToLayerPoint([d.lat, d.lon]).x })
+        .attr("cy", function(d){ return map.latLngToLayerPoint([d.lat, d.lon]).y })
+
+    // If the user change the map (zoom or drag), update circle position:
+    map.on("moveend", update)
+    map.on("zoomend", update)
+
+    // 
 
     // Side divs to same height as middle div
     var convectionHeight = $('#convection').height();
