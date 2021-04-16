@@ -6,7 +6,8 @@
   <title>Model Soundings (GFS)</title>
 
   <link rel="stylesheet" type="text/css" href="css/soundings_style.css?v=1">
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="your_key" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""/>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
 </head>
 
 <body>
@@ -243,33 +244,13 @@
     </div>
   </div>
 
-  <script src="https://maps.googleapis.com/maps/api/js?key=<your API key>"></script>
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.js"></script>
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.js"></script>
   <script src="js/config.js?v=1"></script>
   <script src="js/locations.js?v=1"></script>
   <script src="js/math.js?v=1"></script>
   <script src="js/main.js?v=1"></script>
-
-  <script>
-    // Create the Google map
-    var map = new google.maps.Map(d3.select("#map").node(), {
-          center: {lat: 64, lng: -15},
-          zoom: 4,
-          mapTypeId: 'terrain',
-          disableDefaultUI: true,
-          zoomControl: false,
-          draggable: false,
-          scrollwheel: false,
-          styles: [{
-            featureType: "all",
-            elementType: "labels",
-            stylers: [
-              { visibility: "off" }
-            ]
-          }]
-    });
-  </script>
 
 </body>
 </html>
