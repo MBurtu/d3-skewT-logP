@@ -452,19 +452,27 @@ function calc_cin (step,lift_theta,lift_r,lcl_pres,pp_cin) {
             env_virt_tmpk = calc_virtual_temperature(env_tmpk,pres,env_e);
 
             var tmp_cin = Rd*(parc_virt_tmpk - env_virt_tmpk)*Math.log(pres/(pres-dp));
+            if (tmp_cin < 0) {
+                cin += tmp_cin;
+                cin_coords.push({"tmpc":parc_virt_tmpk-T0, "pres":pres});
+                cin_env_coords.push({"tmpc":env_virt_tmpk-T0, "pres":pres});
+            } else {
+                cin_coords.push({"tmpc":env_virt_tmpk-T0, "pres":pres}); // Don't include cin > 0 (i.e. cape) in cin area (if multiple cin areas)
+                cin_env_coords.push({"tmpc":env_virt_tmpk-T0, "pres":pres});
+            }
+
         } else {
             var tmp_cin = Rd*(parc_tmpk - env_tmpk)*Math.log(pres/(pres-dp));
+            if (tmp_cin < 0) {
+                cin += tmp_cin;
+                cin_coords.push({"tmpc":parc_tmpk-T0, "pres":pres});
+                cin_env_coords.push({"tmpc":env_tmpk-T0, "pres":pres});
+            } else {
+                cin_coords.push({"tmpc":env_tmpk-T0, "pres":pres}); // Don't include cin > 0 (i.e. cape) in cin area (if multiple cin areas)
+                cin_env_coords.push({"tmpc":env_tmpk-T0, "pres":pres});
+            }
         }
 
-        if (tmp_cin < 0) {
-            cin += tmp_cin;
-            cin_coords.push({"tmpc":parc_tmpk-T0, "pres":pres});
-            cin_env_coords.push({"tmpc":env_tmpk-T0, "pres":pres});
-        } else {
-            cin_coords.push({"tmpc":env_tmpk-T0, "pres":pres}); // Don't include cin > 0 (i.e. cape) in cin area (if multiple cin areas)
-            cin_env_coords.push({"tmpc":env_tmpk-T0, "pres":pres});
-        }
-        
     }
    
     if (cin_coords.length > 0) {
