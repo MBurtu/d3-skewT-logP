@@ -176,6 +176,8 @@ $(document).ready(function() {
         .attr("cy", function(d){ return map.latLngToLayerPoint([d.lat, d.lon]).y })
         .attr("r", "0.3em")
         .on("click", function(d) {
+            d3.select(this)
+            .attr("stroke", "red");
             var name = d.name;
             var fileName = d.filename;
             loadSounding(fileName,name);
@@ -895,10 +897,22 @@ function loadSounding(fileName,name) {
             var key = Object.keys(json)[s];
             var time = `${key.substring(0, key.length - 6)}Z`; //"Subtracting" minutes and seconds
             
-            var soundingStep = json[key].reverse();
-            
+            var tmpStep = json[key][0];//.reverse();
+            var soundingStep = [];
+            // Convert all pressure levels to objects
+            for (var j=0; j<tmpStep.pres.length; j++) {
+                var lvlObj = {
+                    "pres": tmpStep.pres[j],
+                    "hght": tmpStep.hght[j],
+                    "hghtagl": tmpStep.hghtagl[j],
+                    "tmpc": tmpStep.tmpc[j],
+                    "dwpc": tmpStep.dwpc[j],
+                    "wdir": tmpStep.wdir[j],
+                    "wspd": tmpStep.wspd[j]
+                };
+                soundingStep.push(lvlObj);
+            };
             dateTime.push(time);
-
             sounding.push([soundingStep]);
 
             // Hodoline
@@ -911,9 +925,17 @@ function loadSounding(fileName,name) {
                 var levels = [];
                 var lvl = 1000*requestedLevels[l]+soundingStep[0].hght; // want height AGL
                 var prev_lvl = 1000*requestedLevels[l-1]+soundingStep[0].hght;
-                for (var i=0; i<soundingStep.length; i++) {
+                for (var i=1; i<soundingStep.length; i++) {
                     var level = []; var bindingLvl = [];
                     if (soundingStep[i].hght > lvl) { 
+                        // Adjust for interpolation over 360deg, e.g. between 2deg and 358deg, by adding 360deg to the lowest degree
+                        var prev_lvl_wdir = soundingStep[i-1].wdir;
+                        var lvl_wdir = soundingStep[i].wdir;
+                        if (prev_lvl_wdir - lvl_wdir > 180) {
+                            soundingStep[i].wdir += 360;
+                        } else if (lvl_wdir - prev_lvl_wdir > 180) {
+                            soundingStep[i-1].wdir += 360;
+                        }
                         break; 
                     } 
                     if (soundingStep[i].hght >= prev_lvl) {
@@ -942,6 +964,7 @@ function loadSounding(fileName,name) {
         drawFirstHour();
         mouseoverdata = sounding[0][0].slice(0).reverse();
     
+        // Indicies and convective data
         conv_data = []; sb_parcel = []; mu_parcel = []; ml_parcel = [];
         for (var s=0; s<nrOfSoundings; s++) {
 
