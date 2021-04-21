@@ -4,8 +4,9 @@
 
 //      Table of Contents
 //      1. Dataset     
-//          2.1 Time
-//          2.2 Defaults 
+//          1.1 Dataset
+//          1.2 Map 
+//          1.3 Defaults 
 //      2. Sounding
 //          2.1 Size
 //          2.2 Domain & Axis
@@ -24,12 +25,12 @@
 
 /////////////////////////////////
 //
-//      1. Dataset
+//      1. Map & Data
 //
 /////////////////////////////////
 
 /////////////////////////////////
-//      1.1 Time
+//      1.1 Dataset
 
 const firstStep = 0,       // timestep of first image
       timeStep = 3, 	   // timestep in hours
@@ -37,12 +38,20 @@ const firstStep = 0,       // timestep of first image
       nrOfSoundings = 24;  // nr of model soundings per location
 
 /////////////////////////////////
-//      1.2 Defaults
+//      1.2 Map
+
+const center = [64, -10],
+      zoom = 4,
+      maxZoom = 6,
+      minZoom = 4;
+
+/////////////////////////////////
+//      1.3 Defaults
 
 var unit_height = 'ft'; // ft | m
 var unit_wind = 'kt'; // kt | m/s
 
-var virtual_temperature_correction = false;   // true | false
+var virtual_temperature_correction = true;   // true | false
 
 /////////////////////////////////
 //
@@ -63,11 +72,11 @@ var margin = {top: width*0.04, right: 0, bottom: width*0.045, left: width*0.07},
 /////////////////////////////////
 //      2.2 Domain & Axis
 
-const basep = 1050,  // Base pressure
-    topp = 100, // Top pressure
-    dp = 1,
-    plines = [1000,850,700,500,300,200,100],  // Isobars
-    pticks = [950,900,800,750,650,600,550,450,400,350,250,150];  // Pressure ticks
+const basep = 1050,  // Base pressure hPa
+    topp = 100, // Top pressure hPa
+    dp = 1, // hPa
+    plines = [1000,850,700,500,300,200,100],  // Isobars hPa
+    pticks = [950,900,800,750,650,600,550,450,400,350,250,150];  // Pressure ticks hPa
 
 // Dry adibats
 const pp_dry = d3.range(topp,basep+1,dp); // pressure
@@ -78,7 +87,7 @@ const pp_moist = pp_moist_range.sort((a,b)=>b-a); // pressure in descending orde
 const moistad = d3.range(-40,50,2); // degC
 // Mixing ratio 
 const pp_mix = d3.range(600,basep+1,dp); // pressure
-const mix_ratio = [0.1,0.2,0.4,1,2,3,5,7,10,15,20,30,40]; //  g/kg
+const mix_ratio = [0.1,0.2,0.4,1,2,3,5,7,10,15,20,30,40]; // g/kg
 
 // Scales and axes. Note the inverted domain for the y-scale: bigger is up!
 var x = d3.scaleLinear().range([0, w]).domain([-45,45]),
