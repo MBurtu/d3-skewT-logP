@@ -266,27 +266,43 @@ function findLFC (step,lcl_tmpk,pp_moist_range) {
         var env_dwpk = env[1] + T0;
 
         if (virtual_temperature_correction) {
-            var parc_e = calc_e(parc_tmpk - T0)
-            parc_tmpk = calc_virtual_temperature(parc_tmpk, parc_pres, parc_e);
-        
+            var parc_e = calc_e(parc_tmpk - T0);
+            var parc_virt_tmpk = calc_virtual_temperature(parc_tmpk, parc_pres, parc_e);
+            
             var env_e = calc_e(env_dwpk - T0);
-            env_tmpk = calc_virtual_temperature(env_tmpk, parc_pres, env_e);       
-        }
+            var env_virt_tmpk = calc_virtual_temperature(env_tmpk, parc_pres, env_e);       
 
-        if (parc_tmpk >= env_tmpk && (nr_of_lfcs == 0 || nr_of_els == 1)) {
-            lfcs[nr_of_lfcs] = {
-                "lfc_tmpk":parc_tmpk,
-                "lfc_pres":parc_pres,
-                "lfc_env_tmpk":env_tmpk,
-                "lfc_env_dwpk": env_dwpk
-            };
-            nr_of_lfcs += 1;
-            if (nr_of_lfcs == 2) { //max two lfcs
-                break;
+            if (parc_virt_tmpk >= env_virt_tmpk && (nr_of_lfcs == 0 || nr_of_els == 1)) {
+                lfcs[nr_of_lfcs] = {
+                    "lfc_tmpk":parc_tmpk,
+                    "lfc_pres":parc_pres,
+                    "lfc_env_tmpk":env_tmpk,
+                    "lfc_env_dwpk": env_dwpk
+                };
+                nr_of_lfcs += 1;
+                if (nr_of_lfcs == 2) { //max two lfcs
+                    break;
+                }
             }
-        }
-        if (parc_tmpk <= env_tmpk && nr_of_lfcs == 1) { // check for equilibrium level
-            nr_of_els += 1;
+            if (parc_virt_tmpk <= env_virt_tmpk && nr_of_lfcs == 1) { // check for equilibrium level
+                nr_of_els += 1;
+            }
+        } else {
+            if (parc_tmpk >= env_tmpk && (nr_of_lfcs == 0 || nr_of_els == 1)) {
+                lfcs[nr_of_lfcs] = {
+                    "lfc_tmpk":parc_tmpk,
+                    "lfc_pres":parc_pres,
+                    "lfc_env_tmpk":env_tmpk,
+                    "lfc_env_dwpk": env_dwpk
+                };
+                nr_of_lfcs += 1;
+                if (nr_of_lfcs == 2) { //max two lfcs
+                    break;
+                }
+            }
+            if (parc_tmpk <= env_tmpk && nr_of_lfcs == 1) { // check for equilibrium level
+                nr_of_els += 1;
+            }
         }
     }
     if (nr_of_lfcs == 0) { // if no LFC can be found
@@ -322,19 +338,26 @@ function findEL (step,lfc_tmpk,pp_lfc_range) {
 
         if (virtual_temperature_correction) {
             var parc_e = calc_e(parc_tmpk - T0)
-            parc_tmpk = calc_virtual_temperature(parc_tmpk, parc_pres, parc_e);
-        
+            var parc_virt_tmpk = calc_virtual_temperature(parc_tmpk, parc_pres, parc_e);
+            
             var env_e = calc_e(env_dwpk - T0);
-            env_tmpk = calc_virtual_temperature(env_tmpk,parc_pres,env_e);
-        }
+            var env_virt_tmpk = calc_virtual_temperature(env_tmpk,parc_pres,env_e);
 
-        if (parc_tmpk <= env_tmpk) {
-            el_tmpk = parc_tmpk;
-            el_pres = parc_pres;
-            el_env_tmpk = env_tmpk;
-            el_env_dwpk = env_dwpk;
-
-            break;
+            if (parc_virt_tmpk <= env_virt_tmpk) {
+                el_tmpk = parc_tmpk;
+                el_pres = parc_pres;
+                el_env_tmpk = env_tmpk;
+                el_env_dwpk = env_dwpk;
+                break;
+            }
+        } else {
+            if (parc_tmpk <= env_tmpk) {
+                el_tmpk = parc_tmpk;
+                el_pres = parc_pres;
+                el_env_tmpk = env_tmpk;
+                el_env_dwpk = env_dwpk;
+                break;
+            }
         }
 
     }
@@ -372,7 +395,7 @@ function find_convective_temperature(step,pp,twom_tmpc,twom_dwpc,sfc_press) {
 }
 
 // Integrates between the (lowest) LFC and (highest) EL
-// Returns CAPE
+// Returns CAPE and coordinates to CAPE area
 function calc_cape (step,lfc_tmpk,pp_cape) {
 
     var deltaT = 0; var cape = 0; var cape_coords = []; var cape_env_coords = []; var cape_label_tmpc = 0;
@@ -385,23 +408,33 @@ function calc_cape (step,lfc_tmpk,pp_cape) {
         var env = env_t_td_from_pressure(step,pres);
         var env_tmpk = env[0] + T0;
         var env_dwpk = env[1] + T0;
-
-        if (virtual_temperature_correction) {
-            var parc_e = calc_e(parc_tmpk - T0); //parcel tmp = dwp
-            parc_tmpk = calc_virtual_temperature(parc_tmpk,pres,parc_e);
-            
-            var env_e = calc_e(env_dwpk - T0); 
-            env_tmpk = calc_virtual_temperature(env_tmpk,pres,env_e);
-        }
+       
+        var parc_e = calc_e(parc_tmpk - T0); //parcel tmp = dwp
+        var parc_virt_tmpk = calc_virtual_temperature(parc_tmpk,pres,parc_e);
         
-        var tmp_cape = Rd*(parc_tmpk - env_tmpk)*Math.log(pres/(pres-dp)); // Wallace & Hobbs (2006) p.345
-        if (tmp_cape > 0) {
-            cape += tmp_cape;
-            cape_coords.push({"tmpc":parc_tmpk-T0, "pres":pres});
-            cape_env_coords.push({"tmpc":env_tmpk-T0, "pres":pres});
+        var env_e = calc_e(env_dwpk - T0); 
+        var env_virt_tmpk = calc_virtual_temperature(env_tmpk,pres,env_e);
+        
+        if (virtual_temperature_correction) {
+            var tmp_cape = Rd*(parc_virt_tmpk - env_virt_tmpk)*Math.log(pres/(pres-dp)); // Wallace & Hobbs (2006) p.345
+            if (tmp_cape > 0) {
+                cape += tmp_cape;
+                cape_coords.push({"tmpc":parc_virt_tmpk-T0, "pres":pres});
+                cape_env_coords.push({"tmpc":env_virt_tmpk-T0, "pres":pres});
+            } else {
+                cape_coords.push({"tmpc":env_virt_tmpk-T0, "pres":pres}); // Don't include cape < 0 (i.e. cin) in cape area (if multiple cape areas)
+                cape_env_coords.push({"tmpc":env_virt_tmpk-T0, "pres":pres});
+            }
         } else {
-            cape_coords.push({"tmpc":env_tmpk-T0, "pres":pres}); // Don't include cape < 0 (i.e. cin) in cape area (if multiple cape areas)
-            cape_env_coords.push({"tmpc":env_tmpk-T0, "pres":pres});
+            var tmp_cape = Rd*(parc_tmpk - env_tmpk)*Math.log(pres/(pres-dp)); // Wallace & Hobbs (2006) p.345
+            if (tmp_cape > 0) {
+                cape += tmp_cape;
+                cape_coords.push({"tmpc":parc_tmpk-T0, "pres":pres});
+                cape_env_coords.push({"tmpc":env_tmpk-T0, "pres":pres});
+            } else {
+                cape_coords.push({"tmpc":env_tmpk-T0, "pres":pres}); // Don't include cape < 0 (i.e. cin) in cape area (if multiple cape areas)
+                cape_env_coords.push({"tmpc":env_tmpk-T0, "pres":pres});
+            }
         }
 
         deltaT -= dt;

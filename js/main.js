@@ -143,12 +143,12 @@ $(document).ready(function() {
 
     // Draw markers on map (https://observablehq.com/@delos/intro-to-leaflet-d3-interactivity)
     
-    var map = L
+    const map = L
         .map('map', {
-        center: [64, -10],
-        zoom: 4,
-        maxZoom: 6,
-        minZoom: 4,
+        center: center,
+        zoom: zoom,
+        maxZoom: maxZoom,
+        minZoom: minZoom,
         zoomControl: false,
         scrollWheelZoom: false 
     });   
@@ -167,22 +167,26 @@ $(document).ready(function() {
     L.svg({clickable:true}).addTo(map) // we have to make the svg layer clickable
   
     const overlay = d3.select(map.getPanes().overlayPane).attr("class", "markers");
-    const svg = overlay.select('svg').attr("pointer-events", "auto");
+    const svg = overlay.select("svg").attr("pointer-events", "auto");
 
-    const markers = svg.selectAll('markers')
+    const markers = svg.selectAll("markers")
         .data(soundingLocations) 
-        .enter().append('circle')
+        .enter().append("circle")
         .attr("cx", function(d){ return map.latLngToLayerPoint([d.lat, d.lon]).x })
         .attr("cy", function(d){ return map.latLngToLayerPoint([d.lat, d.lon]).y })
+        .attr("class", "marker")
         .attr("r", "0.3em")
         .on("click", function(d) {
-            d3.select(this)
-            .attr("stroke", "red");
+            $('.marker').each(function() {
+                $(this).css("stroke", "rgb(255, 187, 60)");
+            });
+            $(this).css("stroke", "red");
             var name = d.name;
             var fileName = d.filename;
-            loadSounding(fileName,name);
+            var icao = d.icao;
+            loadSounding(fileName,name,icao);
         });
-
+  
     // Function that update circle position if something change
     const update = () => markers
         .attr("cx", function(d){ return map.latLngToLayerPoint([d.lat, d.lon]).x })
@@ -374,7 +378,7 @@ $('.save').on('click', function(){
 
     // Reload sounding with new settings
     if (typeof soundingName !== 'undefined') {
-        loadSounding(soundingFileName, soundingName);
+        loadSounding(soundingFileName, soundingName, soundingICAO);
     }
 
     $('.modal-bg').hide();
@@ -860,12 +864,13 @@ function drawBackground() {
 /////////////////////////////////
 //      4.1 Load data
 
-function loadSounding(fileName,name) {
+function loadSounding(fileName,name,icao) {
 
     $('#loader').show();
 
     soundingName = name; // global variable containing the (header) name of the current sounding
     soundingFileName = fileName; // global variable containing the (file) name of the current sounding
+    soundingICAO = icao; // global variable containing the ICAO code (if airport else 'NN')
 
     // Clear plot
     skewtgroup.selectAll("*").remove();
@@ -877,19 +882,23 @@ function loadSounding(fileName,name) {
     // Reset settings
     $("li.rollover").removeClass("selected");
     $("#0").addClass("selected"); // timestep +00
-    $('.on-off').each(function(){ // switch off all parcel profiles
-        $(this).find('.back').css("background-color","#ff4d4d");
-        $(this).find('.front').css("left",0); 
+    $(".on-off").each(function(){ // switch off all parcel profiles
+        $(this).find(".back").css("background-color","#ff4d4d");
+        $(this).find(".front").css("left",0); 
     });
     spaceBar = false;
 
     // Add location name 
-    $('#sounding_name').html(name);  
+    var soundingHeader = name;
+    if (soundingICAO !== "NN") { 
+        soundingHeader = name + " [" + icao + "]";
+    }
+    $("#sounding_name").html(soundingHeader);
 
     drawToolTips();
 
     // Load data
-    d3.json('data/sounding_'+fileName+'.json').then(function(json){
+    d3.json("data/sounding_"+fileName+".json").then(function(json){
         sounding = []; // Array with all model soundings
         dateTime = []; // Array with the forecast time for each sounding
         hodoData = []; // Array with data for hodoline
@@ -1688,13 +1697,16 @@ function drawProfile(profile) {
         .curve(d3.curveLinear)
         .x(function(d,i) {
             
-            var parc_tmp =  lcl_virt_tmpk + deltaT;
+            var parc_tmpk =  lcl_tmpk + deltaT;
             var parc_pres = pp_moist_parcel[i];
-            var dt = calc_moist_gradient(parc_tmp,parc_pres,dp);
+            var dt = calc_moist_gradient(parc_tmpk,parc_pres,dp);
+
+            var parc_e = calc_e(parc_tmpk - T0); //parcel tmp = dwp
+            var parc_virt_tmpk = calc_virtual_temperature(parc_tmpk,parc_pres,parc_e);
 
             deltaT -= dt;
 
-            return x(parc_tmp - dt - T0) + (y(basep)-y(pp_moist_parcel[i]))/tan;
+            return x(parc_virt_tmpk - dt - T0) + (y(basep)-y(pp_moist_parcel[i]))/tan;
         })
         .y(function(d,i) { return y(pp_moist_parcel[i]) } );
 
@@ -1715,11 +1727,22 @@ function drawProfile(profile) {
 
 
     // Labels
-    if (virtual_temperature_correction) {
-        lcl_tmpk = lcl_virt_tmpk;
-    }
     var lfc_tmpk = lfc[lfc.length-1].lfc_tmpk; // Highest LFC
     var lfc_pres = lfc[lfc.length-1].lfc_pres;
+    var el_tmpk = el[0];
+    var el_pres = el[1];
+    if (virtual_temperature_correction && lfc_tmpk !== '---') {
+        lcl_tmpk = lcl_virt_tmpk;
+
+        var lfc_e = calc_e(lfc_tmpk - T0);
+        var lfc_virt_tmpk = calc_virtual_temperature(lfc_tmpk,lfc_pres,lfc_e);
+        lfc_tmpk = lfc_virt_tmpk;
+
+        var el_e = calc_e(el_tmpk - T0);
+        var el_virt_tmpk = calc_virtual_temperature(el_tmpk,el_pres,el_e);
+        el_tmpk = el_virt_tmpk;
+    }
+
     if (lcl_tmpk == lfc_tmpk) {
         parcelgroup.append("text")
             .attr("class", "parcel_label")
@@ -1763,8 +1786,6 @@ function drawProfile(profile) {
         }
     }
 
-    var el_tmpk = el[0];
-    var el_pres = el[1];
     if (typeof el_tmpk !== 'undefined') {
         parcelgroup.append("text")
             .attr("class", "parcel_label")
