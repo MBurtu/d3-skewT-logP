@@ -248,7 +248,7 @@ $('.parcel-switch').on('click', function(){
         back.css("background-color","#ff4d4d");
         parcelgroup.selectAll("*").remove();
         $('.air-parcel').hide();       
-        $('.info').hide('slow');
+        //$('.info').hide('slow');
     } else {
         front.css("left",(back.outerWidth()-front.outerWidth()) + "px");  
         back.css("background-color","#5cd65c");
@@ -261,7 +261,7 @@ $('.parcel-switch').on('click', function(){
             drawProfile(ml_parcel[index]); 
         } else if (parcel == 'air-parcel') { 
             $('.air-parcel').show();       
-            $('.info').show('slow');
+            //$('.info').show('slow');
         }
     }
     
@@ -1042,7 +1042,7 @@ function loadSounding(fileName,name,icao) {
             var mu_cin_val = sb_profile[13];
             
             // Iterate the lowest 300 hPa looking for higher cape than sb
-            var pp_range = d3.range(conv_sfc_press-300,conv_sfc_press,dp);
+            var pp_range = d3.range(conv_sfc_press-300,conv_sfc_press,2);
             var pp = pp_range.sort((a,b)=>b-a); // flip order, bottom first
             for (var p=0; p<pp.length; p++) {
                 var t_td = env_t_td_from_pressure(s,pp[p]);
@@ -1206,8 +1206,9 @@ function drawFirstHour() {
     twom_dwpc = sounding[0][0][0].dwpc;
     twom_tmpc = sounding[0][0][0].tmpc;
     index = 0;
-    parcel = svg.append("circle")
-        .attr("class", "air-parcel")    
+    parcel_tmpc = svg.append("circle")
+        .data(["tmp"])
+        .attr("class", "air-parcel parcel-tmpc")    
         .attr("r", "0.2em")
         .attr("cx", x(twom_tmpc) + (y(basep)-y(sfc_press))/tan)
         .attr("cy", y(sfc_press))
@@ -1215,8 +1216,18 @@ function drawFirstHour() {
             .on("drag", moveParcel)
             .on("end", liftParcel)
         );
+    parcel_dwpc = svg.append("circle")
+        .data(["dwp"])
+        .attr("class", "air-parcel parcel-dwpc")    
+        .attr("r", "0.2em")
+        .attr("cx", x(twom_dwpc) + (y(basep)-y(sfc_press))/tan)
+        .attr("cy", y(sfc_press))
+        .call(d3.drag()
+            .on("drag", moveParcel)
+            .on("end", liftParcel)
+        );
     $('#parcel_tmpc').html(twom_tmpc + '&deg;C');
-    $('#parcel_pres').html(sfc_press + ' hPa');
+    $('#parcel_dwpc').html(twom_dwpc + '&deg;C');
 
     //Hodolines
     holines01 = hodogroup.selectAll("hodolines01")  //0-1 km
@@ -1366,9 +1377,10 @@ function updateData(i) {
     twom_tmpc = sounding[i][0][0].tmpc;
     index = i;
     // Update circle (parcel)
-    parcel.attr("cx",  x(twom_tmpc) + (y(basep)-y(sfc_press))/tan).attr("cy", y(sfc_press));
+    parcel_tmpc.attr("cx",  x(twom_tmpc) + (y(basep)-y(sfc_press))/tan).attr("cy", y(sfc_press));
+    parcel_dwpc.attr("cx",  x(twom_dwpc) + (y(basep)-y(sfc_press))/tan).attr("cy", y(sfc_press));
     $('#parcel_tmpc').html(twom_tmpc + '&deg;C');
-    $('#parcel_pres').html(sfc_press + ' hPa');
+    $('#parcel_dwpc').html(twom_dwpc + '&deg;C');
 
     // Convective data
     $("#bs01").html(conv_data[i].bulk_shear01);
@@ -1427,22 +1439,35 @@ function updateData(i) {
 function moveParcel(d) {
     // Clear plot from previuosly lifted parcels
     parcelgroup.selectAll("*").remove();
-
+    
     // Update circle position
-    var move_x = testBound(d3.event.x); 
-    var parcel_tmpc = Math.round(x.invert(move_x - (y(basep)-y(sfc_press))/tan)*10)/10;
-
-    parcel.attr('cx', move_x).attr('cy', y(sfc_press));
-    $('#parcel_tmpc').html(parcel_tmpc + '&deg;C');
+    var move_x = testBound(d3.event.x,d); 
+    var x_tmp = Math.round(x.invert(move_x - (y(basep)-y(sfc_press))/tan)*10)/10;
+    
+    if (d == "tmp") {
+        parcel_tmpc.attr("cx", move_x).attr("cy", y(sfc_press));
+        $("#parcel_tmpc").html(x_tmp + "&deg;C");
+    } else {
+        parcel_dwpc.attr("cx", move_x).attr("cy", y(sfc_press));
+        $("#parcel_dwpc").html(x_tmp + "&deg;C");
+    }
 }
 
 function liftParcel(d) {
 
-    // Temperature
     var lift_x = d3.event.x;
-    var lift_tmpc = x.invert(lift_x - (y(basep)-y(sfc_press))/tan);
+    
+    if (d == "tmp") {
+        var td_x = parcel_dwpc.attr("cx");
+        var lift_td = x.invert(td_x - (y(basep)-y(sfc_press))/tan);
+        var lift_t = x.invert(lift_x - (y(basep)-y(sfc_press))/tan);
+    } else {
+        var t_x = parcel_tmpc.attr("cx");
+        var lift_t = x.invert(t_x - (y(basep)-y(sfc_press))/tan);
+        var lift_td = x.invert(lift_x - (y(basep)-y(sfc_press))/tan);
+    }
 
-    var profile = makeProfile(index,lift_tmpc,twom_dwpc,sfc_press);
+    var profile = makeProfile(index,lift_t,lift_td,sfc_press);
 
     var parcel = {
         "lift_theta": profile[0],
@@ -1656,6 +1681,23 @@ function drawProfile(profile) {
 
     // If virtual temperature correction is ON draw virtual profile as well
     if (virtual_temperature_correction) {
+        /* Sounding virtual temperature line
+        var virtualTemperature = d3.line()
+        .curve(d3.curveLinear)
+        .x(function(d,i) { 
+            var e = calc_e(d.dwpc);
+            var virt_tmpk = calc_virtual_temperature(d.tmpc+T0,d.pres,e);
+            return x(virt_tmpk - T0) + (y(basep)-y(d.pres))/tan; 
+        })
+        .y(function(d,i) { return y(d.pres); });
+
+        parcelgroup.selectAll(".virtual-temperature-line")
+            .data(sounding[index]).enter().append("path")
+            .attr("class", "virtual-temperature-line")
+            .attr("clip-path", "url(#clipper)")
+            .attr("d", virtualTemperature);
+
+        */
         var tmp_lift_tmpk = theta / Math.pow(1000/pp_dry_parcel[0], Rd/cpd);
         var virt_lift_tmpk = calc_virtual_temperature(tmp_lift_tmpk,pp_dry_parcel[0],lift_e);
         var virt_theta = calc_theta(virt_lift_tmpk - T0, pp_dry_parcel[0]);
@@ -1723,6 +1765,7 @@ function drawProfile(profile) {
             .attr("class", "moist_virtual_parcel_line")
             .attr("clip-path", "url(#clipper)")
             .attr("d", parcelVirtualMoistLine);
+
     }
 
 
@@ -1875,11 +1918,25 @@ function drawProfile(profile) {
     
 }
 
-// Tests if pixel is within allowed range for sfc air parcel [sounding dwp -> +40 degC]
-function testBound(pxls) {
+// Tests if pixel is within allowed range
+// Temperature: sounding dwp -> +40 degC
+// Dewpoint: -40 degC -> sounding tmp
+function testBound(pxls,type) {
 
-    var bound_x = [x(twom_dwpc) + (y(basep)-y(sfc_press))/tan, x(40) + (y(basep)-y(sfc_press))/tan];
+    // Position of dewpoint circle
+    var td_x = parcel_dwpc.attr("cx");
+    var lift_td = x.invert(td_x - (y(basep)-y(sfc_press))/tan);
+    
+    // Position of temperature circle
+    var t_x = parcel_tmpc.attr("cx");
+    var lift_t = x.invert(t_x - (y(basep)-y(sfc_press))/tan);
 
+    if (type == "tmp") {
+        var bound_x = [x(lift_td) + (y(basep)-y(sfc_press))/tan, x(40) + (y(basep)-y(sfc_press))/tan];
+    } else {
+        var bound_x = [x(-40) + (y(basep)-y(sfc_press))/tan, x(lift_t) + (y(basep)-y(sfc_press))/tan];
+    }
+    
     if (pxls > bound_x[1]) { pxls = bound_x[1]; }
     if (pxls < bound_x[0]) { pxls = bound_x[0]; }
 
