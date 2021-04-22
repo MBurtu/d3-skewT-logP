@@ -720,7 +720,6 @@ table.legend td {
 }
 
 .info {
-  display: none;
   margin: 0 auto;
   width: 80%;
   font-size: 0.7em;
@@ -737,12 +736,17 @@ table.legend td {
 .air-parcel {
   display: none;
   fill: transparent;
-  stroke: rgb(255, 187, 60);
   stroke-width: 0.2em;
   cursor: pointer;
   pointer-events: all;
   -webkit-filter: drop-shadow( 0px 0px 2px rgba(0, 0, 0, .5));
   filter: drop-shadow( 0px 0px 2px rgba(0, 0, 0, .5));
+}
+.parcel-tmpc {
+  stroke: rgb(255, 187, 60);
+}
+.parcel-dwpc {
+  stroke: #ff4dff;
 }
 
 /**********************************
@@ -819,7 +823,8 @@ table.legend td {
   stroke-width: 0.15em;
 }
 
-.surface_parcel, .unstable_parcel, .mixed_parcel, .dry_parcel_line, .dry_virtual_parcel_line, .moist_parcel_line, .moist_virtual_parcel_line, .mix_parcel_line {
+.surface_parcel, .unstable_parcel, .mixed_parcel, .dry_parcel_line, .dry_virtual_parcel_line,
+ .moist_parcel_line, .moist_virtual_parcel_line, .mix_parcel_line, .virtual-temperature-line {
   fill: none;
   stroke-width: 0.15em;
   -webkit-filter: drop-shadow( 0px 0px 2px rgba(0, 0, 0, .5));
@@ -839,6 +844,11 @@ table.legend td {
 .dry_virtual_parcel_line, .moist_virtual_parcel_line {
   stroke-width: 0.1em;
   stroke: #009ACD;
+  stroke-dasharray: 5,5;
+}
+.virtual-temperature-line {
+  stroke-width: 0.1em;
+  stroke: red;
   stroke-dasharray: 5,5;
 }
 .cape_area {
