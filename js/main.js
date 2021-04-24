@@ -907,7 +907,7 @@ function loadSounding(fileName,name,icao) {
             var key = Object.keys(json)[s];
             var time = `${key.substring(0, key.length - 6)}Z`; //"Subtracting" minutes and seconds
             
-            var tmpStep = json[key][0];//.reverse();
+            var tmpStep = json[key];//.reverse();
             var soundingStep = [];
             // Convert all pressure levels to objects
             for (var j=0; j<tmpStep.pres.length; j++) {
