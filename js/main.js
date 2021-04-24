@@ -249,7 +249,6 @@ $('.parcel-switch').on('click', function(){
         back.css("background-color","#ff4d4d");
         parcelgroup.selectAll("*").remove();
         $('.air-parcel').hide();       
-        //$('.info').hide('slow');
     } else {
         front.css("left",(back.outerWidth()-front.outerWidth()) + "px");  
         back.css("background-color","#5cd65c");
@@ -262,7 +261,6 @@ $('.parcel-switch').on('click', function(){
             drawProfile(ml_parcel[index]); 
         } else if (parcel == 'air-parcel') { 
             $('.air-parcel').show();       
-            //$('.info').show('slow');
         }
     }
     
@@ -275,7 +273,6 @@ $('.parcel-switch').on('click', function(){
             back.css("background-color","#ff4d4d");
             if (parcel != 'air-parcel') { 
                 $('.air-parcel').hide();       
-                $('.info').hide('slow');
             }
         }
     }
