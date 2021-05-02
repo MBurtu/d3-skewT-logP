@@ -896,7 +896,7 @@ function loadSounding(fileName,name,icao) {
     drawToolTips();
 
     // Load data
-    d3.json("data/sounding_"+fileName+".json").then(function(json){
+    d3.json("data/sounding_"+fileName+".json?" + Math.floor(Math.random() * 1000)).then(function(json){
         sounding = []; // Array with all model soundings
         dateTime = []; // Array with the forecast time for each sounding
         hodoData = []; // Array with data for hodoline
