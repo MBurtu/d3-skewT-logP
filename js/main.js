@@ -1245,13 +1245,24 @@ function drawFirstHour() {
         .attr("class", "hodoline hodo69")
         .attr("d", hodoline);
 
+    // Wind barbs
     allbarbs = barbgroup.selectAll("barbs")
         .data(sounding[0][0]).enter().append("use")
     	.attr("xlink:href", function (d) { 
             var wspdround = Math.ceil((d.wspd*ms2kt)/5)*5;
-            return "#barb"+wspdround; 
+            if (d.pres >= topp) {
+                return "#barb"+wspdround;
+            } else {
+                return "";
+            } 
         })
-        .attr("transform", function(d) { return "translate("+w_barbs/2+","+y(d.pres)+") rotate("+(d.wdir+180)+")"; });
+        .attr("transform", function(d) {
+            if (d.pres >= topp) {
+                return "translate("+w_barbs/2+","+y(d.pres)+") rotate("+(d.wdir+180)+")";
+            } else {
+                return "";
+            } 
+        });
         
 
 }
@@ -1294,60 +1305,62 @@ function drawFirstHourText() {
 }
 
 function drawToolTips() {
-  // Draw T/Td tooltips
-  focus = skewtgroup.append("g").attr("class", "focus tmpc").style("display", "none");
-  focus.append("circle").attr("r", 4);
-  focus.append("text").attr("x", 9).attr("dy", ".35em");
-      
-  focus2 = skewtgroup.append("g").attr("class", "focus dwpc").style("display", "none");
-  focus2.append("circle").attr("r", 4);
-  focus2.append("text").attr("x", -9).attr("text-anchor", "end").attr("dy", ".35em");
-  
-  focus3 = skewtgroup.append("g").attr("class", "focus").style("display", "none");
-  focus3.append("text").attr("x", 0).attr("text-anchor", "start").attr("dy", ".35em");
+    // Draw T/Td tooltips
+    focus = skewtgroup.append("g").attr("class", "focus tmpc").style("display", "none");
+    focus.append("circle").attr("r", 4);
+    focus.append("text").attr("x", 9).attr("dy", ".35em");
+        
+    focus2 = skewtgroup.append("g").attr("class", "focus dwpc").style("display", "none");
+    focus2.append("circle").attr("r", 4);
+    focus2.append("text").attr("x", -9).attr("text-anchor", "end").attr("dy", ".35em");
+    
+    focus3 = skewtgroup.append("g").attr("class", "focus").style("display", "none");
+    focus3.append("text").attr("x", 0).attr("text-anchor", "start").attr("dy", ".35em");
 
-  focus4 = skewtgroup.append("g").attr("class", "focus").style("display", "none");
-  focus4.append("text").attr("x", w).attr("text-anchor", "end").attr("dy", ".35em");
+    focus4 = skewtgroup.append("g").attr("class", "focus").style("display", "none");
+    focus4.append("text").attr("x", w).attr("text-anchor", "end").attr("dy", ".35em");
 
-  svg.append("rect")
-      .attr("class", "overlay")
-      .attr("width", w)
-      .attr("height", h)
-      .on("mouseover", function() { focus.style("display", null); focus2.style("display", null); focus3.style("display", null); focus4.style("display", null);})
-      .on("mouseout", function() { focus.style("display", "none"); focus2.style("display", "none"); focus3.style("display", "none"); focus4.style("display", "none");})
-      .on("mousemove", mousemove);
-      
-  function mousemove() {
-      var y0 = y.invert(d3.mouse(this)[1]); // get y value of mouse pointer in pressure space
-	  var i = bisectTemp(mouseoverdata, y0, 1, mouseoverdata.length-1);
-      var d0 = mouseoverdata[i - 1];
-      var d1 = mouseoverdata[i];
-      var d = y0 - d0.pres > d1.pres - y0 ? d1 : d0;
-      
-      focus.attr("transform", "translate(" + (x(d.tmpc) + (y(basep)-y(d.pres))/tan)+ "," + y(d.pres) + ")");
-      focus2.attr("transform", "translate(" + (x(d.dwpc) + (y(basep)-y(d.pres))/tan)+ "," + y(d.pres) + ")");
-      focus3.attr("transform", "translate(0," + y(d.pres) + ")");
-      focus4.attr("transform", "translate(0," + y(d.pres) + ")");
-      focus.select("text").text(Math.round(d.tmpc) + "°C");
-      focus2.select("text").text(Math.round(d.dwpc) + "°C");
-      if (unit_height == 'ft') {
-        focus3.select("text").text("-" + Math.round(d.hghtagl*m2hft)*100 + ' '+ unit_height + ' agl');
-      } else {
-        focus3.select("text").text("-" + Math.round(d.hghtagl*(m2hft/10))*10 + ' '+ unit_height + ' agl');
-      }
+    svg.append("rect")
+        .attr("class", "overlay")
+        .attr("width", w)
+        .attr("height", h)
+        .on("mouseover", function() { focus.style("display", null); focus2.style("display", null); focus3.style("display", null); focus4.style("display", null);})
+        .on("mouseout", function() { focus.style("display", "none"); focus2.style("display", "none"); focus3.style("display", "none"); focus4.style("display", "none");})
+        .on("mousemove", mousemove);
+        
+    function mousemove() {
+        var y0 = y.invert(d3.mouse(this)[1]); // get y value of mouse pointer in pressure space
+        var i = bisectTemp(mouseoverdata, y0, 1, mouseoverdata.length-1);
+        var d0 = mouseoverdata[i - 1];
+        var d1 = mouseoverdata[i];
+        var d = y0 - d0.pres > d1.pres - y0 ? d1 : d0;
+        
+        if (d.pres >= topp) {
+            focus.attr("transform", "translate(" + (x(d.tmpc) + (y(basep)-y(d.pres))/tan)+ "," + y(d.pres) + ")");
+            focus2.attr("transform", "translate(" + (x(d.dwpc) + (y(basep)-y(d.pres))/tan)+ "," + y(d.pres) + ")");
+            focus3.attr("transform", "translate(0," + y(d.pres) + ")");
+            focus4.attr("transform", "translate(0," + y(d.pres) + ")");
+            focus.select("text").text(Math.round(d.tmpc) + "°C");
+            focus2.select("text").text(Math.round(d.dwpc) + "°C");
+            if (unit_height == 'ft') {
+                focus3.select("text").text("-" + Math.round(d.hghtagl*m2hft)*100 + ' '+ unit_height + ' agl');
+            } else {
+                focus3.select("text").text("-" + Math.round(d.hghtagl*(m2hft/10))*10 + ' '+ unit_height + ' agl');
+            }
 
-      var p_altiude = calc_pressure_altitude(d.pres); // m
-      var p_altiude_hft = Math.round((p_altiude*(3.28084/100))/5)*5; // nearest multiple of 5 [ft]
-      if (d.hghtagl*3.28084 >= 5000) { // only show FLs from 5000 ft agl and above
-        if (p_altiude_hft < 100) {
-            focus4.select("text").text("FL0" + p_altiude_hft + '-');  
-        } else {
-            focus4.select("text").text("FL" + p_altiude_hft + '-');
+            var p_altiude = calc_pressure_altitude(d.pres); // m
+            var p_altiude_hft = Math.round(p_altiude*(3.28084/100)); // nearest multiple of 5 [ft]
+            if (d.hghtagl*3.28084 >= 5000) { // only show FLs from 5000 ft agl and above
+                if (p_altiude_hft < 100) {
+                    focus4.select("text").text("FL0" + p_altiude_hft + '-');  
+                } else {
+                    focus4.select("text").text("FL" + p_altiude_hft + '-');
+                }
+            } else {
+                focus4.select("text").text("");
+            }
         }
-      } else {
-        focus4.select("text").text("");
-      }
-  }
+    }
 }
 
 function updateData(i) {
@@ -1357,9 +1370,19 @@ function updateData(i) {
     allbarbs.data(sounding[i][0])
         .attr("xlink:href", function (d) { 
             var wspdround = Math.ceil((d.wspd*ms2kt)/5)*5;
-            return "#barb"+wspdround; 
+            if (d.pres >= topp) {
+                return "#barb"+wspdround;
+            } else {
+                return "";
+            } 
         })
-        .attr("transform", function(d,i) { return "translate("+w_barbs/2+","+y(d.pres)+") rotate("+(d.wdir+180)+")"; });
+        .attr("transform", function(d,i) {
+            if (d.pres >= topp) { 
+                return "translate("+w_barbs/2+","+y(d.pres)+") rotate("+(d.wdir+180)+")"; 
+            } else {
+                return "";
+            }
+        });
     holines01.data(hodoData[i][0][0]).attr("d", hodoline);
     holines13.data(hodoData[i][0][1]).attr("d", hodoline);
     holines36.data(hodoData[i][0][2]).attr("d", hodoline);
