@@ -76,6 +76,7 @@ var margin = {top: width*0.04, right: 0, bottom: width*0.045, left: width*0.07},
 const basep = 1050,  // Base pressure hPa
     topp = 100, // Top pressure hPa
     dp = 1, // hPa
+    mu_dp = 2, // calculate cape every [mu_dp] hPa (MUCAPE)
     plines = [1000,850,700,500,300,200,100],  // Isobars hPa
     pticks = [950,900,800,750,650,600,550,450,400,350,250,150];  // Pressure ticks hPa
 
