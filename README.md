@@ -27,6 +27,7 @@ Json as seen below. See /data for a full example.
 ### Known bugs
 - Date grid is not correctly generated when transitioning to and from summer time.
 - Top windbarb sometimes disappears and sometimes is duplicated.
+- CIN area is not always shown when it should be shown.
 
 ### Demo
 http://www.westerlies.eu/soundings/d3_skewt.html
