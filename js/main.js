@@ -1014,10 +1014,11 @@ function loadSounding(fileName,name,icao) {
                 "lfc_hght": sb_profile[7],
                 "el": sb_profile[8],
                 "el_hght": sb_profile[9],
-                "cape": sb_profile[10],
-                "cape_val": sb_profile[11],
+                "el_tmpc": sb_profile[10],
+                "cape": sb_profile[11],
+                "cape_val": sb_profile[12],
                 "cin": sb_profile[12],
-                "cin_val": sb_profile[13]
+                "cin_val": sb_profile[14]
             };
 
             // Most unstable parcel (mu) 
@@ -1034,20 +1035,21 @@ function loadSounding(fileName,name,icao) {
             var mu_lfc_hght = sb_profile[7];
             var mu_el = sb_profile[8];
             var mu_el_hght = sb_profile[9];
-            var mu_cape = sb_profile[10];
-            var mu_cape_val = sb_profile[11];
-            var mu_cin = sb_profile[12];
-            var mu_cin_val = sb_profile[13];
+            var mu_el_tmpc = sb_profile[10];
+            var mu_cape = sb_profile[11];
+            var mu_cape_val = sb_profile[12];
+            var mu_cin = sb_profile[13];
+            var mu_cin_val = sb_profile[14];
             
             // Iterate the lowest 300 hPa looking for higher cape than sb
-            var pp_range = d3.range(conv_sfc_press-300,conv_sfc_press,2);
+            var pp_range = d3.range(conv_sfc_press-300,conv_sfc_press,mu_dp);
             var pp = pp_range.sort((a,b)=>b-a); // flip order, bottom first
             for (var p=0; p<pp.length; p++) {
                 var t_td = env_t_td_from_pressure(s,pp[p]);
                 var tmpc = t_td[0];
                 var dwpc = t_td[1]; 
                 var mu_profile = makeProfile(s,tmpc,dwpc,pp[p]);
-                var new_cape = mu_profile[11];
+                var new_cape = mu_profile[12];
                 if (new_cape > mu_cape) {
                     // Dry
                     mu_lift_theta = mu_profile[0];
@@ -1061,10 +1063,11 @@ function loadSounding(fileName,name,icao) {
                     mu_lfc_hght = mu_profile[7];
                     mu_el = mu_profile[8];
                     mu_el_hght = mu_profile[9];
-                    mu_cape = mu_profile[10];
+                    mu_el_tmpc = mu_profile[10];
+                    mu_cape = mu_profile[11];
                     mu_cape_val = new_cape;
-                    mu_cin = mu_profile[12];
-                    mu_cin_val = mu_profile[13];
+                    mu_cin = mu_profile[13];
+                    mu_cin_val = mu_profile[14];
                 }
             }
 
@@ -1079,6 +1082,7 @@ function loadSounding(fileName,name,icao) {
                 "lfc_hght": mu_lfc_hght,
                 "el": mu_el,
                 "el_hght": mu_el_hght,
+                "el_tmpc": mu_el_tmpc,
                 "cape": mu_cape,
                 "cape_val": mu_cape_val,
                 "cin": mu_cin,
@@ -1115,10 +1119,11 @@ function loadSounding(fileName,name,icao) {
                 "lfc_hght": ml_profile[7],
                 "el": ml_profile[8],
                 "el_hght": ml_profile[9],
-                "cape": ml_profile[10],
-                "cape_val": ml_profile[11],
-                "cin": ml_profile[12],
-                "cin_val": ml_profile[13]
+                "el_tmpc": ml_profile[10],
+                "cape": ml_profile[11],
+                "cape_val": ml_profile[12],
+                "cin": ml_profile[13],
+                "cin_val": ml_profile[14]
             };
 
         }
@@ -1284,18 +1289,21 @@ function drawFirstHourText() {
     $("#lcl").html(sb_parcel[0].lcl_hght);
     $("#lfc").html(sb_parcel[0].lfc_hght);
     $("#el").html(sb_parcel[0].el_hght);
+    $("#el_tmpc").html(sb_parcel[0].el_tmpc);
     $("#cape").html(sb_parcel[0].cape_val);
     $("#cin").html(sb_parcel[0].cin_val);
     
     $("#mulcl").html(mu_parcel[0].lcl_hght);
     $("#mulfc").html(mu_parcel[0].lfc_hght);
     $("#muel").html(mu_parcel[0].el_hght);
+    $("#muel_tmpc").html(mu_parcel[0].el_tmpc);
     $("#mucape").html(mu_parcel[0].cape_val);
     $("#mucin").html(mu_parcel[0].cin_val);
     
     $("#mllcl").html(ml_parcel[0].lcl_hght);
     $("#mllfc").html(ml_parcel[0].lfc_hght);
     $("#mlel").html(ml_parcel[0].el_hght);
+    $("#mlel_tmpc").html(ml_parcel[0].el_tmpc);
     $("#mlcape").html(ml_parcel[0].cape_val);
     $("#mlcin").html(ml_parcel[0].cin_val);
     
@@ -1419,18 +1427,21 @@ function updateData(i) {
     $("#lcl").html(sb_parcel[i].lcl_hght);
     $("#lfc").html(sb_parcel[i].lfc_hght);
     $("#el").html(sb_parcel[i].el_hght);
+    $("#el_tmpc").html(sb_parcel[i].el_tmpc);
     $("#cape").html(sb_parcel[i].cape_val);
     $("#cin").html(sb_parcel[i].cin_val);
     
     $("#mulcl").html(mu_parcel[i].lcl_hght);
     $("#mulfc").html(mu_parcel[i].lfc_hght);
     $("#muel").html(mu_parcel[i].el_hght);
+    $("#muel_tmpc").html(mu_parcel[i].el_tmpc);
     $("#mucape").html(mu_parcel[i].cape_val);
     $("#mucin").html(mu_parcel[i].cin_val);
     
     $("#mllcl").html(ml_parcel[i].lcl_hght);
     $("#mllfc").html(ml_parcel[i].lfc_hght);
     $("#mlel").html(ml_parcel[i].el_hght);
+    $("#mlel_tmpc").html(ml_parcel[i].el_tmpc);
     $("#mlcape").html(ml_parcel[i].cape_val);
     $("#mlcin").html(ml_parcel[i].cin_val);
 
@@ -1501,10 +1512,11 @@ function liftParcel(d) {
         "lfc_hght": profile[7],
         "el": profile[8],
         "el_hght": profile[9],
-        "cape": profile[10],
-        "cape_val": profile[11],
-        "cin": profile[12],
-        "cin_val": profile[13]
+        "el_tmpc": profile[10],
+        "cape": profile[11],
+        "cape_val": profile[12],
+        "cin": profile[13],
+        "cin_val": profile[14]
     }
 
     drawProfile(parcel);
@@ -1535,7 +1547,7 @@ function makeProfile (step,lift_tmpc,lift_dwpc,lift_press) {
     var env_lcl_dwpc = env_t_td_from_pressure(step,lcl_pres)[1];
     var env_lcl_e = calc_e(env_lcl_dwpc);
 
-    var lcl_hght = calc_hypsometric(lift_press,lcl_pres,lift_tmpc+T0,env_lcl_tmpc+T0,lift_e,env_lcl_e);
+    var lcl_hght = calc_hypsometric(sfc_press,lcl_pres,lift_tmpc+T0,env_lcl_tmpc+T0,lift_e,env_lcl_e);
     if (unit_height == 'ft') {
         var lcl_hght = Math.round(lcl_hght*m2hft)*100;
     } else {
@@ -1560,10 +1572,10 @@ function makeProfile (step,lift_tmpc,lift_dwpc,lift_press) {
     var env_lfc_dwpk = lfc[lfc.length-1].lfc_env_dwpk;
     var env_lfc_e = calc_e(env_lfc_dwpk - T0);
 
-    var lfc_hght = '---'; var el = []; var el_hght = '---'; var cape_val = 0; var cape = []; var cin_val = 0; var cin = [];
+    var lfc_hght = '---'; var el = []; var el_hght = '---'; var el_tmpc = '---'; var cape_val = 0; var cape = []; var cin_val = 0; var cin = [];
     if (lfc_tmpk != '---') {
 
-        var lfc_hght = calc_hypsometric(lift_press,lfc_pres2,lift_tmpc+T0,env_lfc_tmpk,lift_e,env_lfc_e);
+        var lfc_hght = calc_hypsometric(sfc_press,lfc_pres2,lift_tmpc+T0,env_lfc_tmpk,lift_e,env_lfc_e);
         if (unit_height == 'ft') {
             var lfc_hght = Math.round(lfc_hght*m2hft)*100;
         } else {
@@ -1581,12 +1593,14 @@ function makeProfile (step,lift_tmpc,lift_dwpc,lift_press) {
 
         var env_el_e = calc_e(env_el_dwpk - T0);
 
-        var el_hght = calc_hypsometric(lift_press,el_pres,twom_tmpc+T0,env_el_tmpk,lift_e,env_el_e);
+        var el_hght = calc_hypsometric(sfc_press,el_pres,twom_tmpc+T0,env_el_tmpk,lift_e,env_el_e);
         if (unit_height == 'ft') {
             var el_hght = Math.round(el_hght*m2hft)*100;
         } else {
             var el_hght = Math.round(el_hght*(m2hft/10))*10;
         }
+
+        var el_tmpc = Math.round(env_el_tmpk - T0); // parcel tmp = env tmp at EL
 
         // Convective Available Potential Energy (CAPE)
         var pp_cape_range = d3.range(el_pres,lfc_pres+dp,dp);
@@ -1602,7 +1616,7 @@ function makeProfile (step,lift_tmpc,lift_dwpc,lift_press) {
         
     }
 
-    return [lift_theta,pp_dry_parcel,lift_e,lcl,lcl_hght,pp_moist_parcel,lfc,lfc_hght,el,el_hght,cape,cape_val,cin,cin_val];
+    return [lift_theta,pp_dry_parcel,lift_e,lcl,lcl_hght,pp_moist_parcel,lfc,lfc_hght,el,el_hght,el_tmpc,cape,cape_val,cin,cin_val];
 
 }
 
