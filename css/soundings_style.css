@@ -376,16 +376,7 @@ ul.tabs li a.selected {
 	box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
   border-radius: 5px;
 }
-.modal-footer {
-  float: left;
-  width: 100%;
-  background-color: rgb(130,188,237);
-  color: white;
-  font-size: 80%;
-  text-align: center;
-  padding: 0 10px 0 10px;
-  border-radius: 0 0 5px 5px;
-}
+
 .grid-container-info {
   display: grid;
   grid-gap: 10px;
@@ -842,12 +833,12 @@ table.legend td {
   stroke-dasharray: 5,5;
 }
 .dry_virtual_parcel_line, .moist_virtual_parcel_line {
-  stroke-width: 0.1em;
+  stroke-width: 0.08em;
   stroke: #009ACD;
   stroke-dasharray: 5,5;
 }
 .virtual-temperature-line {
-  stroke-width: 0.1em;
+  stroke-width: 0.08em;
   stroke: red;
   stroke-dasharray: 5,5;
 }
