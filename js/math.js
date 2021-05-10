@@ -228,7 +228,7 @@ function calc_moist_gradient(m_tmp,m_pres,dp) {
 // Returns temperature and pressure of LCL 
 function findLCL (lift_e,theta,pp) {
 
-    var mix_ratio = 621.97*((lift_e)/(sfc_press - lift_e))/1000;
+    var mix_ratio = 621.97*((lift_e)/(pp[0] - lift_e))/1000;
 
     var lcl_tmpk; var lcl_pres
     for (var k=0; k<pp.length; k++) {
