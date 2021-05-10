@@ -1716,7 +1716,7 @@ function drawProfile(profile) {
 
     // If virtual temperature correction is ON draw virtual profile as well
     if (virtual_temperature_correction) {
-        /* Sounding virtual temperature line
+        // Sounding virtual temperature line
         var virtualTemperature = d3.line()
         .curve(d3.curveLinear)
         .x(function(d,i) { 
@@ -1732,7 +1732,7 @@ function drawProfile(profile) {
             .attr("clip-path", "url(#clipper)")
             .attr("d", virtualTemperature);
 
-        */
+        
         var tmp_lift_tmpk = theta / Math.pow(1000/pp_dry_parcel[0], Rd/cpd);
         var virt_lift_tmpk = calc_virtual_temperature(tmp_lift_tmpk,pp_dry_parcel[0],lift_e);
         var virt_theta = calc_theta(virt_lift_tmpk - T0, pp_dry_parcel[0]);
