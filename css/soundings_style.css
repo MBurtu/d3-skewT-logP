@@ -428,14 +428,10 @@ ul.tabs li a.selected {
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: auto;
   grid-template-areas: 
-  'units  domain'
-  'convection convection';
+  'units convection';
 }
 .grid-container-set > .units {
   grid-area: units;
-}
-.grid-container-set > .domain {
-  grid-area: domain;
 }
 .grid-container-set > .convection {
   grid-area: convection;
@@ -473,10 +469,12 @@ h2 { display: inline; font-size: 1.5em; line-height: 1em; margin-right: 20px;}
 .bottoms {
   display: inline-block;
   width: 40px;
+  margin-bottom: 3px;
 }
 .green-bottom { border-bottom: 5px solid rgb(92, 214, 92); }
 .brown-bottom { border-bottom: 5px solid rgb(230, 153, 0); }
-.red-bottom { border-bottom: 5px dashed rgb(255, 128, 128); }
+.pink-bottom { border-bottom: 5px dashed rgb(255, 128, 128); }
+.red-bottom { border-bottom: 5px dashed rgb(255, 77, 77) }
 .purple-bottom { border-bottom: 5px dashed #EE82EE; }
 .blue-bottom { border-bottom: 5px dashed #009ACD; }
 
@@ -833,13 +831,13 @@ table.legend td {
   stroke-dasharray: 5,5;
 }
 .dry_virtual_parcel_line, .moist_virtual_parcel_line {
-  stroke-width: 0.08em;
+  stroke-width: 0.09em;
   stroke: #009ACD;
   stroke-dasharray: 5,5;
 }
 .virtual-temperature-line {
-  stroke-width: 0.08em;
-  stroke: red;
+  stroke-width: 0.09em;
+  stroke: rgb(255, 77, 77);
   stroke-dasharray: 5,5;
 }
 .cape_area {
