@@ -1001,8 +1001,8 @@ function loadSounding(fileName,name,icao) {
             };
 
             // Surface based parcel (sb)
-            var sb_profile = makeProfile(s,conv_twom_tmpc,conv_twom_dwpc,conv_sfc_press);
-           
+            var sb_profile = makeProfile(s,conv_twom_tmpc,conv_twom_dwpc,conv_sfc_press,conv_sfc_press);
+
             sb_parcel[s] = {
                 "lift_theta": sb_profile[0],
                 "pp_dry_parcel": sb_profile[1],
@@ -1042,13 +1042,13 @@ function loadSounding(fileName,name,icao) {
             var mu_cin_val = sb_profile[14];
             
             // Iterate the lowest 300 hPa looking for higher cape than sb
-            var pp_range = d3.range(conv_sfc_press-300,conv_sfc_press,mu_dp);
+            var pp_range = d3.range(conv_sfc_press,conv_sfc_press,mu_dp);
             var pp = pp_range.sort((a,b)=>b-a); // flip order, bottom first
             for (var p=0; p<pp.length; p++) {
                 var t_td = env_t_td_from_pressure(s,pp[p]);
                 var tmpc = t_td[0];
                 var dwpc = t_td[1]; 
-                var mu_profile = makeProfile(s,tmpc,dwpc,pp[p]);
+                var mu_profile = makeProfile(s,tmpc,dwpc,pp[p],conv_sfc_press);
                 var new_cape = mu_profile[12];
                 if (new_cape > mu_cape) {
                     // Dry
@@ -1106,7 +1106,7 @@ function loadSounding(fileName,name,icao) {
             var ml_r = r/pp.length;
             var ml_tmpc = (ml_theta / Math.pow(1000/conv_sfc_press, Rd/cpd)) - T0;
             var ml_dwpc = calc_mix_dwpc(ml_r,conv_sfc_press);
-            var ml_profile = makeProfile(s,ml_tmpc,ml_dwpc,conv_sfc_press);
+            var ml_profile = makeProfile(s,ml_tmpc,ml_dwpc,conv_sfc_press,conv_sfc_press);
             
             ml_parcel[s] = {
                 "lift_theta": ml_profile[0],
@@ -1499,7 +1499,7 @@ function liftParcel(d) {
         var lift_td = x.invert(lift_x - (y(basep)-y(sfc_press))/tan);
     }
 
-    var profile = makeProfile(index,lift_t,lift_td,sfc_press);
+    var profile = makeProfile(index,lift_t,lift_td,sfc_press,sfc_press);
 
     var parcel = {
         "lift_theta": profile[0],
@@ -1523,7 +1523,7 @@ function liftParcel(d) {
 
 }
 
-function makeProfile (step,lift_tmpc,lift_dwpc,lift_press) {
+function makeProfile (step,lift_tmpc,lift_dwpc,lift_press,sfc_press) {
 
     // Potential temperature
     var lift_theta = calc_theta(lift_tmpc,lift_press);
@@ -1546,8 +1546,9 @@ function makeProfile (step,lift_tmpc,lift_dwpc,lift_press) {
     var env_lcl_tmpc = env_t_td_from_pressure(step,lcl_pres)[0];
     var env_lcl_dwpc = env_t_td_from_pressure(step,lcl_pres)[1];
     var env_lcl_e = calc_e(env_lcl_dwpc);
-
+    
     var lcl_hght = calc_hypsometric(sfc_press,lcl_pres,lift_tmpc+T0,env_lcl_tmpc+T0,lift_e,env_lcl_e);
+    
     if (unit_height == 'ft') {
         var lcl_hght = Math.round(lcl_hght*m2hft)*100;
     } else {
@@ -1636,84 +1637,6 @@ function drawProfile(profile) {
     var cin = profile.cin;
     var cin_val = profile.cin_val;
     
-    // Draw parcel profile
-    // Dry adiabat
-    var parcelDryLine = d3.line()
-    .curve(d3.curveLinear)
-    .x(function(d,i) {
-        
-        var dry_tmpk = theta / Math.pow(1000/pp_dry_parcel[i], Rd/cpd);
-
-        return x(dry_tmpk - T0) + (y(basep)-y(pp_dry_parcel[i]))/tan;
-    })
-    .y(function(d,i) { return y(pp_dry_parcel[i]) } );
-
-    var all_dry = [];
-    for (var i=0; i<1; i++) { 
-        var z = [];
-        for (var j=0; j<pp_dry_parcel.length; j++) { z.push(pp_dry_parcel[i]); }
-        all_dry.push(z);
-    }
-
-    parcelgroup.selectAll(".parcel_dry_line")
-        .data(all_dry)
-        .enter().append("path")
-        .attr("class", "dry_parcel_line")
-        .attr("clip-path", "url(#clipper)")
-        .attr("d", parcelDryLine);
-
-    // Mixing ratio
-    var parcelMixLine = d3.line()
-    .curve(d3.curveLinear)
-    .x(function(d,i) {
-        
-        var mix_ratio = 621.97*((lift_e)/(pp_dry_parcel[0] - lift_e))/1000;
-        var mix_tmpc = calc_mix_tmpc(mix_ratio,pp_dry_parcel[i]);
-        
-        return x(mix_tmpc) + (y(basep)-y(pp_dry_parcel[i]))/tan;
-    })
-    .y(function(d,i) { return y(pp_dry_parcel[i]) } );
-
-    parcelgroup.selectAll(".parcel_mix_line")
-        .data(all_dry)
-        .enter().append("path")
-        .attr("class", "mix_parcel_line")
-        .attr("clip-path", "url(#clipper)")
-        .attr("d", parcelMixLine);
-
-    // Moist adiabat
-    var deltaT = 0;
-    var lcl_tmpk = lcl[0];
-    var lcl_pres = lcl[1];
-    var parcelMoistLine = d3.line()
-    .curve(d3.curveLinear)
-    .x(function(d,i) {
-        
-        var parc_tmp =  lcl_tmpk + deltaT;
-        var parc_pres = pp_moist_parcel[i];
-        var dt = calc_moist_gradient(parc_tmp,parc_pres,dp);
-
-        deltaT -= dt;
-
-        return x(parc_tmp - dt - T0) + (y(basep)-y(pp_moist_parcel[i]))/tan;
-    })
-    .y(function(d,i) { return y(pp_moist_parcel[i]) } );
-
-    var all_moist = [];
-    for (var i=0; i<1; i++) { 
-        var z = [];
-        for (var j=0; j<pp_moist_parcel.length; j++) { z.push(pp_moist_parcel[i]); }
-        all_moist.push(z);
-    }
-    
-    parcelgroup.selectAll(".parcel_moist_line")
-        .data(all_moist)
-        .enter().append("path")
-        .attr("class", "moist_parcel_line")
-        .attr("clip-path", "url(#clipper)")
-        .attr("d", parcelMoistLine);
-
-
     // If virtual temperature correction is ON draw virtual profile as well
     if (virtual_temperature_correction) {
         // Sounding virtual temperature line
@@ -1802,7 +1725,83 @@ function drawProfile(profile) {
             .attr("d", parcelVirtualMoistLine);
 
     }
+    
+    // Draw parcel profile
+    // Dry adiabat
+    var parcelDryLine = d3.line()
+    .curve(d3.curveLinear)
+    .x(function(d,i) {
+        
+        var dry_tmpk = theta / Math.pow(1000/pp_dry_parcel[i], Rd/cpd);
 
+        return x(dry_tmpk - T0) + (y(basep)-y(pp_dry_parcel[i]))/tan;
+    })
+    .y(function(d,i) { return y(pp_dry_parcel[i]) } );
+
+    var all_dry = [];
+    for (var i=0; i<1; i++) { 
+        var z = [];
+        for (var j=0; j<pp_dry_parcel.length; j++) { z.push(pp_dry_parcel[i]); }
+        all_dry.push(z);
+    }
+
+    parcelgroup.selectAll(".parcel_dry_line")
+        .data(all_dry)
+        .enter().append("path")
+        .attr("class", "dry_parcel_line")
+        .attr("clip-path", "url(#clipper)")
+        .attr("d", parcelDryLine);
+
+    // Mixing ratio
+    var parcelMixLine = d3.line()
+    .curve(d3.curveLinear)
+    .x(function(d,i) {
+        
+        var mix_ratio = 621.97*((lift_e)/(pp_dry_parcel[0] - lift_e))/1000;
+        var mix_tmpc = calc_mix_tmpc(mix_ratio,pp_dry_parcel[i]);
+        
+        return x(mix_tmpc) + (y(basep)-y(pp_dry_parcel[i]))/tan;
+    })
+    .y(function(d,i) { return y(pp_dry_parcel[i]) } );
+
+    parcelgroup.selectAll(".parcel_mix_line")
+        .data(all_dry)
+        .enter().append("path")
+        .attr("class", "mix_parcel_line")
+        .attr("clip-path", "url(#clipper)")
+        .attr("d", parcelMixLine);
+
+    // Moist adiabat
+    var deltaT = 0;
+    var lcl_tmpk = lcl[0];
+    var lcl_pres = lcl[1];
+    var parcelMoistLine = d3.line()
+    .curve(d3.curveLinear)
+    .x(function(d,i) {
+        
+        var parc_tmp =  lcl_tmpk + deltaT;
+        var parc_pres = pp_moist_parcel[i];
+        var dt = calc_moist_gradient(parc_tmp,parc_pres,dp);
+
+        deltaT -= dt;
+
+        return x(parc_tmp - dt - T0) + (y(basep)-y(pp_moist_parcel[i]))/tan;
+    })
+    .y(function(d,i) { return y(pp_moist_parcel[i]) } );
+
+    var all_moist = [];
+    for (var i=0; i<1; i++) { 
+        var z = [];
+        for (var j=0; j<pp_moist_parcel.length; j++) { z.push(pp_moist_parcel[i]); }
+        all_moist.push(z);
+    }
+    
+    parcelgroup.selectAll(".parcel_moist_line")
+        .data(all_moist)
+        .enter().append("path")
+        .attr("class", "moist_parcel_line")
+        .attr("clip-path", "url(#clipper)")
+        .attr("d", parcelMoistLine);
 
     // Labels
     var lfc_tmpk = lfc[lfc.length-1].lfc_tmpk; // Highest LFC
