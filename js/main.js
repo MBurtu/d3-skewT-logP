@@ -1042,7 +1042,7 @@ function loadSounding(fileName,name,icao) {
             var mu_cin_val = sb_profile[14];
             
             // Iterate the lowest 300 hPa looking for higher cape than sb
-            var pp_range = d3.range(conv_sfc_press,conv_sfc_press,mu_dp);
+            var pp_range = d3.range(conv_sfc_press-300,conv_sfc_press,mu_dp);
             var pp = pp_range.sort((a,b)=>b-a); // flip order, bottom first
             for (var p=0; p<pp.length; p++) {
                 var t_td = env_t_td_from_pressure(s,pp[p]);
