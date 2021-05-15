@@ -1017,7 +1017,7 @@ function loadSounding(fileName,name,icao) {
                 "el_tmpc": sb_profile[10],
                 "cape": sb_profile[11],
                 "cape_val": sb_profile[12],
-                "cin": sb_profile[12],
+                "cin": sb_profile[13],
                 "cin_val": sb_profile[14]
             };
 
@@ -1884,7 +1884,7 @@ function drawProfile(profile) {
     if (typeof cape_val !== 'undefined' && cape_val > 20) {
         
         // Draw polygon
-        parcelgroup.selectAll("polygon")
+        parcelgroup.selectAll("cape_polygon")
             .data([cape_coords])
             .enter().append("polygon")
             .attr("points",function(d) { 
@@ -1915,16 +1915,17 @@ function drawProfile(profile) {
     }
 
     // Fill CIN area
-    var cin_coords = cin[1];
-    var cin_label_tmpc = (lcl_tmpk + lfc_tmpk)/2 - T0;
-    if (typeof cin_val !== 'undefined' && cin_val <= -10) {
+     if (typeof cin_val !== 'undefined' && cin_val <= -10) {
+        var cin_coords = cin[1];
+        var cin_label_tmpc = (lcl_tmpk + lfc_tmpk)/2 - T0;    
 
         // Draw polygon
-        parcelgroup.selectAll("polygon")
+        parcelgroup.selectAll("cin_polygon")
             .data([cin_coords])
             .enter().append("polygon")
             .attr("points",function(d) { 
                 return d.map(function(d) {
+                    //console.log(d.pres);
                     return [
                         x(d.tmpc) + (y(basep)-y(d.pres))/tan,
                         y(d.pres)
