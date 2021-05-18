@@ -455,6 +455,7 @@ h2 { display: inline; font-size: 1.5em; line-height: 1em; margin-right: 20px;}
 
 .blue {color: #33495f;}
 .sky-blue {color: #009ACD;}
+.light-blue {color: rgb(130,188,237)}
 .red {color: red;}
 .white {color: white;}
 .orange { color: rgb(255, 187, 60); }
@@ -634,6 +635,28 @@ table.legend td {
   width: 92%;
   max-height: 80vh;
 }
+.grid-container-conv {
+  display: grid;
+  grid-gap: 0px;
+  padding: 0px;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: auto;
+  grid-template-areas: 
+  'hodograph indicies'
+  'sfc_values sfc_values';
+}
+.grid-container-conv > #hodo_container {
+  grid-area: hodograph;
+}
+.grid-container-conv > .indicies {
+  grid-area: indicies;
+}
+.grid-container-conv > .sfc_values {
+  grid-area: sfc_values;
+  background-color: rgb(227, 212, 181);
+  border-top: 1px solid #333;
+}
+
 #conv-left {
   float: left;
   width: 4%;
@@ -682,13 +705,6 @@ table.legend td {
 /**********************************
 *     5.5 Air parcel */
 
-#lift-air-parcel {
-  float: left;
-  width: 100%;
-  background-color: rgb(227, 212, 181);
-  padding: 0 0 10px 0;
-  border-top: 1px solid #333;
-}
 .parcel-data {
   margin: 0 auto;
   color: #333;
@@ -714,10 +730,10 @@ table.legend td {
   font-size: 0.7em;
   line-height: 100%;
   text-align: left;
-  padding: 0 5% 0.5em 5%;
-  border-left: 5px solid rgb(130,188,237);
-  border-right: 5px solid rgb(130,188,237);
+  /*border-left: 5px solid rgb(130,188,237);
+  border-right: 5px solid rgb(130,188,237);*/
 }
+
 #parcel-info {
   display: none;
 }
