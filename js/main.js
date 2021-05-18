@@ -989,6 +989,9 @@ function loadSounding(fileName,name,icao) {
             var pp = pp_range.sort((a,b)=>b-a); // flip order, bottom first
             var conv_tmpc = find_convective_temperature(s,pp,conv_twom_tmpc,conv_twom_dwpc,conv_sfc_press);
 
+            // Precipitable water
+            var prec_water = calc_precipitable_water(s,conv_sfc_press);
+
             // Freezing level
             var fzlvl = find_freezing_lvl(s,pp,conv_sfc_press,conv_twom_tmpc,conv_twom_dwpc);
             
@@ -997,6 +1000,7 @@ function loadSounding(fileName,name,icao) {
                 "bulk_shear01": bulk_shear01,
                 "bulk_shear03": bulk_shear03,
                 "bulk_shear06": bulk_shear06,
+                "prec_water": prec_water,
                 "fzlvl": fzlvl
             };
 
@@ -1280,6 +1284,8 @@ function drawFirstHourText() {
 
     $("#conv_tmpc").html(conv_data[0].conv_tmpc + '&deg;C');
 
+    $("#pw").html(conv_data[0].prec_water + ' mm');
+
     if (conv_data[0].fzlvl == 'Sfc') {
         $("#fzlvl").html(conv_data[0].fzlvl);
     } else {
@@ -1417,6 +1423,8 @@ function updateData(i) {
     $("#bs06").html(conv_data[i].bulk_shear06);
     
     $("#conv_tmpc").html(conv_data[i].conv_tmpc + '&deg;C');
+
+    $("#pw").html(conv_data[i].prec_water + ' mm');
 
     if (conv_data[i].fzlvl == 'Sfc') {
         $("#fzlvl").html(conv_data[i].fzlvl);
@@ -1915,7 +1923,7 @@ function drawProfile(profile) {
     }
 
     // Fill CIN area
-     if (typeof cin_val !== 'undefined' && cin_val <= -10) {
+    if (typeof cin_val !== 'undefined' && cin_val <= -10) {
         var cin_coords = cin[1];
         var cin_label_tmpc = (lcl_tmpk + lfc_tmpk)/2 - T0;    
 

@@ -46,7 +46,7 @@ const deg2rad = (Math.PI/180), // Converts degrees to radians
 // Converts em to px
 function emToPx(em) {
 
-    var el = document.getElementById('lift-air-parcel');
+    var el = document.getElementById('convection');
     var style = window.getComputedStyle(el, null).getPropertyValue('font-size');
     var fontSize = parseFloat(style); 
     var px = em*fontSize;
@@ -370,7 +370,7 @@ function findEL (step,lfc_tmpk,pp_lfc_range) {
 function find_convective_temperature(step,pp,twom_tmpc,twom_dwpc,sfc_press) {
 
     var conv_tmpc = '&geq;45';
-    for (var t=twom_tmpc; t<45; t+=0.1) {
+    for (var t=twom_tmpc-5; t<45; t+=0.1) {  // -5 to account for superadiabatic conditions
         var theta = calc_theta(t,sfc_press);
         var e = calc_e(twom_dwpc);
 
@@ -515,6 +515,27 @@ function calc_cin (step,lift_theta,lift_r,lcl_pres,pp_cin) {
     }
 
     return [cin, cin_coords];
+
+}
+
+// https://glossary.ametsoc.org/wiki/Precipitable_water
+function calc_precipitable_water(step,sfc_press) {
+
+    var pw = 0;
+
+    for (var p=topp; p<=sfc_press; p+=dp) {
+
+        var td = env_t_td_from_pressure(step, p)[1]; // dewpoint temperature
+        var e = calc_e(td); // vapor pressure
+        var r = calc_mixing_ratio(e, p); //mixing ratio, kg/kg
+        
+        pw += (1/(g*densW))*r*dp*100;
+
+    }
+
+    pw = Math.round(pw*1000); // rounds and converts from m to mm
+
+    return pw
 
 }
 
