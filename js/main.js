@@ -1053,8 +1053,8 @@ function loadSounding(fileName,name,icao) {
                 var tmpc = t_td[0];
                 var dwpc = t_td[1]; 
                 var mu_profile = makeProfile(s,tmpc,dwpc,pp[p],conv_sfc_press);
-                var new_cape = mu_profile[12];
-                if (new_cape > mu_cape) {
+                var new_cape_val = mu_profile[12];
+                if (new_cape_val > mu_cape_val) {
                     // Dry
                     mu_lift_theta = mu_profile[0];
                     mu_pp_dry_parcel = mu_profile[1];
@@ -1069,7 +1069,7 @@ function loadSounding(fileName,name,icao) {
                     mu_el_hght = mu_profile[9];
                     mu_el_tmpc = mu_profile[10];
                     mu_cape = mu_profile[11];
-                    mu_cape_val = new_cape;
+                    mu_cape_val = new_cape_val;
                     mu_cin = mu_profile[13];
                     mu_cin_val = mu_profile[14];
                 }
