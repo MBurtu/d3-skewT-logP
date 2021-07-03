@@ -130,15 +130,16 @@ html {
 *     2.1 Header */
 
 header {
-  height: 10vh;
   position: absolute;
-  left: 15vw;
-  top: 0;
+  height: 10vh;
+  width: 100%;
   z-index: 2;
+  display: flex;
+  align-items: start;
+  justify-content: center;
 }
 
 #navigation {
-  float: left;
   text-align: center;
   background-color: rgb(236,225,203);
   color: #333;
@@ -172,7 +173,6 @@ table.date_container {
 }
 
 .tag {
-  float: left;
   background-color: rgb(236,225,203);
 	-webkit-box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
 	-moz-box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
