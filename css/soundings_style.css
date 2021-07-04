@@ -150,7 +150,7 @@ header {
   border-radius: 0 0 3px 3px;
 }
 table.date_container {
-  border-collapse: collapse;
+  border-spacing: 0;
 }
 .hour {
   font-size: 80%;
