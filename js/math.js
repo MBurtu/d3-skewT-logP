@@ -253,6 +253,7 @@ function findLFC (step,lcl_tmpk,pp_moist_range) {
 
     var lfcs = [];
     var deltaT = 0; var nr_of_lfcs = 0; var nr_of_els = 0;
+    var free_convection; // true if parcel is warmer than environment above the lfc 
     
     for (var j=0; j<pp_moist_range.length; j++) { 
         var parc_pres = pp_moist_range[j];
@@ -280,12 +281,14 @@ function findLFC (step,lcl_tmpk,pp_moist_range) {
                     "lfc_env_dwpk": env_dwpk
                 };
                 nr_of_lfcs += 1;
+                free_convection = true;
                 if (nr_of_lfcs == 2) { //max two lfcs
                     break;
                 }
             }
-            if (parc_virt_tmpk <= env_virt_tmpk && nr_of_lfcs == 1) { // check for equilibrium level
+            if (parc_virt_tmpk <= env_virt_tmpk && nr_of_lfcs == 1 && free_convection) { // check for equilibrium level
                 nr_of_els += 1;
+                free_convection = false;
             }
         } else {
             if (parc_tmpk >= env_tmpk && (nr_of_lfcs == 0 || nr_of_els == 1)) {
@@ -296,12 +299,14 @@ function findLFC (step,lcl_tmpk,pp_moist_range) {
                     "lfc_env_dwpk": env_dwpk
                 };
                 nr_of_lfcs += 1;
+                free_convection = true;
                 if (nr_of_lfcs == 2) { //max two lfcs
                     break;
                 }
             }
-            if (parc_tmpk <= env_tmpk && nr_of_lfcs == 1) { // check for equilibrium level
+            if (parc_tmpk <= env_tmpk && nr_of_lfcs == 1 && free_convection) { // check for equilibrium level
                 nr_of_els += 1;
+                free_convection =  false;
             }
         }
     }
@@ -398,7 +403,7 @@ function find_convective_temperature(step,pp,twom_tmpc,twom_dwpc,sfc_press) {
 // Returns CAPE and coordinates to CAPE area
 function calc_cape (step,lfc_tmpk,pp_cape) {
 
-    var deltaT = 0; var cape = 0; var cape_coords = []; var cape_env_coords = []; var cape_label_tmpc = 0;
+    var deltaT = 0; var cape = 0; var cape_coords = []; var cape_env_coords = []; var cape_label_tmpc = 0; var cape_label = [];
     for (var j=0; j<pp_cape.length; j++) {
         
         var parc_tmpk =  lfc_tmpk + deltaT;
@@ -442,13 +447,16 @@ function calc_cape (step,lfc_tmpk,pp_cape) {
     }
 
     if (cape_coords.length > 0) {
-        cape_label_tmpc = cape_coords[Math.round(cape_coords.length/2)].tmpc;
+        cape_label = {
+            "tmpc": cape_coords[Math.round(cape_coords.length/2)].tmpc,
+            "pres": cape_coords[Math.round(cape_coords.length/2)].pres
+        }  
         for (var j=0; j<cape_env_coords.length; j++) {
             cape_coords.push(cape_env_coords[cape_env_coords.length-j-1]);
         }
     }
 
-    return [cape, cape_coords, cape_label_tmpc];
+    return [cape, cape_coords, cape_label];
 
 }
 
