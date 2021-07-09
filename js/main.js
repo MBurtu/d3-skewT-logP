@@ -475,7 +475,7 @@ function dateGrid(modelrun) {
      }
      nav += row1 + '</tr>' + row2 + '</tr></table>';
      $('#navigation').append(nav);
-
+     
      $(".hour").on('mouseover', function() {
         if (!spaceBar) { // if spaceBar = false, i.e. if not locked
             var i = $(this).attr('id');
@@ -1888,9 +1888,10 @@ function drawProfile(profile) {
 
     // Fill CAPE area
     var cape_coords = cape[1];
-    var cape_label_tmpc = cape[2];
     if (typeof cape_val !== 'undefined' && cape_val > 20) {
         
+        var cape_label_tmpc = cape[2].tmpc;
+        var cape_label_pres = cape[2].pres;
         // Draw polygon
         parcelgroup.selectAll("cape_polygon")
             .data([cape_coords])
@@ -1906,7 +1907,6 @@ function drawProfile(profile) {
             .attr("class","cape_area");
 
         // Draw label
-        var cape_label_pres = lfc_pres - ((lfc_pres-el_pres)/2);
         parcelgroup.append("text")
             .attr("class", "parcel_label")
             .attr("text-anchor", "left")
