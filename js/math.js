@@ -464,7 +464,7 @@ function calc_cape (step,lfc_tmpk,pp_cape) {
 // Returns CIN (and parcel coords of cin area)
 function calc_cin (step,lift_theta,lift_r,lcl_pres,pp_cin) {
 
-    var cin = 0; var cin_coords = []; var cin_env_coords = []; 
+    var cin = 0; var cin_coords = []; var cin_env_coords = []; var cin_label = [];
     var parc_tmpk; var env_tmpk; var parc_e;
     for (var j=0; j<pp_cin.length; j++) {
         
@@ -517,12 +517,16 @@ function calc_cin (step,lift_theta,lift_r,lcl_pres,pp_cin) {
     }
    
     if (cin_coords.length > 0) {
+        cin_label = {
+            "tmpc": cin_coords[Math.round(cin_coords.length/2)].tmpc,
+            "pres": cin_coords[Math.round(cin_coords.length/2)].pres
+        }  
         for (var j=0; j<cin_env_coords.length; j++) {
             cin_coords.push(cin_env_coords[cin_env_coords.length-j-1]);
         }
     }
 
-    return [cin, cin_coords];
+    return [cin, cin_coords, cin_label];
 
 }
 
