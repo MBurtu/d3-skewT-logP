@@ -1855,7 +1855,7 @@ function drawProfile(profile) {
             .attr("y2", y(lcl_pres))
             .attr("class", "parcel_gridline");
         
-        if (lfc_tmpk != '---') {
+        if (lfc_tmpk != '---' && (el_hght - lfc_hght) > 600*m2ft && (lfc_hght - lcl_hght) > 600*m2ft) {
             parcelgroup.append("text")
                 .attr("class", "parcel_label")
                 .attr("text-anchor", "left")
@@ -1871,7 +1871,7 @@ function drawProfile(profile) {
         }
     }
 
-    if (typeof el_tmpk !== 'undefined') {
+    if (typeof el_tmpk !== 'undefined' && (el_hght - lcl_hght) > 600*m2ft) {
         parcelgroup.append("text")
             .attr("class", "parcel_label")
             .attr("text-anchor", "left")
@@ -1907,26 +1907,29 @@ function drawProfile(profile) {
             .attr("class","cape_area");
 
         // Draw label
-        parcelgroup.append("text")
-            .attr("class", "parcel_label")
-            .attr("text-anchor", "left")
-            .attr("x", x(cape_label_tmpc + 4) + (y(basep)-y(cape_label_pres))/tan)
-            .attr("y", y(cape_label_pres) + emToPx(0.2)) 
-            .text('cape: ' + Math.round(cape_val) + ' J/kg');
-        parcelgroup.append("line")
-            .attr("x1", x(cape_label_tmpc) + (y(basep)-y(cape_label_pres))/tan)
-            .attr("x2", x(cape_label_tmpc + 4) + (y(basep)-y(cape_label_pres))/tan)
-            .attr("y1", y(cape_label_pres))
-            .attr("y2", y(cape_label_pres))
-            .attr("class", "parcel_gridline");
+        if ((el_hght - lfc_hght) > 600*m2ft) {
+            parcelgroup.append("text")
+                .attr("class", "parcel_label")
+                .attr("text-anchor", "left")
+                .attr("x", x(cape_label_tmpc + 4) + (y(basep)-y(cape_label_pres))/tan)
+                .attr("y", y(cape_label_pres) + emToPx(0.2)) 
+                .text('cape: ' + Math.round(cape_val) + ' J/kg');
+            parcelgroup.append("line")
+                .attr("x1", x(cape_label_tmpc) + (y(basep)-y(cape_label_pres))/tan)
+                .attr("x2", x(cape_label_tmpc + 4) + (y(basep)-y(cape_label_pres))/tan)
+                .attr("y1", y(cape_label_pres))
+                .attr("y2", y(cape_label_pres))
+                .attr("class", "parcel_gridline");
+        }
 
     }
 
     // Fill CIN area
     if (typeof cin_val !== 'undefined' && cin_val <= -10) {
-        var cin_coords = cin[1];
-        var cin_label_tmpc = (lcl_tmpk + lfc_tmpk)/2 - T0;    
+        var cin_coords = cin[1];  
 
+        var cin_label_tmpc = cin[2].tmpc;
+        var cin_label_pres = cin[2].pres;
         // Draw polygon
         parcelgroup.selectAll("cin_polygon")
             .data([cin_coords])
@@ -1943,19 +1946,20 @@ function drawProfile(profile) {
             .attr("class","cin_area");
 
         // Draw label
-        var cin_label_pres = lfc_pres + (lcl_pres-lfc_pres)/2;
-        parcelgroup.append("text")
-            .attr("class", "parcel_label")
-            .attr("text-anchor", "right")
-            .attr("x", x(cin_label_tmpc + 5) + (y(basep)-y(cin_label_pres))/tan)
-            .attr("y", y(cin_label_pres) + emToPx(0.2)) 
-            .text('cin: ' + Math.round(cin_val) + ' J/kg');
-        parcelgroup.append("line")
-            .attr("x1", x(cin_label_tmpc + 1) + (y(basep)-y(cin_label_pres))/tan)
-            .attr("x2", x(cin_label_tmpc + 5) + (y(basep)-y(cin_label_pres))/tan)
-            .attr("y1", y(cin_label_pres))
-            .attr("y2", y(cin_label_pres))
-            .attr("class", "parcel_gridline");
+        if ((lfc_hght - lcl_hght) > 600*m2ft) {
+            parcelgroup.append("text")
+                .attr("class", "parcel_label")
+                .attr("text-anchor", "right")
+                .attr("x", x(cin_label_tmpc + 5) + (y(basep)-y(cin_label_pres))/tan)
+                .attr("y", y(cin_label_pres) + emToPx(0.2)) 
+                .text('cin: ' + Math.round(cin_val) + ' J/kg');
+            parcelgroup.append("line")
+                .attr("x1", x(cin_label_tmpc + 1) + (y(basep)-y(cin_label_pres))/tan)
+                .attr("x2", x(cin_label_tmpc + 5) + (y(basep)-y(cin_label_pres))/tan)
+                .attr("y1", y(cin_label_pres))
+                .attr("y2", y(cin_label_pres))
+                .attr("class", "parcel_gridline");
+        }
 
     }
     
