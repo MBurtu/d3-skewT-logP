@@ -1015,14 +1015,15 @@ function loadSounding(fileName,name,icao) {
                 "lcl_hght": sb_profile[4],
                 "pp_moist_parcel": sb_profile[5],
                 "lfc": sb_profile[6],
-                "lfc_hght": sb_profile[7],
-                "el": sb_profile[8],
-                "el_hght": sb_profile[9],
-                "el_tmpc": sb_profile[10],
-                "cape": sb_profile[11],
-                "cape_val": sb_profile[12],
-                "cin": sb_profile[13],
-                "cin_val": sb_profile[14]
+                "lfc1_hght": sb_profile[7],
+                "lfc2_hght": sb_profile[8],
+                "el": sb_profile[9],
+                "el_hght": sb_profile[10],
+                "el_tmpc": sb_profile[11],
+                "cape": sb_profile[12],
+                "cape_val": sb_profile[13],
+                "cin": sb_profile[14],
+                "cin_val": sb_profile[15]
             };
 
             // Most unstable parcel (mu) 
@@ -1036,14 +1037,15 @@ function loadSounding(fileName,name,icao) {
             // Moist
             var mu_pp_moist_parcel = sb_profile[5];
             var mu_lfc = sb_profile[6];
-            var mu_lfc_hght = sb_profile[7];
-            var mu_el = sb_profile[8];
-            var mu_el_hght = sb_profile[9];
-            var mu_el_tmpc = sb_profile[10];
-            var mu_cape = sb_profile[11];
-            var mu_cape_val = sb_profile[12];
-            var mu_cin = sb_profile[13];
-            var mu_cin_val = sb_profile[14];
+            var mu_lfc1_hght = sb_profile[7];
+            var mu_lfc2_hght = sb_profile[8];
+            var mu_el = sb_profile[9];
+            var mu_el_hght = sb_profile[10];
+            var mu_el_tmpc = sb_profile[11];
+            var mu_cape = sb_profile[12];
+            var mu_cape_val = sb_profile[13];
+            var mu_cin = sb_profile[14];
+            var mu_cin_val = sb_profile[15];
             
             // Iterate the lowest 300 hPa looking for higher cape than sb
             var pp_range = d3.range(conv_sfc_press-300,conv_sfc_press,mu_dp);
@@ -1053,7 +1055,7 @@ function loadSounding(fileName,name,icao) {
                 var tmpc = t_td[0];
                 var dwpc = t_td[1]; 
                 var mu_profile = makeProfile(s,tmpc,dwpc,pp[p],conv_sfc_press);
-                var new_cape_val = mu_profile[12];
+                var new_cape_val = mu_profile[13];
                 if (new_cape_val > mu_cape_val) {
                     // Dry
                     mu_lift_theta = mu_profile[0];
@@ -1064,14 +1066,15 @@ function loadSounding(fileName,name,icao) {
                     // Moist
                     mu_pp_moist_parcel = mu_profile[5];
                     mu_lfc = mu_profile[6];
-                    mu_lfc_hght = mu_profile[7];
-                    mu_el = mu_profile[8];
-                    mu_el_hght = mu_profile[9];
-                    mu_el_tmpc = mu_profile[10];
-                    mu_cape = mu_profile[11];
+                    mu_lfc1_hght = mu_profile[7];
+                    mu_lfc2_hght = mu_profile[8];
+                    mu_el = mu_profile[9];
+                    mu_el_hght = mu_profile[10];
+                    mu_el_tmpc = mu_profile[11];
+                    mu_cape = mu_profile[12];
                     mu_cape_val = new_cape_val;
-                    mu_cin = mu_profile[13];
-                    mu_cin_val = mu_profile[14];
+                    mu_cin = mu_profile[14];
+                    mu_cin_val = mu_profile[15];
                 }
             }
 
@@ -1083,7 +1086,8 @@ function loadSounding(fileName,name,icao) {
                 "lcl_hght": mu_lcl_hght,
                 "pp_moist_parcel": mu_pp_moist_parcel,
                 "lfc": mu_lfc,
-                "lfc_hght": mu_lfc_hght,
+                "lfc1_hght": mu_lfc1_hght,
+                "lfc2_hght": mu_lfc2_hght,
                 "el": mu_el,
                 "el_hght": mu_el_hght,
                 "el_tmpc": mu_el_tmpc,
@@ -1120,14 +1124,15 @@ function loadSounding(fileName,name,icao) {
                 "lcl_hght": ml_profile[4],
                 "pp_moist_parcel": ml_profile[5],
                 "lfc": ml_profile[6],
-                "lfc_hght": ml_profile[7],
-                "el": ml_profile[8],
-                "el_hght": ml_profile[9],
-                "el_tmpc": ml_profile[10],
-                "cape": ml_profile[11],
-                "cape_val": ml_profile[12],
-                "cin": ml_profile[13],
-                "cin_val": ml_profile[14]
+                "lfc1_hght": ml_profile[7],
+                "lfc2_hght": ml_profile[8],
+                "el": ml_profile[9],
+                "el_hght": ml_profile[10],
+                "el_tmpc": ml_profile[11],
+                "cape": ml_profile[12],
+                "cape_val": ml_profile[13],
+                "cin": ml_profile[14],
+                "cin_val": ml_profile[15]
             };
 
         }
@@ -1293,21 +1298,21 @@ function drawFirstHourText() {
     }
     
     $("#lcl").html(sb_parcel[0].lcl_hght);
-    $("#lfc").html(sb_parcel[0].lfc_hght);
+    $("#lfc").html(sb_parcel[0].lfc1_hght);
     $("#el").html(sb_parcel[0].el_hght);
     $("#el_tmpc").html(sb_parcel[0].el_tmpc);
     $("#cape").html(sb_parcel[0].cape_val);
     $("#cin").html(sb_parcel[0].cin_val);
     
     $("#mulcl").html(mu_parcel[0].lcl_hght);
-    $("#mulfc").html(mu_parcel[0].lfc_hght);
+    $("#mulfc").html(mu_parcel[0].lfc1_hght);
     $("#muel").html(mu_parcel[0].el_hght);
     $("#muel_tmpc").html(mu_parcel[0].el_tmpc);
     $("#mucape").html(mu_parcel[0].cape_val);
     $("#mucin").html(mu_parcel[0].cin_val);
     
     $("#mllcl").html(ml_parcel[0].lcl_hght);
-    $("#mllfc").html(ml_parcel[0].lfc_hght);
+    $("#mllfc").html(ml_parcel[0].lfc1_hght);
     $("#mlel").html(ml_parcel[0].el_hght);
     $("#mlel_tmpc").html(ml_parcel[0].el_tmpc);
     $("#mlcape").html(ml_parcel[0].cape_val);
@@ -1433,21 +1438,21 @@ function updateData(i) {
     }
     
     $("#lcl").html(sb_parcel[i].lcl_hght);
-    $("#lfc").html(sb_parcel[i].lfc_hght);
+    $("#lfc").html(sb_parcel[i].lfc1_hght);
     $("#el").html(sb_parcel[i].el_hght);
     $("#el_tmpc").html(sb_parcel[i].el_tmpc);
     $("#cape").html(sb_parcel[i].cape_val);
     $("#cin").html(sb_parcel[i].cin_val);
     
     $("#mulcl").html(mu_parcel[i].lcl_hght);
-    $("#mulfc").html(mu_parcel[i].lfc_hght);
+    $("#mulfc").html(mu_parcel[i].lfc1_hght);
     $("#muel").html(mu_parcel[i].el_hght);
     $("#muel_tmpc").html(mu_parcel[i].el_tmpc);
     $("#mucape").html(mu_parcel[i].cape_val);
     $("#mucin").html(mu_parcel[i].cin_val);
     
     $("#mllcl").html(ml_parcel[i].lcl_hght);
-    $("#mllfc").html(ml_parcel[i].lfc_hght);
+    $("#mllfc").html(ml_parcel[i].lfc1_hght);
     $("#mlel").html(ml_parcel[i].el_hght);
     $("#mlel_tmpc").html(ml_parcel[i].el_tmpc);
     $("#mlcape").html(ml_parcel[i].cape_val);
@@ -1517,14 +1522,15 @@ function liftParcel(d) {
         "lcl_hght": profile[4],
         "pp_moist_parcel": profile[5],
         "lfc": profile[6],
-        "lfc_hght": profile[7],
-        "el": profile[8],
-        "el_hght": profile[9],
-        "el_tmpc": profile[10],
-        "cape": profile[11],
-        "cape_val": profile[12],
-        "cin": profile[13],
-        "cin_val": profile[14]
+        "lfc1_hght": profile[7],
+        "lfc2_hght": profile[8],
+        "el": profile[9],
+        "el_hght": profile[10],
+        "el_tmpc": profile[11],
+        "cape": profile[12],
+        "cape_val": profile[13],
+        "cin": profile[14],
+        "cin_val": profile[15]
     }
 
     drawProfile(parcel);
@@ -1571,31 +1577,36 @@ function makeProfile (step,lift_tmpc,lift_dwpc,lift_press,sfc_press) {
 
     // Level of Free Convection (LFC)
     var lfc = findLFC(step,lcl_tmpk,pp_moist_parcel);
-    // Lowest LFC (for CAPE)
-    var lfc_tmpk = lfc[0].lfc_tmpk;
-    var lfc_pres = lfc[0].lfc_pres;
-    // Highest LFC (for EL and CIN)
-    var lfc_tmpk2 = lfc[lfc.length-1].lfc_tmpk;
-    var lfc_pres2 = lfc[lfc.length-1].lfc_pres;
-    var env_lfc_tmpk = lfc[lfc.length-1].lfc_env_tmpk;
-    var env_lfc_dwpk = lfc[lfc.length-1].lfc_env_dwpk;
-    var env_lfc_e = calc_e(env_lfc_dwpk - T0);
+    // First LFC (for CAPE)
+    var lfc1_tmpk = lfc[0].lfc_tmpk;
+    var lfc1_pres = lfc[0].lfc_pres;
+    var env_lfc1_tmpk = lfc[0].lfc_env_tmpk;
+    var env_lfc1_dwpk = lfc[0].lfc_env_dwpk;
+    var env_lfc1_e = calc_e(env_lfc1_dwpk - T0);
+    // Second LFC (for EL and CIN) (most often identical to the first one...)
+    var lfc2_tmpk = lfc[lfc.length-1].lfc_tmpk;
+    var lfc2_pres = lfc[lfc.length-1].lfc_pres;
+    var env_lfc2_tmpk = lfc[lfc.length-1].lfc_env_tmpk;
+    var env_lfc2_dwpk = lfc[lfc.length-1].lfc_env_dwpk;
+    var env_lfc2_e = calc_e(env_lfc2_dwpk - T0);
 
-    var lfc_hght = '---'; var el = []; var el_hght = '---'; var el_tmpc = '---'; var cape_val = 0; var cape = []; var cin_val = 0; var cin = [];
-    if (lfc_tmpk != '---') {
+    var lfc1_hght = '---'; var lfc2_hght = '---'; var el = []; var el_hght = '---'; var el_tmpc = '---'; var cape_val = 0; var cape = []; var cin_val = 0; var cin = [];
+    if (lfc1_tmpk != '---') {
 
-        var lfc_hght = calc_hypsometric(sfc_press,lfc_pres2,lift_tmpc+T0,env_lfc_tmpk,lift_e,env_lfc_e);
+        var lfc1_hght = calc_hypsometric(sfc_press,lfc1_pres,lift_tmpc+T0,env_lfc1_tmpk,lift_e,env_lfc1_e);
+        var lfc2_hght = calc_hypsometric(sfc_press,lfc2_pres,lift_tmpc+T0,env_lfc2_tmpk,lift_e,env_lfc2_e);
         if (unit_height == 'ft') {
-            var lfc_hght = Math.round(lfc_hght*m2hft)*100;
+            var lfc1_hght = Math.round(lfc1_hght*m2hft)*100;
+            var lfc2_hght = Math.round(lfc2_hght*m2hft)*100;
         } else {
-            var lfc_hght = Math.round(lfc_hght*(m2hft/10))*10;
+            var lfc1_hght = Math.round(lfc1_hght*(m2hft/10))*10;
+            var lfc2_hght = Math.round(lfc2_hght*(m2hft/10))*10;
         }
 
-        var pp_lfc_parcel_range = d3.range(topp,lfc_pres2+dp,dp);
+        var pp_lfc_parcel_range = d3.range(topp,lfc2_pres+dp,dp);
         var pp_lfc_parcel = pp_lfc_parcel_range.sort((a,b)=>b-a);
-
-        // Equilibrium level (EL)
-        var el = findEL(step,lfc_tmpk2,pp_lfc_parcel);
+        // Equilibrium level (EL) (starting at the second LFC)
+        var el = findEL(step,lfc2_tmpk,pp_lfc_parcel);
         var el_pres = el[1];
         var env_el_tmpk = el[2];
         var env_el_dwpk = el[3];
@@ -1611,21 +1622,21 @@ function makeProfile (step,lift_tmpc,lift_dwpc,lift_press,sfc_press) {
 
         var el_tmpc = Math.round(env_el_tmpk - T0); // parcel tmp = env tmp at EL
 
-        // Convective Available Potential Energy (CAPE)
-        var pp_cape_range = d3.range(el_pres,lfc_pres+dp,dp);
+        // Convective Available Potential Energy (CAPE) (starting at the lowest LFC)
+        var pp_cape_range = d3.range(el_pres,lfc1_pres+dp,dp);
         var pp_cape = pp_cape_range.sort((a,b)=>b-a);
-        var cape = calc_cape(step,lfc_tmpk,pp_cape);
+        var cape = calc_cape(step,lfc1_tmpk,pp_cape);
         var cape_val = Math.round(cape[0]);
 
-        // Convective InhibitioN (CIN)
-        var pp_cin_range = d3.range(lfc_pres2,lift_press,dp);
+        // Convective InhibitioN (CIN) (up to the highest LFC)
+        var pp_cin_range = d3.range(lfc2_pres,lift_press,dp);
         var pp_cin = pp_cin_range.sort((a,b)=>b-a);
         var cin = calc_cin(step,lift_theta,lift_r,lcl_pres,pp_cin);
         var cin_val = Math.round(cin[0]);
         
     }
 
-    return [lift_theta,pp_dry_parcel,lift_e,lcl,lcl_hght,pp_moist_parcel,lfc,lfc_hght,el,el_hght,el_tmpc,cape,cape_val,cin,cin_val];
+    return [lift_theta,pp_dry_parcel,lift_e,lcl,lcl_hght,pp_moist_parcel,lfc,lfc1_hght,lfc2_hght,el,el_hght,el_tmpc,cape,cape_val,cin,cin_val];
 
 }
 
@@ -1637,7 +1648,8 @@ function drawProfile(profile) {
     var lcl_hght = profile.lcl_hght;
     var pp_moist_parcel = profile.pp_moist_parcel;
     var lfc = profile.lfc;
-    var lfc_hght = profile.lfc_hght;
+    var lfc1_hght = profile.lfc1_hght;
+    var lfc2_hght = profile.lfc2_hght;
     var el = profile.el;
     var el_hght = profile.el_hght;
     var cape = profile.cape;
@@ -1812,23 +1824,32 @@ function drawProfile(profile) {
         .attr("d", parcelMoistLine);
 
     // Labels
-    var lfc_tmpk = lfc[lfc.length-1].lfc_tmpk; // Highest LFC
-    var lfc_pres = lfc[lfc.length-1].lfc_pres;
+    // First LFC
+    var lfc1_tmpk = lfc[0].lfc_tmpk;
+    var lfc1_pres = lfc[0].lfc_pres;
+    // Second LFC
+    var lfc2_tmpk = lfc[lfc.length-1].lfc_tmpk;
+    var lfc2_pres= lfc[lfc.length-1].lfc_pres;
+    // (Highest) EL
     var el_tmpk = el[0];
     var el_pres = el[1];
-    if (virtual_temperature_correction && lfc_tmpk !== '---') {
+    if (virtual_temperature_correction && lfc1_tmpk !== '---') {
         lcl_tmpk = lcl_virt_tmpk;
 
-        var lfc_e = calc_e(lfc_tmpk - T0);
-        var lfc_virt_tmpk = calc_virtual_temperature(lfc_tmpk,lfc_pres,lfc_e);
-        lfc_tmpk = lfc_virt_tmpk;
+        var lfc1_e = calc_e(lfc1_tmpk - T0);
+        var lfc1_virt_tmpk = calc_virtual_temperature(lfc1_tmpk,lfc1_pres,lfc1_e);
+        lfc1_tmpk = lfc1_virt_tmpk;
+
+        var lfc2_e = calc_e(lfc2_tmpk - T0);
+        var lfc2_virt_tmpk = calc_virtual_temperature(lfc2_tmpk,lfc2_pres,lfc2_e);
+        lfc2_tmpk = lfc2_virt_tmpk;
 
         var el_e = calc_e(el_tmpk - T0);
         var el_virt_tmpk = calc_virtual_temperature(el_tmpk,el_pres,el_e);
         el_tmpk = el_virt_tmpk;
     }
 
-    if (lcl_tmpk == lfc_tmpk) {
+    if (lcl_tmpk == lfc1_tmpk) {
         parcelgroup.append("text")
             .attr("class", "parcel_label")
             .attr("text-anchor", "left")
@@ -1855,23 +1876,23 @@ function drawProfile(profile) {
             .attr("y2", y(lcl_pres))
             .attr("class", "parcel_gridline");
         
-        if (lfc_tmpk != '---' && (el_hght - lfc_hght) > 600*m2ft && (lfc_hght - lcl_hght) > 600*m2ft) {
+        if (lfc1_tmpk != '---' && (el_hght - lfc1_hght) > 600*m2ft && (lfc1_hght - lcl_hght) > 600*m2ft) {
             parcelgroup.append("text")
                 .attr("class", "parcel_label")
                 .attr("text-anchor", "left")
-                .attr("x", x(lfc_tmpk - T0 + 4) + (y(basep)-y(lfc_pres))/tan)
-                .attr("y", y(lfc_pres) + emToPx(0.2)) 
-                .text('lfc: ' + Math.round(lfc_hght) + ' '+ unit_height + ' agl');
+                .attr("x", x(lfc1_tmpk - T0 + 4) + (y(basep)-y(lfc1_pres))/tan)
+                .attr("y", y(lfc1_pres) + emToPx(0.2)) 
+                .text('lfc: ' + Math.round(lfc1_hght) + ' '+ unit_height + ' agl');
             parcelgroup.append("line")
-                .attr("x1", x(lfc_tmpk - T0) + (y(basep)-y(lfc_pres))/tan)
-                .attr("x2", x(lfc_tmpk - T0 + 4) + (y(basep)-y(lfc_pres))/tan)
-                .attr("y1", y(lfc_pres))
-                .attr("y2", y(lfc_pres))
+                .attr("x1", x(lfc1_tmpk - T0) + (y(basep)-y(lfc1_pres))/tan)
+                .attr("x2", x(lfc1_tmpk - T0 + 4) + (y(basep)-y(lfc1_pres))/tan)
+                .attr("y1", y(lfc1_pres))
+                .attr("y2", y(lfc1_pres))
                 .attr("class", "parcel_gridline");
         }
     }
 
-    if (typeof el_tmpk !== 'undefined' && (el_hght - lcl_hght) > 600*m2ft) {
+    if (typeof el_tmpk !== 'undefined' && (el_hght - lcl_hght) > 500*m2ft) {
         parcelgroup.append("text")
             .attr("class", "parcel_label")
             .attr("text-anchor", "left")
@@ -1907,7 +1928,7 @@ function drawProfile(profile) {
             .attr("class","cape_area");
 
         // Draw label
-        if ((el_hght - lfc_hght) > 600*m2ft) {
+        if ((el_hght - lfc1_hght) > 600*m2ft) {
             parcelgroup.append("text")
                 .attr("class", "parcel_label")
                 .attr("text-anchor", "left")
@@ -1946,7 +1967,11 @@ function drawProfile(profile) {
             .attr("class","cin_area");
 
         // Draw label
-        if ((lfc_hght - lcl_hght) > 600*m2ft) {
+        if ((lfc2_hght - lcl_hght) > 600*m2ft) {
+            if (Math.abs(lcl_pres - cin_label_pres) < 40) {
+                cin_label_pres = lcl_pres - 40; // Adjust if too close to the LCL
+                cin_label_tmpc = lcl_tmpk - T0 - 2;
+            }
             parcelgroup.append("text")
                 .attr("class", "parcel_label")
                 .attr("text-anchor", "right")
