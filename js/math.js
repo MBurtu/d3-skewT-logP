@@ -253,7 +253,7 @@ function findLFC (step,lcl_tmpk,pp_moist_range) {
 
     var lfcs = [];
     var deltaT = 0; var nr_of_lfcs = 0; var nr_of_els = 0;
-    var free_convection; // true if parcel is warmer than environment above the lfc 
+    var free_convection; // true if parcel is warmer than environment above the (first) lfc 
     
     for (var j=0; j<pp_moist_range.length; j++) { 
         var parc_pres = pp_moist_range[j];
@@ -404,6 +404,7 @@ function find_convective_temperature(step,pp,twom_tmpc,twom_dwpc,sfc_press) {
 function calc_cape (step,lfc_tmpk,pp_cape) {
 
     var deltaT = 0; var cape = 0; var cape_coords = []; var cape_env_coords = []; var cape_label_tmpc = 0; var cape_label = [];
+    var max_diff = 0;
     for (var j=0; j<pp_cape.length; j++) {
         
         var parc_tmpk =  lfc_tmpk + deltaT;
@@ -424,6 +425,11 @@ function calc_cape (step,lfc_tmpk,pp_cape) {
             var tmp_cape = Rd*(parc_virt_tmpk - env_virt_tmpk)*Math.log(pres/(pres-dp)); // Wallace & Hobbs (2006) p.345
             if (tmp_cape > 0) {
                 cape += tmp_cape;
+                if ((parc_virt_tmpk - env_virt_tmpk) > max_diff) {
+                    // CAPE label where we have max difference between parcel and environment
+                    max_diff = parc_virt_tmpk - env_virt_tmpk;
+                    cape_label = {"tmpc":parc_virt_tmpk-T0, "pres":pres};
+                }
                 cape_coords.push({"tmpc":parc_virt_tmpk-T0, "pres":pres});
                 cape_env_coords.push({"tmpc":env_virt_tmpk-T0, "pres":pres});
             } else {
@@ -434,6 +440,11 @@ function calc_cape (step,lfc_tmpk,pp_cape) {
             var tmp_cape = Rd*(parc_tmpk - env_tmpk)*Math.log(pres/(pres-dp)); // Wallace & Hobbs (2006) p.345
             if (tmp_cape > 0) {
                 cape += tmp_cape;
+                if ((parc_tmpk - env_tmpk) > max_diff) {
+                    // CAPE label where we have max difference between parcel and environment
+                    max_diff = parc_tmpk - env_tmpk;
+                    cape_label = {"tmpc":parc_tmpk-T0, "pres":pres};
+                }
                 cape_coords.push({"tmpc":parc_tmpk-T0, "pres":pres});
                 cape_env_coords.push({"tmpc":env_tmpk-T0, "pres":pres});
             } else {
@@ -446,11 +457,7 @@ function calc_cape (step,lfc_tmpk,pp_cape) {
 
     }
 
-    if (cape_coords.length > 0) {
-        cape_label = {
-            "tmpc": cape_coords[Math.round(cape_coords.length/2)].tmpc,
-            "pres": cape_coords[Math.round(cape_coords.length/2)].pres
-        }  
+    if (cape_coords.length > 1) {
         for (var j=0; j<cape_env_coords.length; j++) {
             cape_coords.push(cape_env_coords[cape_env_coords.length-j-1]);
         }
@@ -465,7 +472,7 @@ function calc_cape (step,lfc_tmpk,pp_cape) {
 function calc_cin (step,lift_theta,lift_r,lcl_pres,pp_cin) {
 
     var cin = 0; var cin_coords = []; var cin_env_coords = []; var cin_label = [];
-    var parc_tmpk; var env_tmpk; var parc_e;
+    var max_diff = 0; var parc_tmpk; var env_tmpk; var parc_e;
     for (var j=0; j<pp_cin.length; j++) {
         
         var pres = pp_cin[j];
@@ -495,6 +502,11 @@ function calc_cin (step,lift_theta,lift_r,lcl_pres,pp_cin) {
             var tmp_cin = Rd*(parc_virt_tmpk - env_virt_tmpk)*Math.log(pres/(pres-dp));
             if (tmp_cin < 0) {
                 cin += tmp_cin;
+                if ((parc_virt_tmpk - env_virt_tmpk) < max_diff) {
+                    // CIN label where we have max difference between parcel and environment
+                    max_diff = parc_virt_tmpk - env_virt_tmpk;
+                    cin_label = {"tmpc":parc_virt_tmpk-T0, "pres":pres};
+                }
                 cin_coords.push({"tmpc":parc_virt_tmpk-T0, "pres":pres});
                 cin_env_coords.push({"tmpc":env_virt_tmpk-T0, "pres":pres});
             } else {
@@ -506,6 +518,11 @@ function calc_cin (step,lift_theta,lift_r,lcl_pres,pp_cin) {
             var tmp_cin = Rd*(parc_tmpk - env_tmpk)*Math.log(pres/(pres-dp));
             if (tmp_cin < 0) {
                 cin += tmp_cin;
+                if ((parc_tmpk - env_tmpk) < max_diff) {
+                    // CIN label where we have max difference between parcel and environment
+                    max_diff = parc_virt_tmpk - env_virt_tmpk;
+                    cin_label = {"tmpc":parc_tmpk-T0, "pres":pres};
+                }
                 cin_coords.push({"tmpc":parc_tmpk-T0, "pres":pres});
                 cin_env_coords.push({"tmpc":env_tmpk-T0, "pres":pres});
             } else {
@@ -516,11 +533,7 @@ function calc_cin (step,lift_theta,lift_r,lcl_pres,pp_cin) {
 
     }
    
-    if (cin_coords.length > 0) {
-        cin_label = {
-            "tmpc": cin_coords[Math.round(cin_coords.length/2)].tmpc,
-            "pres": cin_coords[Math.round(cin_coords.length/2)].pres
-        }  
+    if (cin_coords.length > 1) {
         for (var j=0; j<cin_env_coords.length; j++) {
             cin_coords.push(cin_env_coords[cin_env_coords.length-j-1]);
         }
