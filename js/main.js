@@ -19,6 +19,7 @@
 //          4.2 Draw data
 //      5. Parcel profiles
 //      6. Copyrights
+//      7. References
 
 //-
 //-
@@ -2039,4 +2040,25 @@ furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
+*/
+
+/////////////////////////////////
+//
+//      7. References
+//
+/////////////////////////////////
+
+/*
+Bolton D., 1980: The Computation of Equivalent Potential Temperature, Monthly
+Weather Review vol. 108
+
+Doswell C. A. and E. N Ramussen, 1994: The Effect of Neglecting the Virtual
+Temperature Correction on CAPE Calculations, Notes and Correspondence December
+1994
+
+Markowski P. and Y. Richardson, 2010: Mesoscale Meteorology in Midlatitudes,
+Wiley-Blackwell
+
+Wallace J. M. and P. V. Hobbs, 2006: Atmospheric Science - An Introductory
+Survey, University of Washington
 */
