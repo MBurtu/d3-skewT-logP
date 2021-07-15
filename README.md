@@ -29,4 +29,4 @@ Json as seen below. See /data for a full example.
 - Top windbarb sometimes disappears and sometimes is duplicated.
 
 ### Demo
-http://www.westerlies.eu/soundings/d3_skewt.html
+https://www.westerlies.eu/soundings/d3_skewt.html
