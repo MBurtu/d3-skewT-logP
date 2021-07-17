@@ -520,7 +520,7 @@ function calc_cin (step,lift_theta,lift_r,lcl_pres,pp_cin) {
                 cin += tmp_cin;
                 if ((parc_tmpk - env_tmpk) < max_diff) {
                     // CIN label where we have max difference between parcel and environment
-                    max_diff = parc_virt_tmpk - env_virt_tmpk;
+                    max_diff = parc_tmpk - env_tmpk;
                     cin_label = {"tmpc":parc_tmpk-T0, "pres":pres};
                 }
                 cin_coords.push({"tmpc":parc_tmpk-T0, "pres":pres});
