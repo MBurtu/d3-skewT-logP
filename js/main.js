@@ -911,7 +911,6 @@ function loadSounding(fileName,name,icao) {
             for (var j=0; j<tmpStep.pres.length; j++) {
                 var lvlObj = {
                     "pres": tmpStep.pres[j],
-                    "hght": tmpStep.hght[j],
                     "hghtagl": tmpStep.hghtagl[j],
                     "tmpc": tmpStep.tmpc[j],
                     "dwpc": tmpStep.dwpc[j],
@@ -931,11 +930,11 @@ function loadSounding(fileName,name,icao) {
                 if (requestedLevels[l] == 0) { continue; }
 
                 var levels = [];
-                var lvl = 1000*requestedLevels[l]+soundingStep[0].hght; // want height AGL
-                var prev_lvl = 1000*requestedLevels[l-1]+soundingStep[0].hght;
+                var lvl = 1000*requestedLevels[l]; 
+                var prev_lvl = 1000*requestedLevels[l-1];
                 for (var i=1; i<soundingStep.length; i++) {
                     var level = []; var bindingLvl = [];
-                    if (soundingStep[i].hght > lvl) { 
+                    if (soundingStep[i].hghtagl > lvl) { 
                         // Adjust for interpolation over 360deg, e.g. between 2deg and 358deg, by adding 360deg to the lowest degree
                         var prev_lvl_wdir = soundingStep[i-1].wdir;
                         var lvl_wdir = soundingStep[i].wdir;
@@ -946,7 +945,7 @@ function loadSounding(fileName,name,icao) {
                         }
                         break; 
                     } 
-                    if (soundingStep[i].hght >= prev_lvl) {
+                    if (soundingStep[i].hghtagl >= prev_lvl) {
                         if (lvl > 1000) {
                             bindingLvl.wdir = soundingStep[i-1].wdir; //Binding -> e.g. first value of 1-3km the same as the last value of 0-1km  
                             bindingLvl.wspd = soundingStep[i-1].wspd*ms2kt; // Convert to kt;
@@ -960,7 +959,7 @@ function loadSounding(fileName,name,icao) {
                 // interpolate to requested heights for each sounding 
                 var interpolatedLvls = [];
                 var interp = d3.interpolateObject(soundingStep[i-1],soundingStep[i]); // interp btw two levels
-                var half = interp(1-(lvl - soundingStep[i].hght)/(soundingStep[i-1].hght - soundingStep[i].hght));
+                var half = interp(1-(lvl - soundingStep[i].hghtagl)/(soundingStep[i-1].hghtagl - soundingStep[i].hghtagl));
                 interpolatedLvls.wdir = Math.round(half.wdir,1);
                 interpolatedLvls.wspd = Math.round(half.wspd*ms2kt,1);
                 levels.push(interpolatedLvls);
