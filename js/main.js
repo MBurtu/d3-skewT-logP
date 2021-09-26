@@ -414,41 +414,24 @@ function dateGrid(modelrun) {
      mm = parseInt(modelrun.substring(5,7)) - 1;
      dd = parseInt(modelrun.substring(8,10));
      hh = parseInt(modelrun.substring(11,13));
-     var date = new Date(yyyy,mm,dd,hh);
+     var date = Date.UTC(yyyy,mm,dd,hh);
      
-     // Add hours to date
-     Date.prototype.addHours = function(h) {
-         this.setTime(this.getTime() + (h*60*60*1000));
-         return this;
-     }
-     /* Standard time offset
-     Date.prototype.stdTimezoneOffset = function () {
-        var jan = new Date(this.getFullYear(), 0, 1);
-        var jul = new Date(this.getFullYear(), 6, 1);
-        return Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
-     }
-     // True if daylight saving
-     Date.prototype.isDstObserved = function () {
-        return this.getTimezoneOffset() < this.stdTimezoneOffset();
-     }*/
- 
      $('#navigation').empty();
      var nav = '<table class="date_container">'; var row1 = '<tr>'; var row2 = '<tr>'; var j = 0; var colspan = 1;
      for (var i=firstStep; i<lastStep; i+=timeStep) {
 
-         var month = date.getMonth() + 1;
+         var newDay = new Date(date);
+
+         var month = newDay.getUTCMonth() + 1;
          if (month < 10) {
              month = '0' + month;
          }
-         var day = date.getDate();
+         var day = newDay.getUTCDate();
          if (day < 10) {
             day = '0' + day;
          }
-         var weekDay = weekDays[date.getDay()];
-         var hour = date.getHours();
-         /*if (date.isDstObserved()){
-             hour -= 1;
-         }*/
+         var weekDay = weekDays[newDay.getUTCDay()];
+         var hour = newDay.getUTCHours();
          if (hour < 10) {
              hour = '0' + hour;
          }
@@ -469,7 +452,7 @@ function dateGrid(modelrun) {
              row2 += '<td class="hour" id="'+j+'" style="border-right:1px solid black;">'+hour+'Z</td>';
          }
  
-         date.addHours(timeStep);
+         date += timeStep*60*60*1000; // adds timestep hours in milliseconds
          j += 1;
          colspan += 1;
  
