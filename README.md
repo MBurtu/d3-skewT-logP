@@ -24,7 +24,6 @@ Json as seen below. See /data for a full example.
 - Font Awesome  
 
 ### Known bugs
-- Date grid is not correctly generated when transitioning to and from summer time.
 - Top windbarb sometimes disappears and sometimes is duplicated.
 
 ### Demo
