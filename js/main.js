@@ -315,6 +315,19 @@ $('.modal-tag').on('click', function(){
             back.css("background-color","#ff4d4d"); // red
         }
 
+        // Wet-bulb temperature
+        var wet_bulb_switch = $('#wet-bulb_tmp');
+        var back = wet_bulb_switch.find('.back');
+        var front = wet_bulb_switch.find('.front');
+
+        if (wetbulb_temperature) {
+            front.css("left",(back.outerWidth()-front.outerWidth()) + "px");  
+            back.css("background-color","#5cd65c"); // green
+        } else {
+            front.css("left",0);   
+            back.css("background-color","#ff4d4d"); // red
+        }
+
     }
 
     $('#' + modalID).show();
@@ -360,6 +373,16 @@ $('.save').on('click', function(){
         virtual_temperature_correction = true;
     } else {
         virtual_temperature_correction = false;
+    }
+
+    // Wet-bulb temperature
+    var wet_bulb_switch = $('#wet-bulb_tmp');
+    var front = wet_bulb_switch.find('.front');
+
+    if (front.position().left != 0){
+        wetbulb_temperature = true;
+    } else {
+        wetbulb_temperature = false;
     }
 
     // Clear plot
@@ -737,13 +760,6 @@ function drawBackground() {
     
     svgwind.append("g").attr("class", "y axis ticks").attr("transform", "translate(-0.5,0)").call(yAxis2);
     
-    // Line along right edge of plot
-    svgwind.append("line")
-        .attr("x1", w_barbs)
-        .attr("x2", w_barbs)
-        .attr("y1", 0)
-        .attr("y2", h)
-        .attr("class", "gridline");
     // Line along bottom edge of plot
     svgwind.append("line")
         .attr("x1", 0)
@@ -752,6 +768,7 @@ function drawBackground() {
         .attr("y2", h)
         .attr("class", "gridline");
 
+    // Isobars
     svgwind.selectAll("gline")
         .data(plines)
         .enter().append("line")
@@ -892,11 +909,17 @@ function loadSounding(fileName,name,icao) {
             var soundingStep = [];
             // Convert all pressure levels to objects
             for (var j=0; j<tmpStep.pres.length; j++) {
+                // Wet-bulb temperature
+                var wetblbc = NaN;
+                if (wetbulb_temperature) {
+                    wetblbc = calc_wetbulb(tmpStep.tmpc[j], tmpStep.dwpc[j], tmpStep.pres[j]);
+                }
                 var lvlObj = {
                     "pres": tmpStep.pres[j],
                     "hghtagl": tmpStep.hghtagl[j],
                     "tmpc": tmpStep.tmpc[j],
                     "dwpc": tmpStep.dwpc[j],
+                    "wetblbc": wetblbc,
                     "wdir": tmpStep.wdir[j],
                     "wspd": tmpStep.wspd[j]
                 };
@@ -1077,7 +1100,7 @@ function loadSounding(fileName,name,icao) {
                 "cape": mu_cape,
                 "cape_val": mu_cape_val,
                 "cin": mu_cin,
-                "cin_val": mu_cin_val
+                "cin_val": mu_cin_val,
             };
 
             // Mixed layer parcel (ml) 
@@ -1088,7 +1111,7 @@ function loadSounding(fileName,name,icao) {
             for (var p=0; p<pp.length; p++) {
                 var t_td = env_t_td_from_pressure(s,pp[p]);
                 var env_theta = calc_theta(t_td[0],pp[p])
-                var env_e = calc_e(t_td[1]);
+                var env_e = calc_e_es(t_td[1]);
                 var env_r = calc_mixing_ratio(env_e,pp[p]);
                 theta += env_theta;
                 r += env_r;
@@ -1183,7 +1206,13 @@ function makeBarbTemplates() {
 
 function drawFirstHour() {
     
-    // draw initial set of lines
+    // Draw initial set of lines
+    wetlines = skewtgroup.selectAll("wetlines")
+        .data(sounding[0]).enter().append("path")
+        .attr("class", "wet_line")
+        .attr("clip-path", "url(#clipper)")
+        .attr("d", wetline);
+
     tlines = skewtgroup.selectAll("tlines")
         .data(sounding[0]).enter().append("path")
         .attr("class", "temp_line")
@@ -1322,12 +1351,17 @@ function drawToolTips() {
     focus4 = skewtgroup.append("g").attr("class", "focus").style("display", "none");
     focus4.append("text").attr("x", w).attr("text-anchor", "end").attr("dy", ".35em");
 
+    focus5 = skewtgroup.append("g").attr("class", "focus wetblbc").style("display", "none");
+    if (wetbulb_temperature) {
+        focus5.append("circle").attr("r", 4);
+    }
+    
     svg.append("rect")
         .attr("class", "overlay")
         .attr("width", w)
         .attr("height", h)
-        .on("mouseover", function() { focus.style("display", null); focus2.style("display", null); focus3.style("display", null); focus4.style("display", null);})
-        .on("mouseout", function() { focus.style("display", "none"); focus2.style("display", "none"); focus3.style("display", "none"); focus4.style("display", "none");})
+        .on("mouseover", function() { focus.style("display", null); focus2.style("display", null); focus3.style("display", null); focus4.style("display", null); focus5.style("display", null);})
+        .on("mouseout", function() { focus.style("display", "none"); focus2.style("display", "none"); focus3.style("display", "none"); focus4.style("display", "none"); focus5.style("display", "none");})
         .on("mousemove", mousemove);
         
     function mousemove() {
@@ -1342,8 +1376,13 @@ function drawToolTips() {
             focus2.attr("transform", "translate(" + (x(d.dwpc) + (y(basep)-y(d.pres))/tan)+ "," + y(d.pres) + ")");
             focus3.attr("transform", "translate(0," + y(d.pres) + ")");
             focus4.attr("transform", "translate(0," + y(d.pres) + ")");
-            focus.select("text").text(Math.round(d.tmpc) + "°C");
-            focus2.select("text").text(Math.round(d.dwpc) + "°C");
+            if (wetbulb_temperature) {
+                focus5.attr("transform", "translate(" + (x(d.wetblbc) + (y(basep)-y(d.pres))/tan)+ "," + y(d.pres) + ")");
+                focus.select("text").text("Tw: " + d.wetblbc + "°C, T: " + d.tmpc + "°C");
+            } else {
+                focus.select("text").text("T: " + d.tmpc + "°C");
+            }
+            focus2.select("text").text("Td: " + d.dwpc + "°C");
             if (unit_height == 'ft') {
                 focus3.select("text").text("-" + Math.round(d.hghtagl*m2hft)*100 + ' '+ unit_height + ' agl');
             } else {
@@ -1351,8 +1390,8 @@ function drawToolTips() {
             }
 
             var p_altiude = calc_pressure_altitude(d.pres); // m
-            var p_altiude_hft = Math.round(p_altiude*(3.28084/100)); // nearest multiple of 5 [ft]
-            if (d.hghtagl*3.28084 >= 5000) { // only show FLs from 5000 ft agl and above
+            var p_altiude_hft = Math.round(p_altiude*(3.28084/100)); // hectofeet
+            if (p_altiude_hft >= 50) { // only show FLs from FL050 and above
                 if (p_altiude_hft < 100) {
                     focus4.select("text").text("FL0" + p_altiude_hft + '-');  
                 } else {
@@ -1369,6 +1408,7 @@ function updateData(i) {
     // update data for lines, barbs, dots, stats
     tlines.data(sounding[i]).attr("d", tline);
     tdlines.data(sounding[i]).attr("d", tdline);
+    wetlines.data(sounding[i]).attr("d", wetline);
     allbarbs.data(sounding[i][0])
         .attr("xlink:href", function (d) { 
             var wspdround = Math.ceil((d.wspd*ms2kt)/5)*5;
@@ -1526,7 +1566,7 @@ function makeProfile (step,lift_tmpc,lift_dwpc,lift_press,sfc_press) {
     var lift_theta = calc_theta(lift_tmpc,lift_press);
 
     // Vapor pressure
-    var lift_e = calc_e(lift_dwpc);
+    var lift_e = calc_e_es(lift_dwpc);
 
     // Mixing ratio
     var lift_r = calc_mixing_ratio(lift_e,lift_press);
@@ -1542,7 +1582,7 @@ function makeProfile (step,lift_tmpc,lift_dwpc,lift_press,sfc_press) {
 
     var env_lcl_tmpc = env_t_td_from_pressure(step,lcl_pres)[0];
     var env_lcl_dwpc = env_t_td_from_pressure(step,lcl_pres)[1];
-    var env_lcl_e = calc_e(env_lcl_dwpc);
+    var env_lcl_e = calc_e_es(env_lcl_dwpc);
     
     var lcl_hght = calc_hypsometric(sfc_press,lcl_pres,lift_tmpc+T0,env_lcl_tmpc+T0,lift_e,env_lcl_e);
     
@@ -1565,13 +1605,13 @@ function makeProfile (step,lift_tmpc,lift_dwpc,lift_press,sfc_press) {
     var lfc1_pres = lfc[0].lfc_pres;
     var env_lfc1_tmpk = lfc[0].lfc_env_tmpk;
     var env_lfc1_dwpk = lfc[0].lfc_env_dwpk;
-    var env_lfc1_e = calc_e(env_lfc1_dwpk - T0);
+    var env_lfc1_e = calc_e_es(env_lfc1_dwpk - T0);
     // Second LFC (for EL and CIN) (most often identical to the first one...)
     var lfc2_tmpk = lfc[lfc.length-1].lfc_tmpk;
     var lfc2_pres = lfc[lfc.length-1].lfc_pres;
     var env_lfc2_tmpk = lfc[lfc.length-1].lfc_env_tmpk;
     var env_lfc2_dwpk = lfc[lfc.length-1].lfc_env_dwpk;
-    var env_lfc2_e = calc_e(env_lfc2_dwpk - T0);
+    var env_lfc2_e = calc_e_es(env_lfc2_dwpk - T0);
 
     var lfc1_hght = '---'; var lfc2_hght = '---'; var el = []; var el_hght = '---'; var el_tmpc = '---'; var cape_val = 0; var cape = []; var cin_val = 0; var cin = [];
     if (lfc1_tmpk != '---') {
@@ -1594,7 +1634,7 @@ function makeProfile (step,lift_tmpc,lift_dwpc,lift_press,sfc_press) {
         var env_el_tmpk = el[2];
         var env_el_dwpk = el[3];
 
-        var env_el_e = calc_e(env_el_dwpk - T0);
+        var env_el_e = calc_e_es(env_el_dwpk - T0);
 
         var el_hght = calc_hypsometric(sfc_press,el_pres,twom_tmpc+T0,env_el_tmpk,lift_e,env_el_e);
         if (unit_height == 'ft') {
@@ -1646,7 +1686,7 @@ function drawProfile(profile) {
         var virtualTemperature = d3.line()
         .curve(d3.curveLinear)
         .x(function(d,i) { 
-            var e = calc_e(d.dwpc);
+            var e = calc_e_es(d.dwpc);
             var virt_tmpk = calc_virtual_temperature(d.tmpc+T0,d.pres,e);
             return x(virt_tmpk - T0) + (y(basep)-y(d.pres))/tan; 
         })
@@ -1692,7 +1732,7 @@ function drawProfile(profile) {
         // Moist adiabat
         var deltaT = 0;
         var lcl_tmpk = lcl[0];
-        var lcl_e = calc_e(lcl_tmpk - T0); // tmp = dwp
+        var lcl_e = calc_e_es(lcl_tmpk - T0); // tmp = dwp
         var lcl_pres = lcl[1];
         var lcl_virt_tmpk = calc_virtual_temperature(lcl_tmpk,lcl_pres,lcl_e);
 
@@ -1704,7 +1744,7 @@ function drawProfile(profile) {
             var parc_pres = pp_moist_parcel[i];
             var dt = calc_moist_gradient(parc_tmpk,parc_pres,dp);
 
-            var parc_e = calc_e(parc_tmpk - T0); //parcel tmp = dwp
+            var parc_e = calc_e_es(parc_tmpk - T0); //parcel tmp = dwp
             var parc_virt_tmpk = calc_virtual_temperature(parc_tmpk,parc_pres,parc_e);
 
             deltaT -= dt;
@@ -1819,15 +1859,15 @@ function drawProfile(profile) {
     if (virtual_temperature_correction && lfc1_tmpk !== '---') {
         lcl_tmpk = lcl_virt_tmpk;
 
-        var lfc1_e = calc_e(lfc1_tmpk - T0);
+        var lfc1_e = calc_e_es(lfc1_tmpk - T0);
         var lfc1_virt_tmpk = calc_virtual_temperature(lfc1_tmpk,lfc1_pres,lfc1_e);
         lfc1_tmpk = lfc1_virt_tmpk;
 
-        var lfc2_e = calc_e(lfc2_tmpk - T0);
+        var lfc2_e = calc_e_es(lfc2_tmpk - T0);
         var lfc2_virt_tmpk = calc_virtual_temperature(lfc2_tmpk,lfc2_pres,lfc2_e);
         lfc2_tmpk = lfc2_virt_tmpk;
 
-        var el_e = calc_e(el_tmpk - T0);
+        var el_e = calc_e_es(el_tmpk - T0);
         var el_virt_tmpk = calc_virtual_temperature(el_tmpk,el_pres,el_e);
         el_tmpk = el_virt_tmpk;
     }

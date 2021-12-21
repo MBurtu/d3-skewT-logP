@@ -58,22 +58,55 @@ function emToPx(em) {
 //////////////////////////////////////
 //      2.2 Temperature & Pressure
 
-// Calculates potential temperature
+
+// Calculates the wet-bulb temperature (degC) using Normand's rule
+function calc_wetbulb(tmpc,dwpc,pres) {
+    
+    // Starting point
+    var e = calc_e_es(dwpc);
+    var theta = calc_theta(tmpc,pres);
+
+    // Find the LCL
+    const deltaP = 1;
+    var pp_range = d3.range(10,pres,deltaP);
+    var pp = pp_range.sort((a,b)=>b-a); // flip order, bottom first
+
+    var lcl = findLCL(e,theta,pp);
+    var lcl_tmpk = lcl[0];
+    var lcl_pres = lcl[1];
+
+    // Go moist adiabatically from the LCL to the starting point
+    var deltaT = 0;
+    for (var p=lcl_pres; p<=pres; p+=deltaP) {
+
+        var moist_tmpk = lcl_tmpk + deltaT;
+        var dt = calc_moist_gradient(moist_tmpk,p,deltaP);
+        deltaT += dt;
+
+    }
+
+    var wetblbc = moist_tmpk - T0; 
+    
+    return Math.round(wetblbc * 10) / 10;
+
+}
+
+// Calculates potential temperature [K]
 function calc_theta(tmpc,pres) {
     
-    tmpk = tmpc + T0;
+    var tmpk = tmpc + T0;
     var theta = tmpk*Math.pow((1000/pres), Rd/cpd);
 
     return theta;
 
 }
 
-// Calculates vapor pressure from dewpoint (degC)
-function calc_e(dwpc) {
+// Calculates vapor pressure from dewpoint or saturation vapor pressure from temperature (degC)
+function calc_e_es(tmp) {
     
-    var e = 6.11*Math.pow(10,((7.5*dwpc)/(237.3 + dwpc)));
+    var e_es = 6.11*Math.pow(10,((7.5*tmp)/(237.3 + tmp)));
 
-    return e;
+    return e_es;
 
 }
 
@@ -158,13 +191,13 @@ function env_t_td_from_pressure(index,pres) {
 function find_freezing_lvl(index,pp,p_sfc,t_twom,td_twom) {
 
     var fzlvl = 'Sfc';
-    var lift_e = calc_e(td_twom);
+    var lift_e = calc_e_es(td_twom);
     if (t_twom >= 0) {
         for (var p=0; p<pp.length; p++) {
             var env = env_t_td_from_pressure(index,pp[p]);
             var env_t = env[0];
             var env_td = env[1];
-            var env_e = calc_e(env_td);
+            var env_e = calc_e_es(env_td);
             if (env_t <= 0) {
                 fzlvl = calc_hypsometric(p_sfc,pp[p],t_twom + T0,env_t + T0,lift_e,env_e);
                 if (unit_height == 'ft') {
@@ -267,10 +300,10 @@ function findLFC (step,lcl_tmpk,pp_moist_range) {
         var env_dwpk = env[1] + T0;
 
         if (virtual_temperature_correction) {
-            var parc_e = calc_e(parc_tmpk - T0);
+            var parc_e = calc_e_es(parc_tmpk - T0); //parcel tmp = dwp above the LCL
             var parc_virt_tmpk = calc_virtual_temperature(parc_tmpk, parc_pres, parc_e);
             
-            var env_e = calc_e(env_dwpk - T0);
+            var env_e = calc_e_es(env_dwpk - T0);
             var env_virt_tmpk = calc_virtual_temperature(env_tmpk, parc_pres, env_e);       
 
             if (parc_virt_tmpk >= env_virt_tmpk && (nr_of_lfcs == 0 || nr_of_els == 1)) {
@@ -342,10 +375,10 @@ function findEL (step,lfc_tmpk,pp_lfc_range) {
         var env_dwpk = env[1] + T0;
 
         if (virtual_temperature_correction) {
-            var parc_e = calc_e(parc_tmpk - T0)
+            var parc_e = calc_e_es(parc_tmpk - T0); //parcel tmp = dwp above the LCL
             var parc_virt_tmpk = calc_virtual_temperature(parc_tmpk, parc_pres, parc_e);
             
-            var env_e = calc_e(env_dwpk - T0);
+            var env_e = calc_e_es(env_dwpk - T0);
             var env_virt_tmpk = calc_virtual_temperature(env_tmpk,parc_pres,env_e);
 
             if (parc_virt_tmpk <= env_virt_tmpk) {
@@ -377,7 +410,7 @@ function find_convective_temperature(step,pp,twom_tmpc,twom_dwpc,sfc_press) {
     var conv_tmpc = '&geq;45';
     for (var t=twom_tmpc-5; t<45; t+=0.1) {  // -5 to account for superadiabatic conditions
         var theta = calc_theta(t,sfc_press);
-        var e = calc_e(twom_dwpc);
+        var e = calc_e_es(twom_dwpc);
 
         var lcl = findLCL(e,theta,pp);
         var lcl_tmpk = lcl[0];
@@ -415,10 +448,10 @@ function calc_cape (step,lfc_tmpk,pp_cape) {
         var env_tmpk = env[0] + T0;
         var env_dwpk = env[1] + T0;
        
-        var parc_e = calc_e(parc_tmpk - T0); //parcel tmp = dwp
+        var parc_e = calc_e_es(parc_tmpk - T0); //parcel tmp = dwp
         var parc_virt_tmpk = calc_virtual_temperature(parc_tmpk,pres,parc_e);
         
-        var env_e = calc_e(env_dwpk - T0); 
+        var env_e = calc_e_es(env_dwpk - T0); 
         var env_virt_tmpk = calc_virtual_temperature(env_tmpk,pres,env_e);
         
         if (virtual_temperature_correction) {
@@ -492,11 +525,11 @@ function calc_cin (step,lift_theta,lift_r,lcl_pres,pp_cin) {
             if (pres > lcl_pres) {
                 parc_e = (lift_r*pres)/(lift_r + eps); // vapor pressure, Wallace & Hobbs (2006) eqn 3.63
             } else {
-                parc_e = calc_e(parc_tmpk - T0); //parcel tmp = dwp above the LCL
+                parc_e = calc_e_es(parc_tmpk - T0); //parcel tmp = dwp above the LCL
             }
             parc_virt_tmpk = calc_virtual_temperature(parc_tmpk,pres,parc_e);
             
-            var env_e = calc_e(env_dwpk - T0); 
+            var env_e = calc_e_es(env_dwpk - T0); 
             env_virt_tmpk = calc_virtual_temperature(env_tmpk,pres,env_e);
 
             var tmp_cin = Rd*(parc_virt_tmpk - env_virt_tmpk)*Math.log(pres/(pres-dp));
@@ -551,7 +584,7 @@ function calc_precipitable_water(step,sfc_press) {
     for (var p=topp; p<=sfc_press; p+=dp) {
 
         var td = env_t_td_from_pressure(step, p)[1]; // dewpoint temperature
-        var e = calc_e(td); // vapor pressure
+        var e = calc_e_es(td); // vapor pressure
         var r = calc_mixing_ratio(e, p); //mixing ratio, kg/kg
         
         pw += (1/(g*densW))*r*dp*100;

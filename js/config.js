@@ -53,6 +53,7 @@ var unit_height = 'ft'; // ft | m
 var unit_wind = 'kt'; // kt | m/s
 
 var virtual_temperature_correction = true;   // true | false
+var wetbulb_temperature = false;   // true | false
 
 /////////////////////////////////
 //
@@ -164,6 +165,12 @@ var tline = d3.line()
 var tdline = d3.line()
     .curve(d3.curveLinear) 
 	.x(function(d,i) { return x(d.dwpc) + (y(basep)-y(d.pres))/tan; })
+    .y(function(d,i) { return y(d.pres); });
+
+// Wet bulb temperature
+var wetline = d3.line()
+    .curve(d3.curveLinear) 
+	.x(function(d,i) { return x(d.wetblbc) + (y(basep)-y(d.pres))/tan; })
     .y(function(d,i) { return y(d.pres); });
     
 // Hodoline
