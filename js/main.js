@@ -1205,11 +1205,13 @@ function makeBarbTemplates() {
 
 function drawFirstHour() {
     // Draw initial set of lines
-    wetlines = skewtgroup.selectAll("wetlines")
-        .data(sounding[index]).enter().append("path")
-        .attr("class", "wet_line")
-        .attr("clip-path", "url(#clipper)")
-        .attr("d", wetline);
+    if (wetbulb_temperature) {
+        wetlines = skewtgroup.selectAll("wetlines")
+            .data(sounding[index]).enter().append("path")
+            .attr("class", "wet_line")
+            .attr("clip-path", "url(#clipper)")
+            .attr("d", wetline);
+    }
 
     tlines = skewtgroup.selectAll("tlines")
         .data(sounding[index]).enter().append("path")
@@ -1406,7 +1408,9 @@ function updateData(i) {
     // update data for lines, barbs, dots, stats
     tlines.data(sounding[i]).attr("d", tline);
     tdlines.data(sounding[i]).attr("d", tdline);
-    wetlines.data(sounding[i]).attr("d", wetline);
+    if (wetbulb_temperature) {
+        wetlines.data(sounding[i]).attr("d", wetline);
+    }
     allbarbs.data(sounding[i][0])
         .attr("xlink:href", function (d) { 
             var wspdround = Math.ceil((d.wspd*ms2kt)/5)*5;

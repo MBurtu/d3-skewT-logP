@@ -160,20 +160,20 @@ const FLs = [50,100,150,200,250,300,350,400,450]; // Flight levels to label up
 // Temperature
 var tline = d3.line()   
     .curve(d3.curveLinear) 
-	.x(function(d,i) { return x(d.tmpc) + (y(basep)-y(d.pres))/tan; })
-	.y(function(d,i) { return y(d.pres); });
+	.x(function(d) { return x(d.tmpc) + (y(basep)-y(d.pres))/tan; })
+	.y(function(d) { return y(d.pres); });
 
 // Dewpoint temperature
 var tdline = d3.line()
     .curve(d3.curveLinear) 
-	.x(function(d,i) { return x(d.dwpc) + (y(basep)-y(d.pres))/tan; })
-    .y(function(d,i) { return y(d.pres); });
+	.x(function(d) { return x(d.dwpc) + (y(basep)-y(d.pres))/tan; })
+    .y(function(d) { return y(d.pres); });
 
 // Wet bulb temperature
 var wetline = d3.line()
     .curve(d3.curveLinear) 
-	.x(function(d,i) { return x(d.wetblbc) + (y(basep)-y(d.pres))/tan; })
-    .y(function(d,i) { return y(d.pres); });
+	.x(function(d) { return x(d.wetblbc) + (y(basep)-y(d.pres))/tan; })
+    .y(function(d) { return y(d.pres); });
     
 // Hodoline
 var hodoline = d3.lineRadial()
@@ -205,5 +205,4 @@ furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
-
 */
