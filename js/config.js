@@ -38,6 +38,8 @@ const firstStep = 0,       // timestep of first image
       lastStep = 72,	   // forecast hour of last sounding
       nrOfSoundings = 24;  // nr of model soundings per location
 
+var index = 0; // timestep of plotted sounding
+
 /////////////////////////////////
 //      1.2 Map
 
