@@ -90,6 +90,7 @@ $(document).ready(function() {
         $("body .hour ").removeClass("selected");
         $("#"+id).addClass("selected");
         updateData(id);
+        index = id;
     }
     function wheel(event) {
         var delta = 0;
@@ -430,60 +431,58 @@ $('.settings-switch').on('click', function(){
 // Generate and plot date-grid
 function dateGrid(modelrun) {
      
-     const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Okt','Nov','Dec'];
-     const weekDays = ['sun','mon','tue','wed','thu','fri','sat'];
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Okt','Nov','Dec'];
+    const weekDays = ['sun','mon','tue','wed','thu','fri','sat'];
  
-     yyyy = modelrun.substring(0,4);
-     mm = parseInt(modelrun.substring(5,7)) - 1;
-     dd = parseInt(modelrun.substring(8,10));
-     hh = parseInt(modelrun.substring(11,13));
-     var date = Date.UTC(yyyy,mm,dd,hh);
+    yyyy = modelrun.substring(0,4);
+    mm = parseInt(modelrun.substring(5,7)) - 1;
+    dd = parseInt(modelrun.substring(8,10));
+    hh = parseInt(modelrun.substring(11,13));
+    var date = Date.UTC(yyyy,mm,dd,hh);
      
-     $('#navigation').empty();
-     var nav = '<table class="date_container">'; var row1 = '<tr>'; var row2 = '<tr>'; var j = 0; var colspan = 1;
-     for (var i=firstStep; i<lastStep; i+=timeStep) {
+    $('#navigation').empty();
+    var nav = '<table class="date_container">'; var row1 = '<tr>'; var row2 = '<tr>'; var j = 0; var colspan = 1;
+    for (let i=firstStep; i<lastStep; i+=timeStep) {
 
-         var newDay = new Date(date);
+        var newDay = new Date(date);
 
-         var month = newDay.getUTCMonth() + 1;
-         if (month < 10) {
-             month = '0' + month;
-         }
-         var day = newDay.getUTCDate();
-         if (day < 10) {
-            day = '0' + day;
-         }
-         var weekDay = weekDays[newDay.getUTCDay()];
-         var hour = newDay.getUTCHours();
-         if (hour < 10) {
-             hour = '0' + hour;
-         }
+        var month = newDay.getUTCMonth() + 1;
+        if (month < 10) {
+            month = '0' + month;
+        }
+        var day = newDay.getUTCDate();
+        if (day < 10) {
+           day = '0' + day;
+        }
+        var weekDay = weekDays[newDay.getUTCDay()];
+        var hour = newDay.getUTCHours();
+        if (hour < 10) {
+            hour = '0' + hour;
+        }
  
-         if (i == firstStep) {
-             row2 += '<td class="hour selected" id="'+j+'" style="border-right:1px solid black;">'+hour+'Z</td>';
-         }
-         else if (i == lastStep - timeStep) {
-             row1 += '<td class="date" colspan='+colspan+'>'+weekDay+' '+month+'-'+day+'</td>';
-             row2 += '<td class="hour" id="'+j+'">'+hour+'Z</td>';
-             colspan = 0;
-         }
-         else if (hour == '21') {
-             row1 += '<td class="date" colspan='+colspan+' style="border-right:2px solid black;">'+weekDay+' '+month+'-'+day+'</td>';
-             row2 += '<td class="hour" id="'+j+'" style="border-right:2px solid black;">'+hour+'Z</td>';
-             colspan = 0;
-         } else {
-             row2 += '<td class="hour" id="'+j+'" style="border-right:1px solid black;">'+hour+'Z</td>';
-         }
+        if (i == lastStep - timeStep) {
+            row1 += '<td class="date" colspan='+colspan+'>'+weekDay+' '+month+'-'+day+'</td>';
+            row2 += '<td class="hour" id="'+j+'">'+hour+'Z</td>';
+            colspan = 0;
+        }
+        else if (hour == 24 - timeStep) {
+            row1 += '<td class="date" colspan='+colspan+' style="border-right:2px solid black;">'+weekDay+' '+month+'-'+day+'</td>';
+            row2 += '<td class="hour" id="'+j+'" style="border-right:2px solid black;">'+hour+'Z</td>';
+            colspan = 0;
+        } else {
+            row2 += '<td class="hour" id="'+j+'" style="border-right:1px solid black;">'+hour+'Z</td>';
+        }
  
-         date += timeStep*60*60*1000; // adds timestep hours in milliseconds
-         j += 1;
-         colspan += 1;
+        date += timeStep*60*60*1000; // adds timestep hours in milliseconds
+        j += 1;
+        colspan += 1;
  
-     }
-     nav += row1 + '</tr>' + row2 + '</tr></table>';
-     $('#navigation').append(nav);
+    }
+    nav += row1 + '</tr>' + row2 + '</tr></table>';
+    $('#navigation').append(nav);
+    $('#' + index).addClass('selected');
      
-     $(".hour").on('mouseover', function() {
+    $(".hour").on('mouseover', function() {
         if (!spaceBar) { // if spaceBar = false, i.e. if not locked
             var i = $(this).attr('id');
             
@@ -491,6 +490,7 @@ function dateGrid(modelrun) {
             $("body .hour ").removeClass("selected");
             $(this).addClass("selected");
             updateData(i);
+            index = i;
         }
     });
  
@@ -880,7 +880,6 @@ function loadSounding(fileName,name,icao) {
 
     // Reset settings
     $("li.rollover").removeClass("selected");
-    $("#0").addClass("selected"); // timestep +00
     $(".on-off").each(function(){ // switch off all parcel profiles
         $(this).find(".back").css("background-color","#ff4d4d");
         $(this).find(".front").css("left",0); 
@@ -975,7 +974,7 @@ function loadSounding(fileName,name,icao) {
             hodoData.push([step]);
         }
         drawFirstHour();
-        mouseoverdata = sounding[0][0].slice(0).reverse();
+        mouseoverdata = sounding[index][0].slice(0).reverse();
     
         // Indicies and convective data
         conv_data = []; sb_parcel = []; mu_parcel = []; ml_parcel = [];
@@ -1205,31 +1204,30 @@ function makeBarbTemplates() {
 }
 
 function drawFirstHour() {
-    
     // Draw initial set of lines
     wetlines = skewtgroup.selectAll("wetlines")
-        .data(sounding[0]).enter().append("path")
+        .data(sounding[index]).enter().append("path")
         .attr("class", "wet_line")
         .attr("clip-path", "url(#clipper)")
         .attr("d", wetline);
 
     tlines = skewtgroup.selectAll("tlines")
-        .data(sounding[0]).enter().append("path")
+        .data(sounding[index]).enter().append("path")
         .attr("class", "temp_line")
         .attr("clip-path", "url(#clipper)")
         .attr("d", tline);
             
 	tdlines = skewtgroup.selectAll("tdlines")
-        .data(sounding[0]).enter().append("path")
+        .data(sounding[index]).enter().append("path")
         .attr("class", "dwp_line")
         .attr("clip-path", "url(#clipper)")
         .attr("d", tdline);
 
     // Air parcel
-    sfc_press = sounding[0][0][0].pres;
-    twom_dwpc = sounding[0][0][0].dwpc;
-    twom_tmpc = sounding[0][0][0].tmpc;
-    index = 0;
+    sfc_press = sounding[index][0][0].pres;
+    twom_dwpc = sounding[index][0][0].dwpc;
+    twom_tmpc = sounding[index][0][0].tmpc;
+    
     parcel_tmpc = svg.append("circle")
         .data(["tmp"])
         .attr("class", "air-parcel parcel-tmpc")    
@@ -1255,25 +1253,25 @@ function drawFirstHour() {
 
     //Hodolines
     holines01 = hodogroup.selectAll("hodolines01")  //0-1 km
-        .data(hodoData[0][0][0]).enter().append("path")
+        .data(hodoData[index][0][0]).enter().append("path")
         .attr("class", "hodoline hodo01")
         .attr("d", hodoline);
     holines13 = hodogroup.selectAll("hodolines13")  //1-3 km
-        .data(hodoData[0][0][1]).enter().append("path")
+        .data(hodoData[index][0][1]).enter().append("path")
         .attr("class", "hodoline hodo13")
         .attr("d", hodoline);
     holines36 = hodogroup.selectAll("hodolines36")  //3-6 km
-        .data(hodoData[0][0][2]).enter().append("path")
+        .data(hodoData[index][0][2]).enter().append("path")
         .attr("class", "hodoline hodo36")
         .attr("d", hodoline);
     holines69 = hodogroup.selectAll("hodolines69")  //6-9 km
-        .data(hodoData[0][0][3]).enter().append("path")
+        .data(hodoData[index][0][3]).enter().append("path")
         .attr("class", "hodoline hodo69")
         .attr("d", hodoline);
 
     // Wind barbs
     allbarbs = barbgroup.selectAll("barbs")
-        .data(sounding[0][0]).enter().append("use")
+        .data(sounding[index][0]).enter().append("use")
     	.attr("xlink:href", function (d) { 
             var wspdround = Math.ceil((d.wspd*ms2kt)/5)*5;
             if (d.pres >= topp) {
@@ -1295,40 +1293,40 @@ function drawFirstHour() {
 
 function drawFirstHourText() {    
 
-    $("#bs01").html(conv_data[0].bulk_shear01);
-    $("#bs03").html(conv_data[0].bulk_shear03);
-    $("#bs06").html(conv_data[0].bulk_shear06);
+    $("#bs01").html(conv_data[index].bulk_shear01);
+    $("#bs03").html(conv_data[index].bulk_shear03);
+    $("#bs06").html(conv_data[index].bulk_shear06);
 
-    $("#conv_tmpc").html(conv_data[0].conv_tmpc + '&deg;C');
+    $("#conv_tmpc").html(conv_data[index].conv_tmpc + '&deg;C');
 
-    $("#pw").html(conv_data[0].prec_water + ' mm');
+    $("#pw").html(conv_data[index].prec_water + ' mm');
 
     if (conv_data[0].fzlvl == 'Sfc') {
-        $("#fzlvl").html(conv_data[0].fzlvl);
+        $("#fzlvl").html(conv_data[index].fzlvl);
     } else {
-        $("#fzlvl").html(conv_data[0].fzlvl + ' '+ unit_height + ' agl');
+        $("#fzlvl").html(conv_data[index].fzlvl + ' '+ unit_height + ' agl');
     }
     
-    $("#lcl").html(sb_parcel[0].lcl_hght);
-    $("#lfc").html(sb_parcel[0].lfc1_hght);
-    $("#el").html(sb_parcel[0].el_hght);
-    $("#el_tmpc").html(sb_parcel[0].el_tmpc);
-    $("#cape").html(sb_parcel[0].cape_val);
-    $("#cin").html(sb_parcel[0].cin_val);
+    $("#lcl").html(sb_parcel[index].lcl_hght);
+    $("#lfc").html(sb_parcel[index].lfc1_hght);
+    $("#el").html(sb_parcel[index].el_hght);
+    $("#el_tmpc").html(sb_parcel[index].el_tmpc);
+    $("#cape").html(sb_parcel[index].cape_val);
+    $("#cin").html(sb_parcel[index].cin_val);
     
-    $("#mulcl").html(mu_parcel[0].lcl_hght);
-    $("#mulfc").html(mu_parcel[0].lfc1_hght);
-    $("#muel").html(mu_parcel[0].el_hght);
-    $("#muel_tmpc").html(mu_parcel[0].el_tmpc);
-    $("#mucape").html(mu_parcel[0].cape_val);
-    $("#mucin").html(mu_parcel[0].cin_val);
+    $("#mulcl").html(mu_parcel[index].lcl_hght);
+    $("#mulfc").html(mu_parcel[index].lfc1_hght);
+    $("#muel").html(mu_parcel[index].el_hght);
+    $("#muel_tmpc").html(mu_parcel[index].el_tmpc);
+    $("#mucape").html(mu_parcel[index].cape_val);
+    $("#mucin").html(mu_parcel[index].cin_val);
     
-    $("#mllcl").html(ml_parcel[0].lcl_hght);
-    $("#mllfc").html(ml_parcel[0].lfc1_hght);
-    $("#mlel").html(ml_parcel[0].el_hght);
-    $("#mlel_tmpc").html(ml_parcel[0].el_tmpc);
-    $("#mlcape").html(ml_parcel[0].cape_val);
-    $("#mlcin").html(ml_parcel[0].cin_val);
+    $("#mllcl").html(ml_parcel[index].lcl_hght);
+    $("#mllfc").html(ml_parcel[index].lfc1_hght);
+    $("#mlel").html(ml_parcel[index].el_hght);
+    $("#mlel_tmpc").html(ml_parcel[index].el_tmpc);
+    $("#mlcape").html(ml_parcel[index].cape_val);
+    $("#mlcin").html(ml_parcel[index].cin_val);
     
     $("#model_run").html(dateTime[0]);
     dateGrid(dateTime[0]);
@@ -1438,7 +1436,7 @@ function updateData(i) {
     sfc_press = sounding[i][0][0].pres;
     twom_dwpc = sounding[i][0][0].dwpc;
     twom_tmpc = sounding[i][0][0].tmpc;
-    index = i;
+    
     // Update circle (parcel)
     parcel_tmpc.attr("cx",  x(twom_tmpc) + (y(basep)-y(sfc_press))/tan).attr("cy", y(sfc_press));
     parcel_dwpc.attr("cx",  x(twom_dwpc) + (y(basep)-y(sfc_press))/tan).attr("cy", y(sfc_press));
