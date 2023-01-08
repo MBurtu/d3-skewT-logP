@@ -43,7 +43,7 @@ var index = 0; // timestep of plotted sounding
 /////////////////////////////////
 //      1.2 Map
 
-const center = [64, -10],
+const center = [58, -15],
       zoom = 4,
       maxZoom = 6,
       minZoom = 4;
