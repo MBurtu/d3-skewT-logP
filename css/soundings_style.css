@@ -928,6 +928,6 @@ table.legend td {
 }
 
 .focus.tmpc circle { fill: red;   stroke: none; }
-.focus.dwpc circle { fill: green; stroke: none; }
+.focus.dwpc circle { fill: red; stroke: none; }
 .focus.wetblbc circle { fill: purple; stroke: none; }
 .focus text { font-size: 0.7em; fill: #333; cursor: default; }
