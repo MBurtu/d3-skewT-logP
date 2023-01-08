@@ -833,8 +833,9 @@ table.legend td {
 }
 .dwp_line {
   fill: none;
-  stroke: green;
+  stroke: red;
   stroke-width: 0.15em;
+  stroke-dasharray: 5,5;
 }
 .wet_line {
   fill: none;
