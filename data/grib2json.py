@@ -23,49 +23,9 @@ model_run = input[2]
 end_hr = int(input[3])
 step = int(input[4])
 
-locations = {'Arlanda': {'lat':59.75, 'lon':18.0},
-             'Jonkoping': {'lat':57.75, 'lon':14.0},
-             'Ostersund': {'lat':63.25, 'lon':14.5},
-             'Gallivare': {'lat':67.25, 'lon':20.75},
-             'Orsa': {'lat':61.0, 'lon':14.75},
-             'Lycksele': {'lat':64.5, 'lon':18.75},
-             'Sundsvall': {'lat':62.5, 'lon':17.5},
-             'Hemavan': {'lat':65.75, 'lon':15.0},
-             'Visby': {'lat':57.75, 'lon':18.5},
-             'Kastrup': {'lat':55.75, 'lon':12.0},
-             'Karup': {'lat':56.25, 'lon':9.0},
-             'Gardemoen': {'lat':60.25, 'lon':11.0},
-             'Bergen': {'lat':60.25, 'lon':5.25 },
-             'Trondheim':{'lat':63.50, 'lon':11.0},
-             'Tromso': {'lat':69.75, 'lon':19.0},
-             'Helsinki': {'lat':60.25, 'lon':25.0},
-             'Oulu': {'lat':65.0, 'lon':25.25},
-             'Jyvaskyla': {'lat':62.25, 'lon':25.75},
-             'Ivalo': {'lat': 68.5, 'lon':27.5},
-             'Tallinn': {'lat':59.25, 'lon':25.0},
-             'Riga': {'lat':57.0, 'lon':24.0},
-             'Vilnius': {'lat':54.75, 'lon':25.25},
-             'Hamburg': {'lat':53.75, 'lon':10.0},
-             'Berlin': {'lat':52.25, 'lon':13.5},
-             'Gdansk': {'lat':54.5, 'lon':18.25},
-             'Warszawa': {'lat':52.25, 'lon':21.0},
-             'Heathrow': {'lat':51.5, 'lon':-0.5},
-             'CharlesDeGaulle': {'lat':49.0, 'lon':2.5},
-             'Schiphol': {'lat':52.25, 'lon':4.75},
-             'Prague': {'lat':50.0, 'lon':14.25},
-             'Glasgow': {'lat':55.75, 'lon':-4.5},
-             'Kyiv': {'lat':50.5, 'lon':30.5},
-             'Vienna': {'lat':48.0, 'lon':16.5},
-             'Zurich': {'lat':47.5, 'lon':8.5},
-             'Bucharest': {'lat':44.5, 'lon':26.0},
-             'Sarajevo': {'lat':43.75, 'lon':18.25},
-             'Rome': {'lat':41.75, 'lon':12.25},
-             'Bordeaux': {'lat':44.75, 'lon':-0.75},
-             'Madrid': {'lat':40.5, 'lon':-3.5},
-             'BothnianSea': {'lat':61.75, 'lon':19.5},
-             'NorthSea': {'lat':56.25, 'lon':4.25},
-             'NorwegianSea': {'lat':65.75, 'lon':6.25}
-            }
+file = open('locations.json')
+locations = json.load(file)
+file.close()
 
 sounding = {}
 date = datetime(yyyy,mm,dd,int(model_run))
@@ -95,14 +55,15 @@ for timestep in forecast:
 
     levels = [100,150,200,250,300,350,400,450,500,550,600,650,700,750,800,850,900,925,950,975,1000] #hPa
 
-    for name, loc in locations.items():
+    for loc in locations["locations"]:
 
+        name = loc["filename"]
         print(name)
 
         location = {}
 
-        latitude = loc["lat"]
-        longitude = loc["lon"]
+        latitude = float(loc["lat"])
+        longitude = float(loc["lon"])
       
         location[f'{date}'] = []
 
@@ -202,8 +163,9 @@ for timestep in forecast:
 
 print('')
 print('Write to file...')    
-for name, loc in locations.items():
+for loc in locations["locations"]:
     
+    name = loc["filename"]
     date = datetime(yyyy,mm,dd,int(model_run))
     new_sounding = {}
 

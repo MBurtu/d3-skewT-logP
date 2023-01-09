@@ -172,33 +172,36 @@ $(document).ready(function() {
     const overlay = d3.select(map.getPanes().overlayPane).attr("class", "markers");
     const svg = overlay.select("svg").attr("pointer-events", "auto");
 
-    const markers = svg.selectAll("markers")
-        .data(soundingLocations) 
-        .enter().append("circle")
-        .attr("cx", function(d){ return map.latLngToLayerPoint([d.lat, d.lon]).x })
-        .attr("cy", function(d){ return map.latLngToLayerPoint([d.lat, d.lon]).y })
-        .attr("class", "marker")
-        .attr("r", "0.3em")
-        .on("click", function(d) {
-            $('.marker').each(function() {
-                $(this).css("stroke", "rgb(255, 187, 60)");
+    d3.json("data/locations.json?" + Math.floor(Math.random() * 1000)).then(function(json){
+    
+        const markers = svg.selectAll("markers")
+            .data(json.locations) 
+            .enter().append("circle")
+            .attr("cx", function(d){ return map.latLngToLayerPoint([d.lat, d.lon]).x })
+            .attr("cy", function(d){ return map.latLngToLayerPoint([d.lat, d.lon]).y })
+            .attr("class", "marker")
+            .attr("r", "0.3em")
+            .on("click", function(d) {
+                $('.marker').each(function() {
+                    $(this).css("stroke", "rgb(255, 187, 60)");
+                });
+                $(this).css("stroke", "red");
+                var name = d.name;
+                var fileName = d.filename;
+                var icao = d.icao;
+                loadSounding(fileName,name,icao);
             });
-            $(this).css("stroke", "red");
-            var name = d.name;
-            var fileName = d.filename;
-            var icao = d.icao;
-            loadSounding(fileName,name,icao);
-        });
-  
-    // Function that update circle position if something change
-    const update = () => markers
-        .attr("cx", function(d){ return map.latLngToLayerPoint([d.lat, d.lon]).x })
-        .attr("cy", function(d){ return map.latLngToLayerPoint([d.lat, d.lon]).y })
+    
+        // Function that update circle position if something change
+        const update = () => markers
+            .attr("cx", function(d){ return map.latLngToLayerPoint([d.lat, d.lon]).x })
+            .attr("cy", function(d){ return map.latLngToLayerPoint([d.lat, d.lon]).y })
 
-    // If the user change the map (zoom or drag), update circle position:
-    map.on("moveend", update)
-    map.on("zoomend", update)
-
+        // If the user change the map (zoom or drag), update circle position:
+        map.on("moveend", update)
+        map.on("zoomend", update)
+        
+    });
     // 
 
     // Side divs to same height as middle div

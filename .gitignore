@@ -1,5 +1,5 @@
 # For git to ignore
 
-*.json
+sounding_*
 
 /.vscode
