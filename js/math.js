@@ -32,6 +32,7 @@ const Lv = 2.5 * Math.pow(10,6),
       densW = 997;  // Density of water
 
 const deg2rad = (Math.PI/180), // Converts degrees to radians
+      rad2deg = (180/Math.PI), // Converts radians to degrees
       tan = Math.tan(55*deg2rad);
 
 /////////////////////////////////
@@ -216,28 +217,95 @@ function find_freezing_lvl(index,pp,p_sfc,t_twom,td_twom) {
 //////////////////////////////////////
 //      2.3 Shear
 
-// Calculates bulk shear between sfc and given lvl [km]
+// Calculates mean wind from two arrays (of equal length), one with wind speeds
+// and one with the corresponding wind directions [deg]
+// http://www.webmet.com/met_monitoring/622.html
+function calc_mean_wind(wdirs,wspds) {
+
+    let w_ew = 0; // east-west component
+    let w_ns = 0; // north-south component
+    for (let i=0; i<wdirs.length; i++) {
+        w_ew += wspds[i] * Math.sin(wdirs[i]);
+        w_ns += wspds[i] * Math.cos(wdirs[i]);
+    }
+    w_ew = -1*(1/wdirs.length)*w_ew;
+    w_ns = -1*(1/wdirs.length)*w_ns;
+
+    let mean_wspd = Math.sqrt(Math.pow(w_ew,2) + Math.pow(w_ns,2));
+    let mean_wdir = Math.atan(w_ew/w_ns)*rad2deg;
+    mean_wdir = mean_wdir > 180 ? mean_wdir - 180 : mean_wdir + 180;
+
+    return {"wspd": mean_wspd, "wdir": mean_wdir};
+
+}
+
+// Calculates the difference between two vectors
+function calc_vector_diff(vector1, vector2) {
+
+    let u1 = vector1.wspd * Math.sin(vector1.wdir*deg2rad);
+    let v1 = vector1.wspd * Math.cos(vector1.wdir*deg2rad);
+    
+    let u2 = vector2.wspd * Math.sin(vector2.wdir*deg2rad);
+    let v2 = vector2.wspd * Math.cos(vector2.wdir*deg2rad);
+
+    let vector_diff = Math.sqrt(Math.pow((v1-v2),2) + Math.pow((u1-u2),2));
+
+    return vector_diff;
+
+}
+
+// Calculates bulk shear [m/s] between sfc and given lvl [km]
 function calc_bulk_shear(step,top_km) {
 
     const shear_lvls = [0,1,3,6];
-    var lvl_index = shear_lvls.indexOf(top_km);
+    let lvl_index = shear_lvls.indexOf(top_km);
 
-    // Sfc
-    var wdir10m = deg2rad*hodoData[step][0][0][0][0].wdir;
-    var wspd10m = hodoData[step][0][0][0][0].wspd;
-    var u10m = wspd10m * Math.sin(wdir10m);
-    var v10m = wspd10m * Math.cos(wdir10m);
+    let top = {
+                "wdir": deg2rad*hodoData[step][0][lvl_index][0][0].wdir,
+                "wspd": hodoData[step][0][lvl_index][0][0].wspd
+            };
 
-    // Top
-    var wdirTop = deg2rad*hodoData[step][0][lvl_index][0][0].wdir;
-    var wspdTop = hodoData[step][0][lvl_index][0][0].wspd;
-    var uTop = wspdTop * Math.sin(wdirTop);
-    var vTop = wspdTop * Math.cos(wdirTop);
+    let sfc = {
+                "wdir": deg2rad*hodoData[step][0][0][0][0].wdir,
+                "wspd": hodoData[step][0][0][0][0].wspd
+            };
 
-    // Bulk shear
-    var bulk_shear = Math.sqrt(Math.pow((v10m-vTop),2) + Math.pow((u10m-uTop),2));
+    let bulk_shear = calc_vector_diff(top, sfc);
 
     return Math.round(bulk_shear);
+
+}
+
+// Calculates the bulk richardson number (brn)
+function calc_brn(step,cape) {
+
+    // Collect wind from sounding
+    let wdirs06 = [], wspds06 = [], wdirs005 = [], wspds005 = [];
+    for (let i=0; i<sounding[step][0].length; i++) {
+        height_agl = sounding[step][0][i].hghtagl;
+        if (height_agl <= 6000) {
+            wdirs06.push(sounding[step][0][i].wdir);
+            wspds06.push(sounding[step][0][i].wspd);
+            if (height_agl <= 500) {
+                wdirs005.push(sounding[step][0][i].wdir);
+                wspds005.push(sounding[step][0][i].wspd);
+            }
+        } else {
+            break;
+        }
+    }
+
+    // Mean wind
+    let mean_wind06 = calc_mean_wind(wdirs06, wspds06); // Mean wind 0-6 km [m/s]
+    let mean_wind005 = calc_mean_wind(wdirs005, wspds005); // Mean wind 0-0.5 km [m/s]
+    
+    // Vector difference
+    let mean_wind_diff = calc_vector_diff(mean_wind06, mean_wind005);
+
+    // BRN
+    let brn = Math.round(cape / (0.5 * Math.pow(mean_wind_diff,2))); // Markowski and Richardson (2010), eqn 8.1
+    
+    return brn;
 
 }
 

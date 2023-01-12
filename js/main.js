@@ -1143,6 +1143,11 @@ function loadSounding(fileName,name,icao) {
                 "cin_val": ml_profile[15]
             };
 
+            // Bulk Richardson Number
+            conv_data[s].sb_brn = calc_brn(s,sb_parcel[s].cape_val);
+            conv_data[s].mu_brn = calc_brn(s,mu_parcel[s].cape_val);
+            conv_data[s].ml_brn = calc_brn(s,ml_parcel[s].cape_val);
+
         }
         drawFirstHourText();
         $('#loader').hide();
@@ -1332,6 +1337,10 @@ function drawFirstHourText() {
     $("#mlel_tmpc").html(ml_parcel[index].el_tmpc);
     $("#mlcape").html(ml_parcel[index].cape_val);
     $("#mlcin").html(ml_parcel[index].cin_val);
+
+    $("#brn").html(conv_data[index].sb_brn);
+    $("#mubrn").html(conv_data[index].mu_brn);
+    $("#mlbrn").html(conv_data[index].ml_brn);
     
     $("#model_run").html(dateTime[0]);
     dateGrid(dateTime[0]);
@@ -1485,6 +1494,10 @@ function updateData(i) {
     $("#mlel_tmpc").html(ml_parcel[i].el_tmpc);
     $("#mlcape").html(ml_parcel[i].cape_val);
     $("#mlcin").html(ml_parcel[i].cin_val);
+
+    $("#brn").html(conv_data[i].sb_brn);
+    $("#mubrn").html(conv_data[i].mu_brn);
+    $("#mlbrn").html(conv_data[i].ml_brn);
 
     // Draw new profile if switch is green
     $('.on-off').each(function(){
