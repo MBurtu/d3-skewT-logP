@@ -931,7 +931,7 @@ function loadSounding(fileName,name,icao) {
             sounding.push([soundingStep]);
 
             // Hodoline
-            requestedLevels = [0,1,3,6,9]; // levels in km agl
+            const requestedLevels = [0,1,3,6,9]; // levels in km agl
             var step = []; var interpolTemp = [];
             for (var l=0; l<requestedLevels.length; l++) {
                 
@@ -992,6 +992,18 @@ function loadSounding(fileName,name,icao) {
             var bulk_shear03 = calc_bulk_shear(s,3);
             var bulk_shear06 = calc_bulk_shear(s,6);
 
+            // Storm motion
+            var maddox = maddox_storm_motion(s);
+            var bunkers = bunkers_storm_motion(s);
+            console.log('maddox:');
+            console.log(maddox);
+            console.log('bunkers:');
+            console.log(bunkers);
+
+            // Storm Relative Helicity (srh)
+            var srh01 = calc_srh(s, 1, bunkers.right_mover);
+            var srh03 = calc_srh(s, 3, bunkers.right_mover);
+
             // Convective temperature
             var pp_range = d3.range(topp,conv_sfc_press,dp);
             var pp = pp_range.sort((a,b)=>b-a); // flip order, bottom first
@@ -1008,6 +1020,8 @@ function loadSounding(fileName,name,icao) {
                 "bulk_shear01": bulk_shear01,
                 "bulk_shear03": bulk_shear03,
                 "bulk_shear06": bulk_shear06,
+                "srh01": srh01,
+                "srh03": srh03,
                 "prec_water": prec_water,
                 "fzlvl": fzlvl
             };
@@ -1307,6 +1321,9 @@ function drawFirstHourText() {
     $("#bs03").html(conv_data[index].bulk_shear03);
     $("#bs06").html(conv_data[index].bulk_shear06);
 
+    $("#srh01").html(conv_data[index].srh01);
+    $("#srh03").html(conv_data[index].srh03);
+
     $("#conv_tmpc").html(conv_data[index].conv_tmpc + '&deg;C');
 
     $("#pw").html(conv_data[index].prec_water + ' mm');
@@ -1463,6 +1480,9 @@ function updateData(i) {
     $("#bs01").html(conv_data[i].bulk_shear01);
     $("#bs03").html(conv_data[i].bulk_shear03);
     $("#bs06").html(conv_data[i].bulk_shear06);
+
+    $("#srh01").html(conv_data[i].srh01);
+    $("#srh03").html(conv_data[i].srh03);
     
     $("#conv_tmpc").html(conv_data[i].conv_tmpc + '&deg;C');
 
@@ -2092,9 +2112,16 @@ copies or substantial portions of the Software.
 Bolton D., 1980: The Computation of Equivalent Potential Temperature, Monthly
 Weather Review vol. 108
 
+Bunkers, M. J., B. A. Klimowski, J. W. Zeitler, R. L. Thompson, and M. L. Weisman, 
+2000: Predicting supercell motion using a new hodograph technique. Wea. Forecasting,
+15, 61-79.
+
 Doswell C. A. and E. N Ramussen, 1994: The Effect of Neglecting the Virtual
 Temperature Correction on CAPE Calculations, Notes and Correspondence December
 1994
+
+Maddox, R. A., 1976: An evaluation of tornado proximity wind and
+stability data. Mon. Wea. Rev., 104, 133–142.
 
 Markowski P. and Y. Richardson, 2010: Mesoscale Meteorology in Midlatitudes,
 Wiley-Blackwell
