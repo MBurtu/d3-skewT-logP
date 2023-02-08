@@ -284,6 +284,37 @@ $('.parcel-switch').on('click', function(){
 
 });
 
+$('.storm-switch').on('click', function(){
+
+    // hide all
+    $('.storm_motion').hide();
+    $('.storm-switch').each(function() {
+        var back = $(this).find('.back');
+        var front = $(this).find('.front');
+        if (front.position().left != 0){
+            front.css("left",0);   
+            back.css("background-color","#ff4d4d");
+        }
+    });
+
+    var storm = $(this).attr('id');
+    var back = $(this).find('.back');
+    var front = $(this).find('.front');
+
+    // show or hide clicked
+    if (front.position().left != 0){
+        front.css("left",0);   
+        back.css("background-color","#ff4d4d");
+        $('.' + storm).hide();       
+    } else {
+        front.css("left",(back.outerWidth()-front.outerWidth()) + "px");  
+        back.css("background-color","#5cd65c");
+        $('.' + storm).show();       
+    }
+
+});
+
+
 /////////////////////////////////
 //      2.2 Modal
 
@@ -995,10 +1026,6 @@ function loadSounding(fileName,name,icao) {
             // Storm motion
             var maddox = maddox_storm_motion(s);
             var bunkers = bunkers_storm_motion(s);
-            console.log('maddox:');
-            console.log(maddox);
-            console.log('bunkers:');
-            console.log(bunkers);
 
             // Storm Relative Helicity (srh)
             var srh01 = calc_srh(s, 1, bunkers.right_mover);
@@ -1023,7 +1050,10 @@ function loadSounding(fileName,name,icao) {
                 "srh01": srh01,
                 "srh03": srh03,
                 "prec_water": prec_water,
-                "fzlvl": fzlvl
+                "fzlvl": fzlvl,
+                "maddox": storm_arrow(maddox),
+                "bunkers_right": storm_arrow(bunkers.right_mover),
+                "bunkers_left": storm_arrow(bunkers.left_mover) 
             };
 
             // Surface based parcel (sb)
@@ -1050,7 +1080,7 @@ function loadSounding(fileName,name,icao) {
 
             // Most unstable parcel (mu) 
             // (Defaults to surface based parcel)
-            // Dry
+            // Dryg
             var mu_lift_theta = sb_profile[0];
             var mu_pp_dry_parcel = sb_profile[1];
             var mu_lift_e = sb_profile[2];
@@ -1358,6 +1388,23 @@ function drawFirstHourText() {
     $("#brn").html(conv_data[index].sb_brn);
     $("#mubrn").html(conv_data[index].mu_brn);
     $("#mlbrn").html(conv_data[index].ml_brn);
+
+    // Storm motion
+    maddoxline = hodogroup.selectAll("maddoxline")
+        .data(conv_data[index].maddox).enter().append("path")
+        .attr("class", "storm_motion maddox")
+        .attr("d", storm_motion);
+  
+    bunkers_rightline = hodogroup.selectAll("bunkers_rightline")
+        .data(conv_data[index].bunkers_right).enter().append("path")
+        .attr("class", "storm_motion bunkers_right")
+        .attr("d", storm_motion);
+
+    bunkers_leftline = hodogroup.selectAll("bunkers_leftline")
+        .data(conv_data[index].bunkers_left).enter().append("path")
+        .attr("class", "storm_motion bunkers_left")
+        .attr("d", storm_motion);
+  
     
     $("#model_run").html(dateTime[0]);
     dateGrid(dateTime[0]);
@@ -1460,6 +1507,11 @@ function updateData(i) {
     holines13.data(hodoData[i][0][1]).attr("d", hodoline);
     holines36.data(hodoData[i][0][2]).attr("d", hodoline);
     holines69.data(hodoData[i][0][3]).attr("d", hodoline);
+
+    // Storm motion
+    maddoxline.data(conv_data[i].maddox).attr("d", storm_motion);
+    bunkers_rightline.data(conv_data[i].bunkers_right).attr("d", storm_motion);
+    bunkers_leftline.data(conv_data[i].bunkers_left).attr("d", storm_motion);
 
     mouseoverdata = sounding[i][0].slice(0).reverse();
     

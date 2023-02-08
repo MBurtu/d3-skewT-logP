@@ -621,6 +621,28 @@ table.legend td {
   border: 1px solid #333;
 }
 
+table.storm-motion {
+  width: 100%;
+  border-top: 1px solid #333;
+  margin: 0.5em auto 0 auto;
+  border-collapse: collapse;
+  font-size: 0.8em;
+  text-align: left;
+}
+table.storm-motion td {
+  padding: 0 0.5em;
+  line-height: 1.5em;
+}
+.storm-header {
+  padding: 0;
+  text-align: center;
+  background-color: rgb(236,225,203);
+  border-right: 1px solid #333;
+}
+table.storm-motion tr:nth-of-type(2n+1) {
+  background-color: rgb(227, 212, 181);
+}
+
 /**********************************
 *     5.4 Convective data */
 
@@ -886,6 +908,13 @@ table.legend td {
 .hodo13 { stroke: #EE82EE;}
 .hodo36 { stroke: #5cd65c;}
 .hodo69 { stroke: #009ACD;}
+
+.storm_motion {
+  display: none; 
+  fill: none; 
+  stroke-width: 0.2em;
+  stroke: red;
+}
 
 
 /**********************************

@@ -179,6 +179,11 @@ var wetline = d3.line()
 var hodoline = d3.lineRadial()
     .radius(function(d) { return r(d.wspd); })
     .angle(function(d) { return (d.wdir+180)*(Math.PI/180); });
+
+// Storm motion
+var storm_motion = d3.lineRadial()
+    .radius(function(d) { return r(d.wspd); })
+    .angle(function(d) { return (d.wdir+180)*(Math.PI/180); });
     
 // Bisector function for tooltips    
 var bisectTemp = d3.bisector(function(d) { return d.pres; }).left;
