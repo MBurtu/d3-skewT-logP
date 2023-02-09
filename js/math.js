@@ -404,7 +404,7 @@ function calc_srh(step,top_km,storm_motion) {
     // Storm relative helicity
     let srh = 0;
     for (let i=0; i<u.length-1; i++) {
-        srh += (u[i+1] - cx) * (v[i] - cy) - (u[i] - cx) * (v[i+1] - cy); // Markowski and Richardson (2010), eqn 8.15
+        srh -= (u[i+1] - cx) * (v[i] - cy) - (u[i] - cx) * (v[i+1] - cy); // Markowski and Richardson (2010), eqn 8.15
     } 
 
     return Math.round(srh);
