@@ -287,7 +287,7 @@ $('.parcel-switch').on('click', function(){
 $('.storm-switch').on('click', function(){
 
     // hide all
-    $('.storm_motion').hide();
+    $('.storm_vector').hide();
     $('.storm-switch').each(function() {
         var back = $(this).find('.back');
         var front = $(this).find('.front');
@@ -363,6 +363,9 @@ $('.modal-tag').on('click', function(){
             back.css("background-color","#ff4d4d"); // red
         }
 
+        // Storm relative helicity
+        $('#srh_storm_motion').val(storm_motion);
+
     }
 
     $('#' + modalID).show();
@@ -419,6 +422,9 @@ $('.save').on('click', function(){
     } else {
         wetbulb_temperature = false;
     }
+
+    // Storm relative helicity
+    storm_motion = $('#srh_storm_motion').val();
 
     // Clear plot
     skewtgroup.selectAll("*").remove();
@@ -1027,9 +1033,14 @@ function loadSounding(fileName,name,icao) {
             var maddox = maddox_storm_motion(s);
             var bunkers = bunkers_storm_motion(s);
 
+            let srh_storm_motion = '';
+            if (storm_motion == 'maddox') { srh_storm_motion = maddox; }
+            else if (storm_motion == 'bunkers-right') { srh_storm_motion = bunkers.right_mover; }
+            else if (storm_motion == 'bunkers-left') { srh_storm_motion = bunkers.left_mover; }
+
             // Storm Relative Helicity (srh)
-            var srh01 = calc_srh(s, 1, bunkers.right_mover);
-            var srh03 = calc_srh(s, 3, bunkers.right_mover);
+            var srh01 = calc_srh(s, 1, srh_storm_motion);
+            var srh03 = calc_srh(s, 3, srh_storm_motion);
 
             // Convective temperature
             var pp_range = d3.range(topp,conv_sfc_press,dp);
@@ -1392,18 +1403,18 @@ function drawFirstHourText() {
     // Storm motion
     maddoxline = hodogroup.selectAll("maddoxline")
         .data(conv_data[index].maddox).enter().append("path")
-        .attr("class", "storm_motion maddox")
-        .attr("d", storm_motion);
+        .attr("class", "storm_vector maddox")
+        .attr("d", storm_vector);
   
     bunkers_rightline = hodogroup.selectAll("bunkers_rightline")
         .data(conv_data[index].bunkers_right).enter().append("path")
-        .attr("class", "storm_motion bunkers_right")
-        .attr("d", storm_motion);
+        .attr("class", "storm_vector bunkers_right")
+        .attr("d", storm_vector);
 
     bunkers_leftline = hodogroup.selectAll("bunkers_leftline")
         .data(conv_data[index].bunkers_left).enter().append("path")
-        .attr("class", "storm_motion bunkers_left")
-        .attr("d", storm_motion);
+        .attr("class", "storm_vector bunkers_left")
+        .attr("d", storm_vector);
   
     
     $("#model_run").html(dateTime[0]);
@@ -1509,9 +1520,9 @@ function updateData(i) {
     holines69.data(hodoData[i][0][3]).attr("d", hodoline);
 
     // Storm motion
-    maddoxline.data(conv_data[i].maddox).attr("d", storm_motion);
-    bunkers_rightline.data(conv_data[i].bunkers_right).attr("d", storm_motion);
-    bunkers_leftline.data(conv_data[i].bunkers_left).attr("d", storm_motion);
+    maddoxline.data(conv_data[i].maddox).attr("d", storm_vector);
+    bunkers_rightline.data(conv_data[i].bunkers_right).attr("d", storm_vector);
+    bunkers_leftline.data(conv_data[i].bunkers_left).attr("d", storm_vector);
 
     mouseoverdata = sounding[i][0].slice(0).reverse();
     

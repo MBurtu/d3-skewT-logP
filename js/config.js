@@ -57,6 +57,9 @@ var unit_wind = 'kt'; // kt | m/s
 var virtual_temperature_correction = true;   // true | false
 var wetbulb_temperature = false;   // true | false
 
+var storm_motion = 'bunkers-right'; // storm motion used to calculate srh,
+                                    // bunkers-right | bunkers-left | maddox
+
 /////////////////////////////////
 //
 //      2. Sounding
@@ -181,7 +184,7 @@ var hodoline = d3.lineRadial()
     .angle(function(d) { return (d.wdir+180)*(Math.PI/180); });
 
 // Storm motion
-var storm_motion = d3.lineRadial()
+var storm_vector = d3.lineRadial()
     .radius(function(d) { return r(d.wspd); })
     .angle(function(d) { return (d.wdir+180)*(Math.PI/180); });
     
