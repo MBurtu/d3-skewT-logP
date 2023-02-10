@@ -635,10 +635,7 @@ table.storm-motion td {
   padding: 0 0.5em;
   line-height: 1.5em;
 }
-.storm-header {
-  padding: 0;
-  text-align: center;
-  background-color: rgb(236,225,203);
+table.storm-motion .right-border {
   border-right: 1px solid #333;
 }
 table.storm-motion tr:nth-of-type(2n+1) {
@@ -714,11 +711,11 @@ table.storm-motion tr:nth-of-type(2n+1) {
 .convective-data th {
   padding: 5px;
   font-size: 0.8em;
-  background-color: rgb(227, 212, 181);
   line-height: 80%;
+  background-color: rgb(227, 212, 181);
 }
-.convective-data th:first-of-type {
-  text-align: right;
+.convective-data tr:first-of-type th:first-of-type { 
+  background-color: #333;
 }
 .convective-data tbody {
   font-weight: 200;
@@ -733,6 +730,12 @@ table.storm-motion tr:nth-of-type(2n+1) {
   font-weight: bold;
   text-align: right;
   font-family: 'Open Sans Condensed', sans-serif, Georgia;
+}
+
+.table-header {
+  background-color: #333;
+  color: rgb(227, 212, 181);
+  text-align: center;
 }
 
 /**********************************

@@ -59,7 +59,7 @@
             <table class="storm-motion">
               <tbody>
                 <tr>
-                  <td rowspan="3" class="storm-header">Storm<br>motion</td>
+                  <td colspan="2" class="table-header">storm motion</td>
                   <td>Maddox (30R75)</td>
                   <td>
                     <div class="on-off storm-switch" id="maddox">
@@ -70,21 +70,35 @@
                 </tr>
                 <tr>
                   <td>Bunkers right mover</td>
-                  <td>
+                  <td class="right-border">
                     <div class="on-off storm-switch" id="bunkers_right">
                       <div class="back"></div>
                       <div class="front"></div>
                     </div>
                   </td>
-                </tr>
-                <tr>
                   <td>Bunkers left mover</td>
                   <td>
                     <div class="on-off storm-switch" id="bunkers_left">
                       <div class="back"></div>
                       <div class="front"></div>
                     </div>
-                </td>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Corfidi upshear</td>
+                  <td class="right-border">
+                    <div class="on-off storm-switch" id="corfidi_up">
+                      <div class="back"></div>
+                      <div class="front"></div>
+                    </div>
+                  </td>
+                  <td>Corfidi downshear</td>
+                  <td>
+                    <div class="on-off storm-switch" id="corfidi_down">
+                      <div class="back"></div>
+                      <div class="front"></div>
+                    </div>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -93,7 +107,7 @@
         <div class="indicies">
           <table class="convective-data">
             <thead>
-              <tr><th>[km]&nbsp;</th><th>&nbsp;0-1&nbsp;</th><th>&nbsp;0-3&nbsp;</th><th>&nbsp;0-6&nbsp;</th></tr>
+              <tr><th class="table-header">shear &amp; helicity</th><th>0-1 km</th><th>0-3 km</th><th>0-6 km</th></tr>
             </thead>
             <tbody>
               <tr><td>Bulk shear [<span class="unit_wind">kt</span>]</td><td id="bs01"></td><td id="bs03"></td><td id="bs06"></td></tr>
@@ -102,7 +116,8 @@
           </table>
           <table class="convective-data" style="border-top: 1px solid #333;">
             <thead>
-              <tr><th></th><th style="vertical-align: bottom;">surface<br>based</th><th>most<br>unstable</th><th>mixed<br>layer</th></tr>
+              <tr><th class="table-header">convection</th><th rowspan="2">surface<br>based</th><th rowspan="2">most<br>unstable</th><th rowspan="2">mixed<br>layer</th></tr>
+              <tr><th></th></tr>
             </thead>
             <tbody>
               <tr>

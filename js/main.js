@@ -1032,7 +1032,8 @@ function loadSounding(fileName,name,icao) {
             // Storm motion
             var maddox = maddox_storm_motion(s);
             var bunkers = bunkers_storm_motion(s);
-
+            var corfidi = corfidi_storm_motion(s);
+            
             let srh_storm_motion = '';
             if (storm_motion == 'maddox') { srh_storm_motion = maddox; }
             else if (storm_motion == 'bunkers-right') { srh_storm_motion = bunkers.right_mover; }
@@ -1064,7 +1065,9 @@ function loadSounding(fileName,name,icao) {
                 "fzlvl": fzlvl,
                 "maddox": storm_arrow(maddox),
                 "bunkers_right": storm_arrow(bunkers.right_mover),
-                "bunkers_left": storm_arrow(bunkers.left_mover) 
+                "bunkers_left": storm_arrow(bunkers.left_mover), 
+                "corfidi_upshear": storm_arrow(corfidi.upshear),
+                "corfidi_downshear": storm_arrow(corfidi.downshear) 
             };
 
             // Surface based parcel (sb)
@@ -1415,6 +1418,16 @@ function drawFirstHourText() {
         .data(conv_data[index].bunkers_left).enter().append("path")
         .attr("class", "storm_vector bunkers_left")
         .attr("d", storm_vector);
+
+    corfidi_upline = hodogroup.selectAll("corfidi_upline")
+        .data(conv_data[index].corfidi_upshear).enter().append("path")
+        .attr("class", "storm_vector corfidi_up")
+        .attr("d", storm_vector);
+
+    corfidi_downline = hodogroup.selectAll("corfidi_downline")
+        .data(conv_data[index].corfidi_downshear).enter().append("path")
+        .attr("class", "storm_vector corfidi_down")
+        .attr("d", storm_vector);
   
     
     $("#model_run").html(dateTime[0]);
@@ -1523,6 +1536,8 @@ function updateData(i) {
     maddoxline.data(conv_data[i].maddox).attr("d", storm_vector);
     bunkers_rightline.data(conv_data[i].bunkers_right).attr("d", storm_vector);
     bunkers_leftline.data(conv_data[i].bunkers_left).attr("d", storm_vector);
+    corfidi_upline.data(conv_data[i].corfidi_upshear).attr("d", storm_vector);
+    corfidi_downline.data(conv_data[i].corfidi_downshear).attr("d", storm_vector);
 
     mouseoverdata = sounding[i][0].slice(0).reverse();
     
@@ -1583,7 +1598,7 @@ function updateData(i) {
     $("#mlbrn").html(conv_data[i].ml_brn);
 
     // Draw new profile if switch is green
-    $('.on-off').each(function(){
+    $('.parcel-switch').each(function(){
         var front = $(this).find('.front');
         var parcelID = $(this).attr("id");
         if (front.position().left != 0){
@@ -2178,6 +2193,9 @@ Weather Review vol. 108
 Bunkers, M. J., B. A. Klimowski, J. W. Zeitler, R. L. Thompson, and M. L. Weisman, 
 2000: Predicting supercell motion using a new hodograph technique. Wea. Forecasting,
 15, 61-79.
+
+Corfidi S. F., 2003: Cold Pools and MCS Propagation: Forecasting the Motion 
+of Downwind-Developing MCSs, Weather Forecast. 18: 997–1017.
 
 Doswell C. A. and E. N Ramussen, 1994: The Effect of Neglecting the Virtual
 Temperature Correction on CAPE Calculations, Notes and Correspondence December

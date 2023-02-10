@@ -243,7 +243,7 @@ function calc_mean_wind(wdirs,wspds) {
     let w_ew = 0; // east-west component
     let w_ns = 0; // north-south component
     for (let i=0; i<wdirs.length; i++) {
-        let wdir = arith_geo_deg(wdirs[i]);
+        let wdir = wdirs[i];
         w_ew += wspds[i] * Math.sin(wdir*deg2rad);
         w_ns += wspds[i] * Math.cos(wdir*deg2rad);
     }
@@ -251,7 +251,7 @@ function calc_mean_wind(wdirs,wspds) {
     w_ns = -1*(1/wdirs.length)*w_ns;
 
     let mean_wspd = Math.sqrt(Math.pow(w_ew,2) + Math.pow(w_ns,2));
-    let mean_wdir = arith_geo_deg(Math.atan(w_ew/w_ns)*rad2deg);
+    let mean_wdir = Math.atan2(w_ew, w_ns) * rad2deg;
     mean_wdir = mean_wdir > 180 ? mean_wdir - 180 : mean_wdir + 180;
 
     return {"wspd": mean_wspd, "wdir": mean_wdir};
@@ -307,7 +307,7 @@ function calc_vector_diff(vector1, vector2) {
 
 }
 
-//
+// Calculates the cross product between two vectors
 function cross_product(v1, v2) {
 
     let x = v1[1]*v2[2] - v1[2]*v2[1];
@@ -411,7 +411,7 @@ function calc_srh(step,top_km,storm_motion) {
 
 }
 
-// "30R75" storm motion given in Maddox (1976)
+// "30R75" storm motion presented in Maddox (1976)
 // 75% of the mean wind speed and +30deg of the 
 // mean wind direction of 850 - 200 hPa
 function maddox_storm_motion(step) {
@@ -496,6 +496,42 @@ function bunkers_storm_motion(step) {
     let bunkers_left = comp_to_wind_vector(bunkers_left_u,bunkers_left_v);
 
     return {"right_mover": bunkers_right, "left_mover": bunkers_left};
+
+}
+
+// Calculates corfidi vectors (Corfidi 2003)
+function corfidi_storm_motion(step) {
+
+    // Collect wind from sounding
+    let wspds = [], wdirs = [], llj = {"wdir": 0, "wspd": 0};
+    for (let i=0; i<sounding[step][0].length; i++) {
+        let pres = sounding[step][0][i].pres;
+        let wspd = sounding[step][0][i].wspd;
+        if (pres <= 850 && pres >= 300) {           // Cloud layer (cl) (850-300 hPa)
+            wspds.push(sounding[step][0][i].wspd);
+            wdirs.push(sounding[step][0][i].wdir);
+        }
+        if (pres >= 850 && wspd > llj.wspd) {      // Low level jet (llj), strongest wind sfc -> 850 hPa
+            llj.wspd = wspd;
+            llj.wdir = sounding[step][0][i].wdir;
+        }
+    }
+    
+    let cl = calc_mean_wind(wdirs, wspds);
+    let cl_comp = vector_components(cl);
+    let llj_comp = vector_components(llj);
+    
+    // Corfidi upshear vector
+    let corfidi_upshear_u = cl_comp.u - llj_comp.u;
+    let corfidi_upshear_v = cl_comp.v - llj_comp.v;
+    let corfidi_upshear = comp_to_wind_vector(corfidi_upshear_u, corfidi_upshear_v);
+
+    // Corfidi downshear vector
+    let corfidi_downshear_u = cl_comp.u + corfidi_upshear_u;
+    let corfidi_downshear_v = cl_comp.v + corfidi_upshear_v;
+    let corfidi_downshear = comp_to_wind_vector(corfidi_downshear_u, corfidi_downshear_v);
+
+    return {"upshear": corfidi_upshear, "downshear": corfidi_downshear}; // 180 gr fel?
 
 }
 
