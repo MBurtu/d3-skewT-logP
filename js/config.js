@@ -33,8 +33,7 @@
 /////////////////////////////////
 //      1.1 Dataset
 
-const firstStep = 0,       // timestep of first image
-      timeStep = 3, 	   // timestep in hours
+const timeStep = 3, 	   // timestep in hours
       lastStep = 72,	   // forecast hour of last sounding
       nrOfSoundings = 24;  // nr of model soundings per location
 
