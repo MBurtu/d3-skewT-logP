@@ -259,11 +259,11 @@ $('.parcel-switch').on('click', function(){
         back.css("background-color","#5cd65c");
         parcelgroup.selectAll("*").remove();
         if (parcel == 'surface_parcel') {
-            drawProfile(sb_parcel[index]);
+            drawProfile(index,sb_parcel[index]);
         } else if (parcel == 'unstable_parcel') {
-            drawProfile(mu_parcel[index]);
+            drawProfile(index,mu_parcel[index]);
         } else if (parcel == 'mixed_parcel') {
-            drawProfile(ml_parcel[index]); 
+            drawProfile(index,ml_parcel[index]); 
         } else if (parcel == 'air-parcel') { 
             $('.air-parcel').show();       
         }
@@ -482,8 +482,8 @@ function dateGrid(modelrun) {
      
     $('#navigation').empty();
     var nav = '<table class="date_container">'; var row1 = '<tr>'; var row2 = '<tr>'; var j = 0; var colspan = 1;
-    for (let i=firstStep; i<lastStep; i+=timeStep) {
-
+    for (let i=0; i<lastStep; i+=timeStep) {
+  
         var newDay = new Date(date);
 
         var month = newDay.getUTCMonth() + 1;
@@ -920,7 +920,7 @@ function loadSounding(fileName,name,icao) {
 
     // Reset settings
     $("li.rollover").removeClass("selected");
-    $(".on-off").each(function(){ // switch off all parcel profiles
+    $(".on-off").each(function(){ // switch off all parcel profiles and storm motion vectors
         $(this).find(".back").css("background-color","#ff4d4d");
         $(this).find(".front").css("left",0); 
     });
@@ -1603,14 +1603,15 @@ function updateData(i) {
         var parcelID = $(this).attr("id");
         if (front.position().left != 0){
             if (parcelID == 'surface_parcel') {
-                drawProfile(sb_parcel[i]);
+                drawProfile(i,sb_parcel[i]);
             } else if (parcelID == 'unstable_parcel') {
-                drawProfile(mu_parcel[i]);
+                drawProfile(i,mu_parcel[i]);
             } else if (parcelID == 'mixed_parcel') {
-                drawProfile(ml_parcel[i]);
+                drawProfile(i,ml_parcel[i]);
             } 
         }
     });
+    console.log(index);
 
 }
 
@@ -1672,7 +1673,7 @@ function liftParcel(d) {
         "cin_val": profile[15]
     }
 
-    drawProfile(parcel);
+    drawProfile(index,parcel);
 
 }
 
@@ -1779,7 +1780,7 @@ function makeProfile (step,lift_tmpc,lift_dwpc,lift_press,sfc_press) {
 
 }
 
-function drawProfile(profile) {
+function drawProfile(step,profile) {
     var theta = profile.lift_theta;
     var pp_dry_parcel = profile.pp_dry_parcel;
     var lift_e = profile.lift_e;
@@ -1809,7 +1810,7 @@ function drawProfile(profile) {
         .y(function(d,i) { return y(d.pres); });
 
         parcelgroup.selectAll(".virtual-temperature-line")
-            .data(sounding[index]).enter().append("path")
+            .data(sounding[step]).enter().append("path")
             .attr("class", "virtual-temperature-line")
             .attr("clip-path", "url(#clipper)")
             .attr("d", virtualTemperature);
