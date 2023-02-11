@@ -538,13 +538,13 @@ function corfidi_storm_motion(step) {
 // Adds an arrow to storm motion vector
 function storm_arrow (storm_motion) {
 
-    let storm = [[{"wdir": 0, "wspd": 0}, {"wdir": storm_motion.wdir, "wspd": storm_motion.wspd*ms2kt}]];
+    let stormVector = [[{"wdir": 0, "wspd": 0}, {"wdir": storm_motion.wdir, "wspd": storm_motion.wspd*ms2kt}]];
 
-    storm[0].push({"wdir": storm_motion.wdir + 5, "wspd": storm_motion.wspd*ms2kt - 5});
-    storm[0].push({"wdir": storm_motion.wdir - 5, "wspd": storm_motion.wspd*ms2kt - 5});
-    storm[0].push({"wdir": storm_motion.wdir, "wspd": storm_motion.wspd*ms2kt});
+    stormVector[0].push({"wdir": storm_motion.wdir + 50/storm_motion.wspd*ms2kt, "wspd": storm_motion.wspd*ms2kt - 5});
+    stormVector[0].push({"wdir": storm_motion.wdir - 50/storm_motion.wspd*ms2kt, "wspd": storm_motion.wspd*ms2kt - 5});
+    stormVector[0].push({"wdir": storm_motion.wdir, "wspd": storm_motion.wspd*ms2kt});
 
-    return storm;
+    return stormVector;
 
 }
 
