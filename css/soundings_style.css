@@ -366,7 +366,6 @@ ul.tabs li a.selected {
   cursor: pointer;
 }
 .save {
-  float: right;
   padding: 5px 10px 5px 10px;
   margin-top: 1em;
   cursor: pointer;
@@ -444,6 +443,9 @@ ul.tabs li a.selected {
 .grid-container-set > .save-settings {
   grid-area: save-settings;
   background-color: rgb(227, 212, 181);
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
 }
 
 .modal-txt {
@@ -621,6 +623,25 @@ table.legend td {
   border: 1px solid #333;
 }
 
+table.storm-motion {
+  width: 100%;
+  border-top: 1px solid #333;
+  margin: 0.5em auto 0 auto;
+  border-collapse: collapse;
+  font-size: 0.8em;
+  text-align: left;
+}
+table.storm-motion td {
+  padding: 0 0.5em;
+  line-height: 1.5em;
+}
+table.storm-motion .right-border {
+  border-right: 1px solid #333;
+}
+table.storm-motion tr:nth-of-type(2n+1) {
+  background-color: rgb(227, 212, 181);
+}
+
 /**********************************
 *     5.4 Convective data */
 
@@ -690,11 +711,11 @@ table.legend td {
 .convective-data th {
   padding: 5px;
   font-size: 0.8em;
-  background-color: rgb(227, 212, 181);
   line-height: 80%;
+  background-color: rgb(227, 212, 181);
 }
-.convective-data th:first-of-type {
-  text-align: right;
+.convective-data tr:first-of-type th:first-of-type { 
+  background-color: #333;
 }
 .convective-data tbody {
   font-weight: 200;
@@ -709,6 +730,12 @@ table.legend td {
   font-weight: bold;
   text-align: right;
   font-family: 'Open Sans Condensed', sans-serif, Georgia;
+}
+
+.table-header {
+  background-color: #333;
+  color: rgb(227, 212, 181);
+  text-align: center;
 }
 
 /**********************************
@@ -886,6 +913,13 @@ table.legend td {
 .hodo13 { stroke: #EE82EE;}
 .hodo36 { stroke: #5cd65c;}
 .hodo69 { stroke: #009ACD;}
+
+.storm_vector {
+  display: none; 
+  fill: none; 
+  stroke-width: 0.2em;
+  stroke: red;
+}
 
 
 /**********************************

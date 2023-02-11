@@ -2,4 +2,6 @@
 
 sounding_*
 
+*.sh
+*.py
 /.vscode

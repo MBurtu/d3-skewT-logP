@@ -56,20 +56,68 @@
                 <tr><td>&nbsp;&nbsp;0-3&nbsp;&nbsp;</td><td>&nbsp;&nbsp;3-10&nbsp;</td><td>&nbsp;10-20&nbsp;</td><td>&nbsp;20-30&nbsp;</td><td>[kft]</td></tr>
               </tbody>
             </table>
+            <table class="storm-motion">
+              <tbody>
+                <tr>
+                  <td colspan="2" class="table-header">storm motion</td>
+                  <td>Maddox (30R75)</td>
+                  <td>
+                    <div class="on-off storm-switch" id="maddox">
+                      <div class="back"></div>
+                      <div class="front"></div>
+                    </div>
+                </td>
+                </tr>
+                <tr>
+                  <td>Bunkers right mover</td>
+                  <td class="right-border">
+                    <div class="on-off storm-switch" id="bunkers_right">
+                      <div class="back"></div>
+                      <div class="front"></div>
+                    </div>
+                  </td>
+                  <td>Bunkers left mover</td>
+                  <td>
+                    <div class="on-off storm-switch" id="bunkers_left">
+                      <div class="back"></div>
+                      <div class="front"></div>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Corfidi upshear</td>
+                  <td class="right-border">
+                    <div class="on-off storm-switch" id="corfidi_up">
+                      <div class="back"></div>
+                      <div class="front"></div>
+                    </div>
+                  </td>
+                  <td>Corfidi downshear</td>
+                  <td>
+                    <div class="on-off storm-switch" id="corfidi_down">
+                      <div class="back"></div>
+                      <div class="front"></div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>    
         <div class="indicies">
           <table class="convective-data">
             <thead>
-              <tr><th>[km]</th><th>0-1</th><th>0-3</th><th>0-6</th></tr>
+              <tr><th class="table-header">shear &amp; helicity</th><th>0-1 km</th><th>0-3 km</th><th>0-6 km</th></tr>
             </thead>
             <tbody>
               <tr><td>Bulk shear [<span class="unit_wind">kt</span>]</td><td id="bs01"></td><td id="bs03"></td><td id="bs06"></td></tr>
+              <tr><td>SRH [<span>m<sup class="font-size-07">2</sup>/s<sup class="font-size-07">2</sup></span>]</td><td id="srh01"></td><td id="srh03"></td><td id="srh06"></td></tr>
             </tbody>
           </table>
           <table class="convective-data" style="border-top: 1px solid #333;">
             <thead>
-              <tr><th></th><th style="vertical-align: bottom;">surface<br>based</th><th>most<br>unstable</th><th>mixed<br>layer</th></tr>
+              <tr><th class="table-header">convection</th><th rowspan="2">surface<br>based</th><th rowspan="2">most<br>unstable</th><th rowspan="2">mixed<br>layer</th></tr>
+              <tr><th></th></tr>
             </thead>
             <tbody>
               <tr>
@@ -99,6 +147,7 @@
               <tr><td>EL [&deg;C]</td><td id="el_tmpc"></td><td id="muel_tmpc"></td><td id="mlel_tmpc"></td></tr>
               <tr><td>CAPE [J/kg]</td><td id="cape"></td><td id="mucape"></td><td id="mlcape"></td></tr>
               <tr><td>CIN [J/kg]</td><td id="cin"></td><td id="mucin"></td><td id="mlcin"></td></tr>
+              <tr><td>BRN</td><td id="brn"></td><td id="mubrn"></td><td id="mlbrn"></td></tr>
               <tr><td colspan="2">Convective temperature</td><td id="conv_tmpc" colspan="2"></td></tr>
               <tr><td colspan="2">Precipitable water</td><td id="pw" colspan="2"></td></tr>
               <tr><td colspan="2">(lowest) Freezing level</td><td id="fzlvl" colspan="2"></td></tr>
@@ -183,6 +232,15 @@
           <div style="float:left;padding-top:0.2em;">
             <div class="on-off settings-switch" id="vir_tmp_corr" style="margin-left:0.2em;"><div class="back"></div><div class="front"></div></div>
           </div>
+          <br>
+          <div class="modal-txt" style="float:left;">
+            <span class="red-bg-white-txt">Storm relative helicity</span> is calculated with
+            <select id="srh_storm_motion">
+              <option value="maddox">maddox (30R75)</option>
+              <option value="bunkers-right">bunkers right mover</option>
+              <option value="bunkers-left">bunkers left mover</option>
+            </select>
+          </div>
         </div>
         <div class="modal-grid save-settings">
           <div class="save"><i class="far fa-save"></i> Save</div>
@@ -249,6 +307,7 @@
             <span class="red-bg-white-txt">CAPE</span> - Convective Available Potential Energy
             <span class="red-bg-white-txt">CIN</span> - Convective Inhibition
             <span class="red-bg-white-txt">BRN</span> - Bulk Richardson Number
+            <span class="red-bg-white-txt">SRH</span> - Storm Relative Helicity
             <span class="red-bg-white-txt">FL</span> - Flight Level
             <span class="red-bg-white-txt">AGL</span> - Above Ground Level
           </div>
@@ -261,7 +320,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
   <script src="js/config.js?v=1"></script>
-  <script src="js/locations.js?v=1"></script>
   <script src="js/math.js?v=1"></script>
   <script src="js/main.js?v=1"></script>
 

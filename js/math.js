@@ -7,7 +7,7 @@
 //      2. Functions
 //          2.1 Convert Units
 //          2.2 Temperature & Pressure
-//          2.3 Shear
+//          2.3 Shear & Storm motion
 //          2.4 Convection
 //          2.5 Aviation
 
@@ -32,6 +32,7 @@ const Lv = 2.5 * Math.pow(10,6),
       densW = 997;  // Density of water
 
 const deg2rad = (Math.PI/180), // Converts degrees to radians
+      rad2deg = (180/Math.PI), // Converts radians to degrees
       tan = Math.tan(55*deg2rad);
 
 /////////////////////////////////
@@ -52,6 +53,15 @@ function emToPx(em) {
     var px = em*fontSize;
 
     return px;
+
+}
+
+// Converts between arithmetic and geographic degrees (works both ways)
+function arith_geo_deg(deg) {
+
+    if (deg < 0) { deg += 360; }
+
+    return (450 - deg) % 360;
 
 }
 
@@ -213,31 +223,328 @@ function find_freezing_lvl(index,pp,p_sfc,t_twom,td_twom) {
     return fzlvl;
 }
 
-//////////////////////////////////////
-//      2.3 Shear
+function interpolate_height(step, i, height) {
 
-// Calculates bulk shear between sfc and given lvl [km]
+    const interpolator = d3.interpolateObject(sounding[step][0][i-1], sounding[step][0][i]);
+    let interpolatedObj = interpolator(1 - (height - sounding[step][0][i].hghtagl)/(sounding[step][0][i-1].hghtagl - sounding[step][0][i].hghtagl));
+ 
+    return interpolatedObj;
+
+}
+
+//////////////////////////////////////
+//      2.3 Shear & Storm motion
+
+// Calculates mean wind from two arrays (of equal length), one with wind speeds
+// and one with the corresponding wind directions [deg]
+// http://www.webmet.com/met_monitoring/622.html
+function calc_mean_wind(wdirs,wspds) {
+
+    let w_ew = 0; // east-west component
+    let w_ns = 0; // north-south component
+    for (let i=0; i<wdirs.length; i++) {
+        let wdir = wdirs[i];
+        w_ew += wspds[i] * Math.sin(wdir*deg2rad);
+        w_ns += wspds[i] * Math.cos(wdir*deg2rad);
+    }
+    w_ew = -1*(1/wdirs.length)*w_ew;
+    w_ns = -1*(1/wdirs.length)*w_ns;
+
+    let mean_wspd = Math.sqrt(Math.pow(w_ew,2) + Math.pow(w_ns,2));
+    let mean_wdir = Math.atan2(w_ew, w_ns) * rad2deg;
+    mean_wdir = mean_wdir > 180 ? mean_wdir - 180 : mean_wdir + 180;
+
+    return {"wspd": mean_wspd, "wdir": mean_wdir};
+
+}
+
+// Returns the absolute value of a vector
+function vector_abs_val(u, v) {
+
+    let abs_val = Math.sqrt(Math.pow(u,2) + Math.pow(v,2));
+
+    return abs_val;
+
+}
+
+// Returns the u, v components of a vector
+function vector_components(vector) {
+
+    let wdir = arith_geo_deg(vector.wdir);
+
+    let u = -1*vector.wspd * Math.sin(wdir*deg2rad);
+    let v = -1*vector.wspd * Math.cos(wdir*deg2rad);
+
+    return {"u": u, "v": v};
+
+}
+
+// Converts vector components to a vector (wspd & wdir)
+function comp_to_wind_vector(u, v) {
+
+    let wspd = vector_abs_val(u, v);
+    let wdir = Math.atan2(-1*v,-1*u) * rad2deg;
+    if (wdir <= 0) { wdir += 360; }
+
+    return {"wspd": wspd, "wdir": wdir}; 
+
+}
+
+// Calculates the absolute difference between two vectors
+function calc_vector_diff(vector1, vector2) {
+
+    let vector1_comp = vector_components(vector1);
+    let u1 = vector1_comp.u;
+    let v1 = vector1_comp.v;
+    
+    let vector2_comp = vector_components(vector2);
+    let u2 = vector2_comp.u;
+    let v2 = vector2_comp.v;
+    
+    let vector_diff = Math.sqrt(Math.pow((v1-v2),2) + Math.pow((u1-u2),2));
+
+    return vector_diff;
+
+}
+
+// Calculates the cross product between two vectors
+function cross_product(v1, v2) {
+
+    let x = v1[1]*v2[2] - v1[2]*v2[1];
+    let y = v1[2]*v2[0] - v1[0]*v2[2];
+    let z = v1[0]*v2[1] - v1[1]*v2[0];
+    
+    return [x, y, z];
+
+}
+
+// Calculates bulk shear [m/s] between sfc and given level [km]
 function calc_bulk_shear(step,top_km) {
 
     const shear_lvls = [0,1,3,6];
-    var lvl_index = shear_lvls.indexOf(top_km);
+    let lvl_index = shear_lvls.indexOf(top_km);
 
-    // Sfc
-    var wdir10m = deg2rad*hodoData[step][0][0][0][0].wdir;
-    var wspd10m = hodoData[step][0][0][0][0].wspd;
-    var u10m = wspd10m * Math.sin(wdir10m);
-    var v10m = wspd10m * Math.cos(wdir10m);
+    let top = {
+                "wdir": deg2rad*hodoData[step][0][lvl_index][0][0].wdir,
+                "wspd": hodoData[step][0][lvl_index][0][0].wspd
+            };
 
-    // Top
-    var wdirTop = deg2rad*hodoData[step][0][lvl_index][0][0].wdir;
-    var wspdTop = hodoData[step][0][lvl_index][0][0].wspd;
-    var uTop = wspdTop * Math.sin(wdirTop);
-    var vTop = wspdTop * Math.cos(wdirTop);
+    let sfc = {
+                "wdir": deg2rad*hodoData[step][0][0][0][0].wdir,
+                "wspd": hodoData[step][0][0][0][0].wspd
+            };
 
-    // Bulk shear
-    var bulk_shear = Math.sqrt(Math.pow((v10m-vTop),2) + Math.pow((u10m-uTop),2));
+    let bulk_shear = calc_vector_diff(top, sfc);
 
     return Math.round(bulk_shear);
+
+}
+
+// Calculates the bulk richardson number (brn)
+function calc_brn(step,cape) {
+
+    // Collect wind from sounding
+    let wdirs06 = [], wspds06 = [], wdirs005 = [], wspds005 = [];
+    for (let i=0; i<sounding[step][0].length; i++) {
+        let height_agl = sounding[step][0][i].hghtagl;
+        if (height_agl <= 6000) {
+            wdirs06.push(sounding[step][0][i].wdir);
+            wspds06.push(sounding[step][0][i].wspd);
+            if (height_agl <= 500) {
+                wdirs005.push(sounding[step][0][i].wdir);
+                wspds005.push(sounding[step][0][i].wspd);
+            }
+        } else {
+            break;
+        }
+    }
+
+    // Mean wind
+    let mean_wind06 = calc_mean_wind(wdirs06, wspds06); // Mean wind 0-6 km [m/s]
+    let mean_wind005 = calc_mean_wind(wdirs005, wspds005); // Mean wind 0-0.5 km [m/s]
+    
+    // Vector difference
+    let mean_wind_diff = calc_vector_diff(mean_wind06, mean_wind005);
+
+    // BRN
+    let brn = Math.round(cape / (0.5 * Math.pow(mean_wind_diff,2))); // Markowski and Richardson (2010), eqn 8.1
+    
+    return brn;
+
+}
+
+// Calculates the storm relative helicity (srh)
+function calc_srh(step,top_km,storm_motion) {
+
+    // Collect wind from sounding
+    let u = [], v = [];
+    for (let i=0; i<sounding[step][0].length; i++) {
+        let height_agl = sounding[step][0][i].hghtagl;
+        if (height_agl < top_km*1000) {
+            let wspd = sounding[step][0][i].wspd;
+            let wdir = sounding[step][0][i].wdir;
+            let vector_comp = vector_components({"wspd": wspd, "wdir": wdir});
+            u.push(vector_comp.u);
+            v.push(vector_comp.v);
+        } else {
+            // Interpolate to and add top_km
+            let interpolated = interpolate_height(step, i, top_km*1000); 
+            let vector_comp = vector_components({"wspd": interpolated.wspd, "wdir": interpolated.wdir});
+            u.push(vector_comp.u);
+            v.push(vector_comp.v);
+            break;
+        }
+    }
+
+    // Storm motion
+    let storm_comp = vector_components(storm_motion);
+    let cx = storm_comp.u;
+    let cy = storm_comp.v;
+
+    // Storm relative helicity
+    let srh = 0;
+    for (let i=0; i<u.length-1; i++) {
+        srh -= (u[i+1] - cx) * (v[i] - cy) - (u[i] - cx) * (v[i+1] - cy); // Markowski and Richardson (2010), eqn 8.15
+    } 
+
+    return Math.round(srh);
+
+}
+
+// "30R75" storm motion presented in Maddox (1976)
+// 75% of the mean wind speed and +30deg of the 
+// mean wind direction of 850 - 200 hPa
+function maddox_storm_motion(step) {
+
+    // Collect wind from sounding
+    let wspds = [], wdirs = [];
+    for (let i=0; i<sounding[step][0].length; i++) {
+        let pres = sounding[step][0][i].pres;
+        if (pres <= 850 && pres >= 200) {
+            wspds.push(sounding[step][0][i].wspd);
+            wdirs.push(sounding[step][0][i].wdir);
+        }
+    }
+    
+    let mean_wind = calc_mean_wind(wdirs, wspds);
+
+    let maddox_wspd = mean_wind.wspd * 0.75;
+    let maddox_wdir = mean_wind.wdir + 30 > 360 ? mean_wind.wdir + 30 - 360 : mean_wind.wdir + 30;
+
+    return {"wspd": maddox_wspd, "wdir": maddox_wdir};
+
+}
+
+// Calculates Bunkers storm motion (Bunkers et al. 2000)
+function bunkers_storm_motion(step) {
+
+    const D = 7.5; // Deviation from the mean wind 
+
+    // Collect wind from sounding
+    let wspds06 = [], wdirs06 = [], wspds005 = [], wdirs005 = [], wspds556 = [], wdirs556 = [];
+    for (let i=0; i<sounding[step][0].length; i++) {
+        let height_agl = sounding[step][0][i].hghtagl;
+        if (height_agl <= 6000) {
+            wspds06.push(sounding[step][0][i].wspd);
+            wdirs06.push(sounding[step][0][i].wdir);
+            if (height_agl <= 500) {
+                wspds005.push(sounding[step][0][i].wspd);
+                wdirs005.push(sounding[step][0][i].wdir);
+            }
+            if (height_agl >= 5500 && height_agl <= 6000) {
+                wspds556.push(sounding[step][0][i].wspd);
+                wdirs556.push(sounding[step][0][i].wdir);
+            }
+        } else {
+            let interpolated = interpolate_height(step, i, 6000);
+            wspds06.push(interpolated.wspd);
+            wdirs06.push(interpolated.wdir);
+            wspds556.push(interpolated.wspd);
+            wdirs556.push(interpolated.wdir);
+            break;
+        }
+    }
+
+    // Mean wind
+    let mean_wind06 = calc_mean_wind(wdirs06,wspds06); // sfc - 6 km
+    let mean_wind06_comp = vector_components(mean_wind06);
+
+    let mean_wind005 = calc_mean_wind(wdirs005,wspds005); // sfc - 500 m
+    let mean_wind005_comp = vector_components(mean_wind005);
+    
+    let mean_wind556 = calc_mean_wind(wdirs556,wspds556); // 5.5 km - 6 km
+    let mean_wind556_comp = vector_components(mean_wind556);
+
+    // Shear
+    let shear06_comp_u = mean_wind556_comp.u - mean_wind005_comp.u;
+    let shear06_comp_v = mean_wind556_comp.v - mean_wind005_comp.v;
+    let shear06_abs = vector_abs_val(shear06_comp_u,shear06_comp_v);
+    
+    // Cross product between shear vector and k (unit vector)
+    let cross = cross_product([shear06_comp_u,shear06_comp_v,0], [0,0,-1]);
+    
+    // Right mover
+    let bunkers_right_u = mean_wind06_comp.u + (D / shear06_abs) * cross[0];
+    let bunkers_right_v = mean_wind06_comp.v + (D / shear06_abs) * cross[1];
+
+    let bunkers_right = comp_to_wind_vector(bunkers_right_u,bunkers_right_v);
+
+    // Left mover
+    let bunkers_left_u = mean_wind06_comp.u - (D / shear06_abs) * cross[0];
+    let bunkers_left_v = mean_wind06_comp.v - (D / shear06_abs) * cross[1];
+
+    let bunkers_left = comp_to_wind_vector(bunkers_left_u,bunkers_left_v);
+
+    return {"right_mover": bunkers_right, "left_mover": bunkers_left};
+
+}
+
+// Calculates corfidi vectors (Corfidi 2003)
+function corfidi_storm_motion(step) {
+
+    // Collect wind from sounding
+    let wspds = [], wdirs = [], llj = {"wdir": 0, "wspd": 0};
+    for (let i=0; i<sounding[step][0].length; i++) {
+        let pres = sounding[step][0][i].pres;
+        let wspd = sounding[step][0][i].wspd;
+        if (pres <= 850 && pres >= 300) {           // Cloud layer (cl) (850-300 hPa)
+            wspds.push(sounding[step][0][i].wspd);
+            wdirs.push(sounding[step][0][i].wdir);
+        }
+        if (pres >= 850 && wspd > llj.wspd) {      // Low level jet (llj), strongest wind sfc -> 850 hPa
+            llj.wspd = wspd;
+            llj.wdir = sounding[step][0][i].wdir;
+        }
+    }
+    
+    let cl = calc_mean_wind(wdirs, wspds);
+    let cl_comp = vector_components(cl);
+    let llj_comp = vector_components(llj);
+    
+    // Corfidi upshear vector
+    let corfidi_upshear_u = cl_comp.u - llj_comp.u;
+    let corfidi_upshear_v = cl_comp.v - llj_comp.v;
+    let corfidi_upshear = comp_to_wind_vector(corfidi_upshear_u, corfidi_upshear_v);
+
+    // Corfidi downshear vector
+    let corfidi_downshear_u = cl_comp.u + corfidi_upshear_u;
+    let corfidi_downshear_v = cl_comp.v + corfidi_upshear_v;
+    let corfidi_downshear = comp_to_wind_vector(corfidi_downshear_u, corfidi_downshear_v);
+
+    return {"upshear": corfidi_upshear, "downshear": corfidi_downshear}; // 180 gr fel?
+
+}
+
+// Adds an arrow to storm motion vector
+function storm_arrow (storm_motion) {
+
+    let stormVector = [[{"wdir": 0, "wspd": 0}, {"wdir": storm_motion.wdir, "wspd": storm_motion.wspd*ms2kt}]];
+
+    stormVector[0].push({"wdir": storm_motion.wdir + 50/storm_motion.wspd*ms2kt, "wspd": storm_motion.wspd*ms2kt - 5});
+    stormVector[0].push({"wdir": storm_motion.wdir - 50/storm_motion.wspd*ms2kt, "wspd": storm_motion.wspd*ms2kt - 5});
+    stormVector[0].push({"wdir": storm_motion.wdir, "wspd": storm_motion.wspd*ms2kt});
+
+    return stormVector;
 
 }
 

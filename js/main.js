@@ -259,11 +259,11 @@ $('.parcel-switch').on('click', function(){
         back.css("background-color","#5cd65c");
         parcelgroup.selectAll("*").remove();
         if (parcel == 'surface_parcel') {
-            drawProfile(sb_parcel[index]);
+            drawProfile(index,sb_parcel[index]);
         } else if (parcel == 'unstable_parcel') {
-            drawProfile(mu_parcel[index]);
+            drawProfile(index,mu_parcel[index]);
         } else if (parcel == 'mixed_parcel') {
-            drawProfile(ml_parcel[index]); 
+            drawProfile(index,ml_parcel[index]); 
         } else if (parcel == 'air-parcel') { 
             $('.air-parcel').show();       
         }
@@ -283,6 +283,37 @@ $('.parcel-switch').on('click', function(){
     }
 
 });
+
+$('.storm-switch').on('click', function(){
+
+    // hide all
+    $('.storm_vector').hide();
+    $('.storm-switch').each(function() {
+        var back = $(this).find('.back');
+        var front = $(this).find('.front');
+        if (front.position().left != 0){
+            front.css("left",0);   
+            back.css("background-color","#ff4d4d");
+        }
+    });
+
+    var storm = $(this).attr('id');
+    var back = $(this).find('.back');
+    var front = $(this).find('.front');
+
+    // show or hide clicked
+    if (front.position().left != 0){
+        front.css("left",0);   
+        back.css("background-color","#ff4d4d");
+        $('.' + storm).hide();       
+    } else {
+        front.css("left",(back.outerWidth()-front.outerWidth()) + "px");  
+        back.css("background-color","#5cd65c");
+        $('.' + storm).show();       
+    }
+
+});
+
 
 /////////////////////////////////
 //      2.2 Modal
@@ -331,6 +362,9 @@ $('.modal-tag').on('click', function(){
             front.css("left",0);   
             back.css("background-color","#ff4d4d"); // red
         }
+
+        // Storm relative helicity
+        $('#srh_storm_motion').val(storm_motion);
 
     }
 
@@ -389,6 +423,9 @@ $('.save').on('click', function(){
         wetbulb_temperature = false;
     }
 
+    // Storm relative helicity
+    storm_motion = $('#srh_storm_motion').val();
+
     // Clear plot
     skewtgroup.selectAll("*").remove();
     barbgroup.selectAll("*").remove();
@@ -445,8 +482,8 @@ function dateGrid(modelrun) {
      
     $('#navigation').empty();
     var nav = '<table class="date_container">'; var row1 = '<tr>'; var row2 = '<tr>'; var j = 0; var colspan = 1;
-    for (let i=firstStep; i<lastStep; i+=timeStep) {
-
+    for (let i=0; i<lastStep; i+=timeStep) {
+  
         var newDay = new Date(date);
 
         var month = newDay.getUTCMonth() + 1;
@@ -883,7 +920,7 @@ function loadSounding(fileName,name,icao) {
 
     // Reset settings
     $("li.rollover").removeClass("selected");
-    $(".on-off").each(function(){ // switch off all parcel profiles
+    $(".on-off").each(function(){ // switch off all parcel profiles and storm motion vectors
         $(this).find(".back").css("background-color","#ff4d4d");
         $(this).find(".front").css("left",0); 
     });
@@ -931,7 +968,7 @@ function loadSounding(fileName,name,icao) {
             sounding.push([soundingStep]);
 
             // Hodoline
-            requestedLevels = [0,1,3,6,9]; // levels in km agl
+            const requestedLevels = [0,1,3,6,9]; // levels in km agl
             var step = []; var interpolTemp = [];
             for (var l=0; l<requestedLevels.length; l++) {
                 
@@ -992,6 +1029,20 @@ function loadSounding(fileName,name,icao) {
             var bulk_shear03 = calc_bulk_shear(s,3);
             var bulk_shear06 = calc_bulk_shear(s,6);
 
+            // Storm motion
+            var maddox = maddox_storm_motion(s);
+            var bunkers = bunkers_storm_motion(s);
+            var corfidi = corfidi_storm_motion(s);
+            
+            let srh_storm_motion = '';
+            if (storm_motion == 'maddox') { srh_storm_motion = maddox; }
+            else if (storm_motion == 'bunkers-right') { srh_storm_motion = bunkers.right_mover; }
+            else if (storm_motion == 'bunkers-left') { srh_storm_motion = bunkers.left_mover; }
+
+            // Storm Relative Helicity (srh)
+            var srh01 = calc_srh(s, 1, srh_storm_motion);
+            var srh03 = calc_srh(s, 3, srh_storm_motion);
+
             // Convective temperature
             var pp_range = d3.range(topp,conv_sfc_press,dp);
             var pp = pp_range.sort((a,b)=>b-a); // flip order, bottom first
@@ -1008,8 +1059,15 @@ function loadSounding(fileName,name,icao) {
                 "bulk_shear01": bulk_shear01,
                 "bulk_shear03": bulk_shear03,
                 "bulk_shear06": bulk_shear06,
+                "srh01": srh01,
+                "srh03": srh03,
                 "prec_water": prec_water,
-                "fzlvl": fzlvl
+                "fzlvl": fzlvl,
+                "maddox": storm_arrow(maddox),
+                "bunkers_right": storm_arrow(bunkers.right_mover),
+                "bunkers_left": storm_arrow(bunkers.left_mover), 
+                "corfidi_upshear": storm_arrow(corfidi.upshear),
+                "corfidi_downshear": storm_arrow(corfidi.downshear) 
             };
 
             // Surface based parcel (sb)
@@ -1036,7 +1094,7 @@ function loadSounding(fileName,name,icao) {
 
             // Most unstable parcel (mu) 
             // (Defaults to surface based parcel)
-            // Dry
+            // Dryg
             var mu_lift_theta = sb_profile[0];
             var mu_pp_dry_parcel = sb_profile[1];
             var mu_lift_e = sb_profile[2];
@@ -1142,6 +1200,11 @@ function loadSounding(fileName,name,icao) {
                 "cin": ml_profile[14],
                 "cin_val": ml_profile[15]
             };
+
+            // Bulk Richardson Number
+            conv_data[s].sb_brn = calc_brn(s,sb_parcel[s].cape_val);
+            conv_data[s].mu_brn = calc_brn(s,mu_parcel[s].cape_val);
+            conv_data[s].ml_brn = calc_brn(s,ml_parcel[s].cape_val);
 
         }
         drawFirstHourText();
@@ -1302,6 +1365,9 @@ function drawFirstHourText() {
     $("#bs03").html(conv_data[index].bulk_shear03);
     $("#bs06").html(conv_data[index].bulk_shear06);
 
+    $("#srh01").html(conv_data[index].srh01);
+    $("#srh03").html(conv_data[index].srh03);
+
     $("#conv_tmpc").html(conv_data[index].conv_tmpc + '&deg;C');
 
     $("#pw").html(conv_data[index].prec_water + ' mm');
@@ -1332,6 +1398,37 @@ function drawFirstHourText() {
     $("#mlel_tmpc").html(ml_parcel[index].el_tmpc);
     $("#mlcape").html(ml_parcel[index].cape_val);
     $("#mlcin").html(ml_parcel[index].cin_val);
+
+    $("#brn").html(conv_data[index].sb_brn);
+    $("#mubrn").html(conv_data[index].mu_brn);
+    $("#mlbrn").html(conv_data[index].ml_brn);
+
+    // Storm motion
+    maddoxline = hodogroup.selectAll("maddoxline")
+        .data(conv_data[index].maddox).enter().append("path")
+        .attr("class", "storm_vector maddox")
+        .attr("d", storm_vector);
+  
+    bunkers_rightline = hodogroup.selectAll("bunkers_rightline")
+        .data(conv_data[index].bunkers_right).enter().append("path")
+        .attr("class", "storm_vector bunkers_right")
+        .attr("d", storm_vector);
+
+    bunkers_leftline = hodogroup.selectAll("bunkers_leftline")
+        .data(conv_data[index].bunkers_left).enter().append("path")
+        .attr("class", "storm_vector bunkers_left")
+        .attr("d", storm_vector);
+
+    corfidi_upline = hodogroup.selectAll("corfidi_upline")
+        .data(conv_data[index].corfidi_upshear).enter().append("path")
+        .attr("class", "storm_vector corfidi_up")
+        .attr("d", storm_vector);
+
+    corfidi_downline = hodogroup.selectAll("corfidi_downline")
+        .data(conv_data[index].corfidi_downshear).enter().append("path")
+        .attr("class", "storm_vector corfidi_down")
+        .attr("d", storm_vector);
+  
     
     $("#model_run").html(dateTime[0]);
     dateGrid(dateTime[0]);
@@ -1435,6 +1532,13 @@ function updateData(i) {
     holines36.data(hodoData[i][0][2]).attr("d", hodoline);
     holines69.data(hodoData[i][0][3]).attr("d", hodoline);
 
+    // Storm motion
+    maddoxline.data(conv_data[i].maddox).attr("d", storm_vector);
+    bunkers_rightline.data(conv_data[i].bunkers_right).attr("d", storm_vector);
+    bunkers_leftline.data(conv_data[i].bunkers_left).attr("d", storm_vector);
+    corfidi_upline.data(conv_data[i].corfidi_upshear).attr("d", storm_vector);
+    corfidi_downline.data(conv_data[i].corfidi_downshear).attr("d", storm_vector);
+
     mouseoverdata = sounding[i][0].slice(0).reverse();
     
     // Clear plot from previuosly lifted parcels
@@ -1454,6 +1558,9 @@ function updateData(i) {
     $("#bs01").html(conv_data[i].bulk_shear01);
     $("#bs03").html(conv_data[i].bulk_shear03);
     $("#bs06").html(conv_data[i].bulk_shear06);
+
+    $("#srh01").html(conv_data[i].srh01);
+    $("#srh03").html(conv_data[i].srh03);
     
     $("#conv_tmpc").html(conv_data[i].conv_tmpc + '&deg;C');
 
@@ -1486,20 +1593,25 @@ function updateData(i) {
     $("#mlcape").html(ml_parcel[i].cape_val);
     $("#mlcin").html(ml_parcel[i].cin_val);
 
+    $("#brn").html(conv_data[i].sb_brn);
+    $("#mubrn").html(conv_data[i].mu_brn);
+    $("#mlbrn").html(conv_data[i].ml_brn);
+
     // Draw new profile if switch is green
-    $('.on-off').each(function(){
+    $('.parcel-switch').each(function(){
         var front = $(this).find('.front');
         var parcelID = $(this).attr("id");
         if (front.position().left != 0){
             if (parcelID == 'surface_parcel') {
-                drawProfile(sb_parcel[i]);
+                drawProfile(i,sb_parcel[i]);
             } else if (parcelID == 'unstable_parcel') {
-                drawProfile(mu_parcel[i]);
+                drawProfile(i,mu_parcel[i]);
             } else if (parcelID == 'mixed_parcel') {
-                drawProfile(ml_parcel[i]);
+                drawProfile(i,ml_parcel[i]);
             } 
         }
     });
+    console.log(index);
 
 }
 
@@ -1561,7 +1673,7 @@ function liftParcel(d) {
         "cin_val": profile[15]
     }
 
-    drawProfile(parcel);
+    drawProfile(index,parcel);
 
 }
 
@@ -1668,7 +1780,7 @@ function makeProfile (step,lift_tmpc,lift_dwpc,lift_press,sfc_press) {
 
 }
 
-function drawProfile(profile) {
+function drawProfile(step,profile) {
     var theta = profile.lift_theta;
     var pp_dry_parcel = profile.pp_dry_parcel;
     var lift_e = profile.lift_e;
@@ -1698,7 +1810,7 @@ function drawProfile(profile) {
         .y(function(d,i) { return y(d.pres); });
 
         parcelgroup.selectAll(".virtual-temperature-line")
-            .data(sounding[index]).enter().append("path")
+            .data(sounding[step]).enter().append("path")
             .attr("class", "virtual-temperature-line")
             .attr("clip-path", "url(#clipper)")
             .attr("d", virtualTemperature);
@@ -2079,9 +2191,19 @@ copies or substantial portions of the Software.
 Bolton D., 1980: The Computation of Equivalent Potential Temperature, Monthly
 Weather Review vol. 108
 
+Bunkers, M. J., B. A. Klimowski, J. W. Zeitler, R. L. Thompson, and M. L. Weisman, 
+2000: Predicting supercell motion using a new hodograph technique. Wea. Forecasting,
+15, 61-79.
+
+Corfidi S. F., 2003: Cold Pools and MCS Propagation: Forecasting the Motion 
+of Downwind-Developing MCSs, Weather Forecast. 18: 997–1017.
+
 Doswell C. A. and E. N Ramussen, 1994: The Effect of Neglecting the Virtual
 Temperature Correction on CAPE Calculations, Notes and Correspondence December
 1994
+
+Maddox, R. A., 1976: An evaluation of tornado proximity wind and
+stability data. Mon. Wea. Rev., 104, 133–142.
 
 Markowski P. and Y. Richardson, 2010: Mesoscale Meteorology in Midlatitudes,
 Wiley-Blackwell
