@@ -118,7 +118,7 @@ $(document).ready(function() {
     //      1.2 Defaults
 
     // Show default tabs
-    $('.tabs a').click(function(){
+    $('.tabs').click(function(){
 		switchTabs($(this));
 	});
  
@@ -233,7 +233,7 @@ $('.toggle_convection').on('click', function(){
 
 function switchTabs(obj){
 	$('.tab-content').hide();
-	$('.tabs a').removeClass("selected");
+	$('.tabs').removeClass("selected");
 	var id = obj.attr("data-tab");
  
 	$('#'+id).show();
