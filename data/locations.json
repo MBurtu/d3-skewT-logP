@@ -13,7 +13,7 @@
         { "filename":"Gardemoen", "name":"Oslo/Gardermoen Airport", "icao":"ENGM", "lat":"60.25", "lon":"11.0" },
         { "filename":"Bergen", "name":"Bergen/Flesland Airport", "icao":"ENBR", "lat":"60.25", "lon":"5.25" },
         { "filename":"Trondheim", "name":"Trondheim/V&aelig;rnes Airport", "icao":"ENVA", "lat":"63.50","lon":"11.0" },
-        { "filename":"Tromso", "name":"Troms&oslash; Aiport", "icao":"EFJO", "lat":"69.75", "lon":"19.0" },
+        { "filename":"Tromso", "name":"Troms&oslash; Airport", "icao":"ENTC", "lat":"69.75", "lon":"19.0" },
         { "filename":"Helsinki", "name":"Helsinki/Vantaa Airport", "icao":"EFHK", "lat":"60.25", "lon":"25.0" },
         { "filename":"Oulu", "name":"Oulu Airport", "icao":"EFOU", "lat":"65.0", "lon":"25.25" },
         { "filename":"Jyvaskyla", "name":"Jyv&auml;skyl&auml; Airport", "icao":"EFJY", "lat":"62.25", "lon":"25.75" },
