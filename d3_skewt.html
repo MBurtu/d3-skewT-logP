@@ -252,64 +252,127 @@
   <div class="modal-bg" id="information" >
     <div class="modal">
       <div class="modal-header">
-        information 
+        <div class="tabs defaulttab" data-tab="tab1"><i class="fas fa-info-circle"></i> information</div>
+        <div class="tabs" data-tab="tab2"><i class="fas fa-book"></i> further reading</div> 
         <div class="close">X</div>
       </div>
-      <div class="grid-container-info">
-        <div class="modal-grid control">
-          <span class="blue-bg-white-txt">timestep</span><br>
-          <div class="modal-txt">
-            <span class="red-bg-white-txt">Change</span> with either mouse hover or mouse scroll.<br>
-            <span class="red-bg-white-txt">Lock &amp; unlock</span> with spacebar.
+      <div class="tab-content" id="tab1">
+        <div class="grid-container-info">
+          <div class="modal-grid control">
+            <span class="blue-bg-white-txt">timestep</span><br>
+            <div class="modal-txt">
+              <span class="red-bg-white-txt">Change</span> with either mouse hover or mouse scroll.<br>
+              <span class="red-bg-white-txt">Lock &amp; unlock</span> with spacebar.
+            </div>
+          </div>
+          <div class="modal-grid parcels">
+            <span class="blue-bg-white-txt">convection</span><br>
+            <div class="modal-txt">
+              <span class="red-bg-white-txt">Surface based parcel</span> - temperature and dewpoint of the bottom layer of the sounding.<br>
+              <span class="red-bg-white-txt">Mixed layer parcel</span> - average potential temperature and average mixing ratio of the lowest 100 hPa.<br>
+              <span class="red-bg-white-txt">Most unstable parcel</span> - parcel with highest cape when starting in the lowest 300 hPa.<br>  
+              <span class="red-bg-white-txt">Convective temperature</span> - lowest temperature required for surface based convection.<br>
+              <span class="red-bg-white-txt">Virtual temperature correction</span> - CAPE &amp; CIN computed with virtual temperature, can be switched ON/OFF under settings.
+            </div>
+          </div>
+          <div class="modal-grid dry">
+            <div class="modal-txt">
+              <div class="bottoms brown-bottom"></div> dry adiabat
+            </div>
+          </div>
+          <div class="modal-grid moist">
+            <div class="modal-txt">
+              <div class="bottoms green-bottom"></div> moist adiabat
+            </div>
+          </div>
+          <div class="modal-grid ratio">
+            <div class="modal-txt">
+              <div class="bottoms purple-bottom"></div> saturation mixing ratio
+            </div>
+          </div>
+          <div class="modal-grid standard">
+            <div class="modal-txt">
+              <div class="bottoms pink-bottom"></div> international standard atmosphere
+            </div>
+          </div>
+          <div class="modal-grid corrected">
+            <div class="modal-txt">
+              <div class="bottoms blue-bottom"></div>/<div class="bottoms red-bottom"></div> virtual temperature (parcel/sounding)
+            </div>
+          </div>
+          <div class="modal-grid abbr">
+            <span class="blue-bg-white-txt">abbreviations</span><br>
+            <div class="modal-txt">
+              <span class="red-bg-white-txt">LCL</span> - Lifting Condensation Level
+              <span class="red-bg-white-txt">LFC</span> - Level of Free Convection
+              <span class="red-bg-white-txt">EL</span> - Equilibrium Level
+              <span class="red-bg-white-txt">CAPE</span> - Convective Available Potential Energy
+              <span class="red-bg-white-txt">CIN</span> - Convective Inhibition
+              <span class="red-bg-white-txt">BRN</span> - Bulk Richardson Number
+              <span class="red-bg-white-txt">SRH</span> - Storm Relative Helicity
+              <span class="red-bg-white-txt">FL</span> - Flight Level
+              <span class="red-bg-white-txt">AGL</span> - Above Ground Level
+            </div>
           </div>
         </div>
-        <div class="modal-grid parcels">
-          <span class="blue-bg-white-txt">convection</span><br>
-          <div class="modal-txt">
-            <span class="red-bg-white-txt">Surface based parcel</span> - temperature and dewpoint of the bottom layer of the sounding.<br>
-            <span class="red-bg-white-txt">Mixed layer parcel</span> - average potential temperature and average mixing ratio of the lowest 100 hPa.<br>
-            <span class="red-bg-white-txt">Most unstable parcel</span> - parcel with highest cape when starting in the lowest 300 hPa.<br>  
-            <span class="red-bg-white-txt">Convective temperature</span> - lowest temperature required for surface based convection.<br>
-            <span class="red-bg-white-txt">Virtual temperature correction</span> - CAPE &amp; CIN computed with virtual temperature, can be switched ON/OFF under settings.
-          </div>
-        </div>
-        <div class="modal-grid dry">
-          <div class="modal-txt">
-            <div class="bottoms brown-bottom"></div> dry adiabat
-          </div>
-        </div>
-        <div class="modal-grid moist">
-          <div class="modal-txt">
-            <div class="bottoms green-bottom"></div> moist adiabat
-          </div>
-        </div>
-        <div class="modal-grid ratio">
-          <div class="modal-txt">
-            <div class="bottoms purple-bottom"></div> saturation mixing ratio
-          </div>
-        </div>
-        <div class="modal-grid standard">
-          <div class="modal-txt">
-            <div class="bottoms pink-bottom"></div> international standard atmosphere
-          </div>
-        </div>
-        <div class="modal-grid corrected">
-          <div class="modal-txt">
-            <div class="bottoms blue-bottom"></div>/<div class="bottoms red-bottom"></div> virtual temperature (parcel/sounding)
-          </div>
-        </div>
-        <div class="modal-grid abbr">
-          <span class="blue-bg-white-txt">abbreviations</span><br>
-          <div class="modal-txt">
-            <span class="red-bg-white-txt">LCL</span> - Lifting Condensation Level
-            <span class="red-bg-white-txt">LFC</span> - Level of Free Convection
-            <span class="red-bg-white-txt">EL</span> - Equilibrium Level
-            <span class="red-bg-white-txt">CAPE</span> - Convective Available Potential Energy
-            <span class="red-bg-white-txt">CIN</span> - Convective Inhibition
-            <span class="red-bg-white-txt">BRN</span> - Bulk Richardson Number
-            <span class="red-bg-white-txt">SRH</span> - Storm Relative Helicity
-            <span class="red-bg-white-txt">FL</span> - Flight Level
-            <span class="red-bg-white-txt">AGL</span> - Above Ground Level
+      </div>
+
+      <div class="tab-content" id="tab2">
+        <div class="grid-container-reading">
+          <div class="modal-grid reading modal-txt">
+            <div class="papers">
+              <div class="author">
+                <span class="blue-bg-white-txt">Bolton</span> D.,&nbsp;
+              </div>
+              <div class="paper">
+                1980: <span class="red-bg-white-txt">The Computation of Equivalent Potential Temperature</span>, Monthly
+                Weather Review vol. 108 <a href="https://journals.ametsoc.org/view/journals/mwre/108/7/1520-0493_1980_108_1046_tcoept_2_0_co_2.xml" target="blank"><i class="light-blue fas fa-link"></i></a>
+              </div>
+            </div>
+            <div class="papers">
+              <div class="author">
+                <span class="blue-bg-white-txt">Bunkers</span> M. J.,&nbsp;
+              </div>
+              <div class="paper">
+                B. A. Klimowski, J. W. Zeitler, R. L. Thompson, and M. L. Weisman, 2000: <span class="red-bg-white-txt">Predicting supercell motion using a new hodograph technique.</span> Wea. Forecasting,
+                15, 61-79. <a href="https://journals.ametsoc.org/view/journals/wefo/15/1/1520-0434_2000_015_0061_psmuan_2_0_co_2.xml" target="blank"><i class="light-blue fas fa-link"></i></a>
+              </div>
+            </div>
+            <div class="papers">
+              <div class="author">
+                <span class="blue-bg-white-txt">Corfidi</span> S. F.,&nbsp;
+              </div>
+              <div class="paper">
+                2003: <span class="red-bg-white-txt">Cold Pools and MCS Propagation: Forecasting the Motion 
+                of Downwind-Developing MCSs</span>, Wea. Forecasting 18: 997–1017. <a href="https://www.researchgate.net/publication/241369191_Cold_Pools_and_MCS_Propagation_Forecasting_the_Motion_of_Downwind-Developing_MCSs" target="blank"><i class="light-blue fas fa-link"></i></a>
+              </div>
+            </div>
+            <div class="papers">
+              <div class="author">
+                <span class="blue-bg-white-txt">Doswell</span> C. A.&nbsp;
+              </div>
+              <div class="paper">
+                and E. N Ramussen, 1994: <span class="red-bg-white-txt">The Effect of Neglecting the Virtual Temperature Correction on CAPE Calculations</span>, Notes and Correspondence December 1994&nbsp;
+                <a href="https://journals.ametsoc.org/view/journals/wefo/9/4/1520-0434_1994_009_0625_teontv_2_0_co_2.xml#:~:text=A%20simple%20theoretical%20analysis%20of,become%20substantial%20for%20small%20CAPE." target="blank"><i class="light-blue fas fa-link"></i></a>
+              </div>
+            </div>
+            <div class="papers">
+              <div class="author">
+                <span class="blue-bg-white-txt">Maddox</span> R. A.,
+              </div>
+              <div class="paper">
+                1976: <span class="red-bg-white-txt">An evaluation of tornado proximity wind and stability data</span>. Mon. Wea. Rev., 104, 133–142.&nbsp;
+                <a href="https://journals.ametsoc.org/view/journals/mwre/104/2/1520-0493_1976_104_0133_aeotpw_2_0_co_2.xml" target="blank"><i class="light-blue fas fa-link"></i></a>
+              </div>
+            </div>
+            <div class="papers">
+              <div class="author">
+                <span class="blue-bg-white-txt">Markowski</span> P.&nbsp;
+              </div>
+              <div class="paper">
+                and Y. Richardson, 2010: <span class="red-bg-white-txt">Mesoscale Meteorology in Midlatitudes</span></span>, Wiley-Blackwell
+              </div>
+            </div>
           </div>
         </div>
       </div>
