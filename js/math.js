@@ -112,9 +112,10 @@ function calc_theta(tmpc,pres) {
 }
 
 // Calculates vapor pressure from dewpoint or saturation vapor pressure from temperature (degC)
+// Bolton (1980), eqn (10)
 function calc_e_es(tmp) {
     
-    var e_es = 6.11*Math.pow(10,((7.5*tmp)/(237.3 + tmp)));
+    let e_es = 6.112 * Math.exp((17.67 * tmp) / (tmp + 243.5));
 
     return e_es;
 
@@ -126,6 +127,25 @@ function calc_mixing_ratio(e,p) {
     var r = (eps*e)/(p - e);
 
     return r; //[kg/kg]
+
+}
+
+// Calculates the frost point temperature [degC]
+// WMO - RECOMMENDED ALGORITHMS FOR THE COMPUTATION OF MARINE METEOROLOGICAL VARIABLES
+// https://library.wmo.int/doc_num.php?explnum_id=7450
+function calc_frost_point(tmpc,dwpc,p) {
+
+    let frpc = dwpc;
+    if (dwpc < 0) {
+        let e = calc_e_es(dwpc); // vapor pressure
+        let fp = 1.0016 + 3.15 * Math.pow(10,-6) * p - (0.074 / p); // adjusts for pressure dependency    
+        frpc = (272.62 * Math.log((e/6.112) * fp)) / (22.46 - Math.log((e/6.112) * fp));
+    }
+    if (frpc > tmpc) {
+        frpc = tmpc;
+    }
+
+    return Math.round(frpc * 10) / 10;
 
 }
 

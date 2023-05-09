@@ -55,6 +55,7 @@ var unit_wind = 'kt'; // kt | m/s
 
 var virtual_temperature_correction = true;   // true | false
 var wetbulb_temperature = false;   // true | false
+var frostpoint_temperature = false;   // true | false
 
 var storm_motion = 'bunkers-right'; // storm motion used to calculate srh,
                                     // bunkers-right | bunkers-left | maddox
@@ -175,6 +176,12 @@ var tdline = d3.line()
 var wetline = d3.line()
     .curve(d3.curveLinear) 
 	.x(function(d) { return x(d.wetblbc) + (y(basep)-y(d.pres))/tan; })
+    .y(function(d) { return y(d.pres); });
+
+// Frost point temperature
+var frostline = d3.line()
+    .curve(d3.curveLinear) 
+	.x(function(d) { return x(d.frpc) + (y(basep)-y(d.pres))/tan; })
     .y(function(d) { return y(d.pres); });
     
 // Hodoline

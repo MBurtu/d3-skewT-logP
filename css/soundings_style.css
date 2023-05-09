@@ -885,6 +885,11 @@ table.storm-motion tr:nth-of-type(2n+1) {
   stroke: purple;
   stroke-width: 0.13em;
 }
+.frost_line {
+  fill: none;
+  stroke: rgb(69, 134, 183);
+  stroke-width: 0.13em;
+}
 
 .surface_parcel, .unstable_parcel, .mixed_parcel, .dry_parcel_line, .dry_virtual_parcel_line,
  .moist_parcel_line, .moist_virtual_parcel_line, .mix_parcel_line, .virtual-temperature-line {
@@ -980,4 +985,5 @@ table.storm-motion tr:nth-of-type(2n+1) {
 .focus.tmpc circle { fill: red;   stroke: none; }
 .focus.dwpc circle { fill: red; stroke: none; }
 .focus.wetblbc circle { fill: purple; stroke: none; }
+.focus.frpc circle { fill: rgb(69, 134, 183); stroke: none; }
 .focus text { font-size: 0.7em; fill: #333; cursor: default; }

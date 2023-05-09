@@ -363,6 +363,19 @@ $('.modal-tag').on('click', function(){
             back.css("background-color","#ff4d4d"); // red
         }
 
+        // Frost point temperature
+        var frp_switch = $('#frp_tmp');
+        var back = frp_switch.find('.back');
+        var front = frp_switch.find('.front');
+
+        if (frostpoint_temperature) {
+            front.css("left",(back.outerWidth()-front.outerWidth()) + "px");  
+            back.css("background-color","#5cd65c"); // green
+        } else {
+            front.css("left",0);   
+            back.css("background-color","#ff4d4d"); // red
+        }
+
         // Storm relative helicity
         $('#srh_storm_motion').val(storm_motion);
 
@@ -423,6 +436,16 @@ $('.save').on('click', function(){
         wetbulb_temperature = false;
     }
 
+    // Frost point temperature
+    var frp_switch = $('#frp_tmp');
+    var front = frp_switch.find('.front');
+
+    if (front.position().left != 0){
+        frostpoint_temperature = true;
+    } else {
+        frostpoint_temperature = false;
+    }
+
     // Storm relative helicity
     storm_motion = $('#srh_storm_motion').val();
 
@@ -451,6 +474,33 @@ $('.save').on('click', function(){
 //  Settings that can be turned on/off
 $('.settings-switch').on('click', function(){
     
+    var back = $(this).find('.back');
+    var front = $(this).find('.front');
+
+    if (front.position().left != 0){
+        front.css("left",0);   
+        back.css("background-color","#ff4d4d"); // red
+    } else {
+        front.css("left",(back.outerWidth()-front.outerWidth()) + "px");  
+        back.css("background-color","#5cd65c"); // green
+    }
+
+});
+
+//  Settings that can be turned on/off
+$('.wetblb-frost-switch').on('click', function(){
+
+    // hide all
+    $('.wetblb-frost-switch').each(function() {
+        var back = $(this).find('.back');
+        var front = $(this).find('.front');
+        if (front.position().left != 0){
+            front.css("left",0);   
+            back.css("background-color","#ff4d4d");
+        }
+    });
+
+    // show / hide clicked 
     var back = $(this).find('.back');
     var front = $(this).find('.front');
 
@@ -952,6 +1002,11 @@ function loadSounding(fileName,name,icao) {
                 var wetblbc = NaN;
                 if (wetbulb_temperature) {
                     wetblbc = calc_wetbulb(tmpStep.tmpc[j], tmpStep.dwpc[j], tmpStep.pres[j]);
+                 }
+                // Frost point temperature
+                var frpc = NaN;
+                if (frostpoint_temperature) {
+                    frpc = calc_frost_point(tmpStep.tmpc[j],tmpStep.dwpc[j],tmpStep.pres[j]);
                 }
                 var lvlObj = {
                     "pres": tmpStep.pres[j],
@@ -959,6 +1014,7 @@ function loadSounding(fileName,name,icao) {
                     "tmpc": tmpStep.tmpc[j],
                     "dwpc": tmpStep.dwpc[j],
                     "wetblbc": wetblbc,
+                    "frpc": frpc,
                     "wdir": tmpStep.wdir[j],
                     "wspd": tmpStep.wspd[j]
                 };
@@ -1279,6 +1335,14 @@ function drawFirstHour() {
             .attr("d", wetline);
     }
 
+    if (frostpoint_temperature) {
+        frostlines = skewtgroup.selectAll("frostlines")
+            .data(sounding[index]).enter().append("path")
+            .attr("class", "frost_line")
+            .attr("clip-path", "url(#clipper)")
+            .attr("d", frostline);
+    }
+
     tlines = skewtgroup.selectAll("tlines")
         .data(sounding[index]).enter().append("path")
         .attr("class", "temp_line")
@@ -1454,6 +1518,9 @@ function drawToolTips() {
     focus5 = skewtgroup.append("g").attr("class", "focus wetblbc").style("display", "none");
     if (wetbulb_temperature) {
         focus5.append("circle").attr("r", 4);
+    } else if (frostpoint_temperature) {
+        focus5 = skewtgroup.append("g").attr("class", "focus frpc").style("display", "none");
+        focus5.append("circle").attr("r", 4);
     }
     
     svg.append("rect")
@@ -1479,6 +1546,9 @@ function drawToolTips() {
             if (wetbulb_temperature) {
                 focus5.attr("transform", "translate(" + (x(d.wetblbc) + (y(basep)-y(d.pres))/tan)+ "," + y(d.pres) + ")");
                 focus.select("text").text("Tw: " + d.wetblbc + "°C, T: " + d.tmpc + "°C");
+            } else if (frostpoint_temperature) {
+                focus5.attr("transform", "translate(" + (x(d.frpc) + (y(basep)-y(d.pres))/tan)+ "," + y(d.pres) + ")");
+                focus.select("text").text("Tf: " + d.frpc + "°C, T: " + d.tmpc + "°C");
             } else {
                 focus.select("text").text("T: " + d.tmpc + "°C");
             }
@@ -1510,6 +1580,9 @@ function updateData(i) {
     tdlines.data(sounding[i]).attr("d", tdline);
     if (wetbulb_temperature) {
         wetlines.data(sounding[i]).attr("d", wetline);
+    }
+    if (frostpoint_temperature) {
+        frostlines.data(sounding[i]).attr("d", frostline);
     }
     allbarbs.data(sounding[i][0])
         .attr("xlink:href", function (d) { 
@@ -2188,6 +2261,9 @@ copies or substantial portions of the Software.
 /////////////////////////////////
 
 /*
+Alduchov O. A. and R. E Eskridge, 1996: Improved Magnus Form Approximation
+of Saturation Vapor Pressure, Notes and Correspondence April 1996
+
 Bolton D., 1980: The Computation of Equivalent Potential Temperature, Monthly
 Weather Review vol. 108
 
