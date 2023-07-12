@@ -379,6 +379,17 @@ $('.modal-tag').on('click', function(){
         // Storm relative helicity
         $('#srh_storm_motion').val(storm_motion);
 
+    } else if (modalID == 'information') {
+        
+        // Storm relative helicity
+        let storm_motion_txt = "Bunkers right mover";
+        if (storm_motion == "bunkers-left") {
+            storm_motion_txt = "Bunkers left mover";
+        } else if (storm_motion == "maddox") {
+            storm_motion_txt = "Maddox (30R75)";
+        }
+        $('#storm_motion').html(storm_motion_txt);
+
     }
 
     $('#' + modalID).show();

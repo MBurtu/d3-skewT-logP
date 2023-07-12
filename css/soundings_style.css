@@ -380,6 +380,7 @@ table.date_container {
   'control control     parcels parcels'
   'dry     moist       parcels parcels'
   'ratio   standard    parcels parcels'
+  'wetblb  frost       parcels parcels'
   'corrected corrected parcels parcels'
   'abbr    abbr        abbr abbr';
 }
@@ -403,6 +404,12 @@ table.date_container {
 }
 .grid-container-info > .moist {
   grid-area: moist;
+}
+.grid-container-info > .wetblb {
+  grid-area: wetblb;
+}
+.grid-container-info > .frost {
+  grid-area: frost;
 }
 .grid-container-info > .standard {
   grid-area: standard;
@@ -503,8 +510,10 @@ h2 { display: inline; font-size: 1.5em; line-height: 1em; margin-right: 20px;}
 .brown-bottom { border-bottom: 5px solid rgb(230, 153, 0); }
 .pink-bottom { border-bottom: 5px dashed rgb(255, 128, 128); }
 .red-bottom { border-bottom: 5px dashed rgb(255, 77, 77) }
-.purple-bottom { border-bottom: 5px dashed #EE82EE; }
-.blue-bottom { border-bottom: 5px dashed #009ACD; }
+.purple-bottom { border-bottom: 5px solid purple; }
+.purple-dashed-bottom { border-bottom: 5px dashed #EE82EE; }
+.blue-bottom { border-bottom: 5px solid #009ACD; }
+.blue-dashed-bottom { border-bottom: 5px dashed #009ACD; }
 
 a { text-decoration: none; color: white;}
 

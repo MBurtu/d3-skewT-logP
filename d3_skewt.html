@@ -255,7 +255,7 @@
     </div>
   </div>
 
-  <div class="modal-bg" id="information" >
+  <div class="modal-bg" id="information">
     <div class="modal">
       <div class="modal-header">
         <div class="tabs defaulttab" data-tab="tab1"><i class="fas fa-info-circle"></i> information</div>
@@ -278,7 +278,8 @@
               <span class="red-bg-white-txt">Mixed layer parcel</span> - average potential temperature and average mixing ratio of the lowest 100 hPa.<br>
               <span class="red-bg-white-txt">Most unstable parcel</span> - parcel with highest cape when starting in the lowest 300 hPa.<br>  
               <span class="red-bg-white-txt">Convective temperature</span> - lowest temperature required for surface based convection.<br>
-              <span class="red-bg-white-txt">Virtual temperature correction</span> - CAPE &amp; CIN computed with virtual temperature, can be switched ON/OFF under settings.
+              <span class="red-bg-white-txt">Virtual temperature correction</span> - CAPE &amp; CIN computed with virtual temperature, can be switched ON/OFF under settings.<br>
+              <span class="red-bg-white-txt">Storm relative helicity</span> - measure of the potential for cyclonic updraft rotation, computed with <span id="storm_motion"></span>.
             </div>
           </div>
           <div class="modal-grid dry">
@@ -293,7 +294,7 @@
           </div>
           <div class="modal-grid ratio">
             <div class="modal-txt">
-              <div class="bottoms purple-bottom"></div> saturation mixing ratio
+              <div class="bottoms purple-dashed-bottom"></div> saturation mixing ratio
             </div>
           </div>
           <div class="modal-grid standard">
@@ -301,9 +302,19 @@
               <div class="bottoms pink-bottom"></div> international standard atmosphere
             </div>
           </div>
+          <div class="modal-grid wetblb">
+            <div class="modal-txt">
+              <div class="bottoms purple-bottom"></div> wet bulb temperature
+            </div>
+          </div>
+          <div class="modal-grid frost">
+            <div class="modal-txt">
+              <div class="bottoms blue-bottom"></div> frost point temperature
+            </div>
+          </div>
           <div class="modal-grid corrected">
             <div class="modal-txt">
-              <div class="bottoms blue-bottom"></div>/<div class="bottoms red-bottom"></div> virtual temperature (parcel/sounding)
+              <div class="bottoms blue-dashed-bottom"></div>/<div class="bottoms red-bottom"></div> virtual temperature (parcel/sounding)
             </div>
           </div>
           <div class="modal-grid abbr">
