@@ -507,6 +507,7 @@ h2 { display: inline; font-size: 1.5em; line-height: 1em; margin-right: 20px;}
   margin-bottom: 3px;
 }
 .green-bottom { border-bottom: 5px solid rgb(92, 214, 92); }
+.green-dashed-bottom { border-bottom: 5px dashed rgb(0, 152, 18);}
 .brown-bottom { border-bottom: 5px solid rgb(230, 153, 0); }
 .pink-bottom { border-bottom: 5px dashed rgb(255, 128, 128); }
 .red-bottom { border-bottom: 5px dashed rgb(255, 77, 77) }
@@ -891,13 +892,15 @@ table.storm-motion tr:nth-of-type(2n+1) {
 }
 .wet_line {
   fill: none;
-  stroke: purple;
+  stroke: rgb(0, 152, 18);
   stroke-width: 0.13em;
+  stroke-dasharray: 5,5;
 }
 .frost_line {
   fill: none;
   stroke: rgb(69, 134, 183);
   stroke-width: 0.13em;
+  stroke-dasharray: 5,5;
 }
 
 .surface_parcel, .unstable_parcel, .mixed_parcel, .dry_parcel_line, .dry_virtual_parcel_line,
