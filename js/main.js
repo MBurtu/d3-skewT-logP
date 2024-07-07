@@ -223,10 +223,10 @@ $(document).ready(function() {
 // Hide/Show convective data
 $('.toggle_convection').on('click', function(){
     if ($('#convection').css('left') == '0px') {
-        $('#convection').animate({'left':'48%'});
+        $('#convection').animate({'left':'48%'}, "slow");
         $('.toggle_convection').html('x');
     } else {
-        $('#convection').animate({'left':'0'});
+        $('#convection').animate({'left':'0'}, "slow");
         $('.toggle_convection').html('>>');
     }
 });
@@ -1695,7 +1695,6 @@ function updateData(i) {
             } 
         }
     });
-    console.log(index);
 
 }
 
@@ -2181,7 +2180,6 @@ function drawProfile(step,profile) {
             .enter().append("polygon")
             .attr("points",function(d) { 
                 return d.map(function(d) {
-                    //console.log(d.pres);
                     return [
                         x(d.tmpc) + (y(basep)-y(d.pres))/tan,
                         y(d.pres)
